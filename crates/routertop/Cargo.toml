@@ -1,6 +1,6 @@
 [package]
 name = "routertop"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 description = "Small Alpine Linux router control plane"
@@ -13,3 +13,5 @@ argon2 = "0.5"
 rand_core = { version = "0.6", features = ["getrandom"] }
 fs2 = "0.4"
 subtle = "2"
+base64 = "0.22"
+x25519-dalek = { version = "2", default-features = false, features = ["static_secrets", "zeroize"] }

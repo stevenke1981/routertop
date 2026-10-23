@@ -12,3 +12,4 @@ ifupdown-ng
 kmod
 lighttpd
 openssl
+wireguard-tools-wg

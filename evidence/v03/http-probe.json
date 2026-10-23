@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "checks": {
+    "/status": "401",
+    "/config": "401",
+    "/wireguard/keys": "401",
+    "wan_https": "denied"
+  },
+  "certificate_sha256": "7909827a621f5c59e8a83e0b7c0c630671ba0536c898fbcbf2faf4420d4de1eb"
+}

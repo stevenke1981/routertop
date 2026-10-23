@@ -1,13 +1,13 @@
 # Local source package. Run packaging/make-source.sh, then abuild checksum.
 # The generated checksum binds the exact source archive, including Cargo.lock.
 pkgname=routertop
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=0
 pkgdesc="Compact Rust control plane for the RouterTop Linux router"
-url="https://example.invalid/routertop-local-development"
+url="https://github.com/stevenke1981/routertop"
 arch="x86_64 aarch64"
 license="MIT"
-depends="iproute2 nftables dnsmasq ifupdown-ng"
+depends="iproute2 nftables dnsmasq ifupdown-ng wireguard-tools-wg"
 makedepends="cargo"
 source="$pkgname-$pkgver.tar.gz"
 builddir="$srcdir/$pkgname-$pkgver"

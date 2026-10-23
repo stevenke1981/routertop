@@ -39,6 +39,9 @@ done
 routertop check /etc/routertop/routertop.toml
 hostname "$(routertop hostname /etc/routertop/routertop.toml)"
 routertop render /etc/routertop/routertop.toml --output /run/routertop
+if [ -f /run/routertop/persistent ]; then
+    routertop wg-configs /data/routertop /run/routertop/wireguard
+fi
 cp /run/routertop/interfaces /etc/network/interfaces
 cp /run/routertop/nftables.nft /etc/nftables.nft
 cp /run/routertop/dnsmasq.conf /etc/dnsmasq.conf
@@ -49,6 +52,8 @@ nft -f /etc/nftables.nft
 dnsmasq --test
 # Bounded WAN acquisition: BusyBox udhcpc runs in the background if no lease.
 ifup -a
+routertop network-check /etc/routertop/routertop.toml
+sh /run/routertop/network-setup.sh
 sysctl -p /etc/sysctl.conf
 dnsmasq --user=dnsmasq --group=dnsmasq --pid-file=/run/dnsmasq.pid
 touch /run/routertop/applied

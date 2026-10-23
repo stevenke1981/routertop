@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "memory_mib": 256,
+  "bios_and_uefi_iso": true,
+  "cold_boot_config_and_wireguard_identity": "verified by serial hashes",
+  "administrator_retained": true,
+  "tls_certificate_retained": true,
+  "forwarding_restored_after_conflict_and_reboot": true
+}

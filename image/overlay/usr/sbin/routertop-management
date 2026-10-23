@@ -41,7 +41,6 @@ server.max-write-idle = 15
 server.follow-symlink = "enable"
 server.upload-dirs = ( "/tmp" )
 index-file.names = ( "index.html" )
-dir-listing.activate = "disable"
 mimetype.assign = ( ".html" => "text/html; charset=utf-8", ".css" => "text/css", ".js" => "text/javascript" )
 cgi.assign = ( ".cgi" => "" )
 ssl.engine = "enable"

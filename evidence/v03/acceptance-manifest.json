@@ -1,0 +1,60 @@
+{
+  "version": "0.3.0",
+  "date": "2026-10-24",
+  "local_acceptance": "PASS",
+  "windows_tests": 43,
+  "alpine_tests": 43,
+  "real_linux_network_cases": 15,
+  "real_chrome_groups": 8,
+  "bios_iso_256_mib": "PASS",
+  "uefi_iso_256_mib": "PASS",
+  "persistent_config_admin_tls_wireguard_identity": "PASS",
+  "wan_conflict_renew_hook": "PASS",
+  "artifacts": {
+    "build-manifest.json": {
+      "bytes": 480,
+      "sha256": "e7fe7b7555f10d424655ed04cb895369da05e5f4a944d27234ec973f6fd2048e"
+    },
+    "initramfs.gz": {
+      "bytes": 40300071,
+      "sha256": "d3f14c5e6c3b046ba8ad79d1fd963065b12ad59cf3e82355b32b6d7f73939276"
+    },
+    "packages.txt": {
+      "bytes": 1225,
+      "sha256": "b5e16d9c2c89a343ea81500f7aff8b34cb8a5305fd0625c90376aa1f0a4cb218"
+    },
+    "repositories.txt": {
+      "bytes": 103,
+      "sha256": "7b8b3e6fe030eeb4ee7619b42c9419aa846bff1c632442d3f00ed9fb97c6fa36"
+    },
+    "routertop-data-blank.img": {
+      "bytes": 34603008,
+      "sha256": "38149266db0ae54c3544b68153782329995c9cce8215463af925dbc8b5ac1d1f"
+    },
+    "routertop-x86_64": {
+      "bytes": 1032832,
+      "sha256": "ba3cd824a761c8edf10cdb17205c75eef49571cdbd6cecfeed36e7864543e947"
+    },
+    "routertop-x86_64.iso": {
+      "bytes": 66062336,
+      "sha256": "c0ef84e2f3aa84f95a9d34473b46a9272173be19bf3776af0555818078e97394"
+    },
+    "SHA256SUMS": {
+      "bytes": 488,
+      "sha256": "daa53e3867ce46cc37a5f21a5540c844f0312e2e5532689d22a62ccb6c7fc397"
+    },
+    "vmlinuz": {
+      "bytes": 12641280,
+      "sha256": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85"
+    }
+  },
+  "not_run": [
+    "ARM",
+    "physical hardware",
+    "throughput stress",
+    "power-loss stress",
+    "signed apk release",
+    "production deployment"
+  ],
+  "remote_ci": "separate GitHub Actions evidence"
+}

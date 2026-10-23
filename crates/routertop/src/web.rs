@@ -4,17 +4,20 @@ use argon2::{
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use fs2::FileExt;
 use rand_core::{OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
+    collections::BTreeMap,
     fs::{self, File, OpenOptions},
     io::{Read, Write},
     path::{Path, PathBuf},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use subtle::ConstantTimeEq;
+use x25519_dalek::{PublicKey, StaticSecret};
 
 const MAX_BODY: usize = 32 * 1024;
 const MAX_STATE: u64 = 256 * 1024;
@@ -34,6 +37,8 @@ struct Durable {
     enrollment_token: Option<String>,
     #[serde(default)]
     auth_epoch: u64,
+    #[serde(default)]
+    wireguard_keys: BTreeMap<String, String>,
 }
 #[derive(Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -175,9 +180,24 @@ fn canonical(source: &str) -> Result<String, String> {
     toml::to_string(&crate::parse_config(source)?).map_err(io_error)
 }
 fn durable(data: &Path) -> Result<Durable, String> {
-    let state: Durable = read_json(&data.join("state.json"))?;
-    if state.schema != 1 || state.revision == 0 || canonical(&state.config)? != state.config {
+    let mut state: Durable = read_json(&data.join("state.json"))?;
+    if state.schema != 1 || state.revision == 0 {
         return Err("持久設定格式無效；帳號未重設".into());
+    }
+    // Normalize newly defaulted fields in older 0.2 configs without replacing
+    // credentials, revision, or initialized markers. Invalid config still fails.
+    state.config = canonical(&state.config)?;
+    let config = crate::parse_config(&state.config)?;
+    if config.wireguard.len() != state.wireguard_keys.len() {
+        return Err("WireGuard 金鑰缺失；拒絕自動更換既有身分".into());
+    }
+    for tunnel in &config.wireguard {
+        public_key(
+            state
+                .wireguard_keys
+                .get(&tunnel.interface)
+                .ok_or("WireGuard 金鑰缺失")?,
+        )?;
     }
     match (&state.admin_hash, &state.enrollment_token) {
         (Some(hash), None) => {
@@ -201,6 +221,7 @@ fn durable(data: &Path) -> Result<Durable, String> {
 
 pub fn initialize_store(data: &Path, default_config: &str) -> Result<(), String> {
     let config = canonical(default_config)?;
+    let parsed = crate::parse_config(&config)?;
     private_directory(data)?;
     let _guard = lock(data)?;
     if data.join("state.json").exists() {
@@ -223,6 +244,7 @@ pub fn initialize_store(data: &Path, default_config: &str) -> Result<(), String>
             admin_hash: None,
             enrollment_token: Some(token()?),
             auth_epoch: 0,
+            wireguard_keys: reconcile_keys(&parsed, &BTreeMap::new())?,
         },
     )
 }
@@ -235,6 +257,86 @@ pub fn bootstrap_token(data: &Path) -> Result<String, String> {
     durable(data)?
         .enrollment_token
         .ok_or_else(|| "管理員已完成註冊".into())
+}
+
+fn private_key_bytes(encoded: &str) -> Result<[u8; 32], String> {
+    let bytes = STANDARD.decode(encoded).map_err(|_| "WireGuard 私鑰損壞")?;
+    let bytes: [u8; 32] = bytes.try_into().map_err(|_| "WireGuard 私鑰長度無效")?;
+    if STANDARD.encode(bytes) != encoded || bytes[0] & 7 != 0 || bytes[31] & 0xc0 != 0x40 {
+        return Err("WireGuard 私鑰格式無效".into());
+    }
+    Ok(bytes)
+}
+
+fn public_key(encoded: &str) -> Result<String, String> {
+    let secret = StaticSecret::from(private_key_bytes(encoded)?);
+    Ok(STANDARD.encode(PublicKey::from(&secret).as_bytes()))
+}
+
+fn reconcile_keys(
+    config: &crate::Config,
+    previous: &BTreeMap<String, String>,
+) -> Result<BTreeMap<String, String>, String> {
+    let mut keys = BTreeMap::new();
+    for tunnel in &config.wireguard {
+        let private = if let Some(existing) = previous.get(&tunnel.interface) {
+            existing.clone()
+        } else {
+            let mut bytes = [0u8; 32];
+            OsRng.try_fill_bytes(&mut bytes).map_err(io_error)?;
+            bytes[0] &= 248;
+            bytes[31] = (bytes[31] & 127) | 64;
+            STANDARD.encode(bytes)
+        };
+        let own_public = public_key(&private)?;
+        if tunnel
+            .peers
+            .iter()
+            .any(|peer| peer.public_key == own_public)
+        {
+            return Err("WireGuard peer 不可使用自己的公鑰".into());
+        }
+        keys.insert(tunnel.interface.clone(), private);
+    }
+    Ok(keys)
+}
+
+/// Root CLI only: secret files are separate from the public active config.
+/// Callers enforce local-root access; the directory and files are private.
+pub fn write_wireguard_configs(data: &Path, output: &Path) -> Result<usize, String> {
+    use std::fmt::Write as _;
+    let _guard = lock(data)?;
+    let state = durable(data)?;
+    let config = crate::parse_config(&state.config)?;
+    private_directory(output)?;
+    for tunnel in &config.wireguard {
+        let private = state
+            .wireguard_keys
+            .get(&tunnel.interface)
+            .ok_or("WireGuard 金鑰缺失")?;
+        let mut text = format!(
+            "[Interface]\nPrivateKey = {private}\nListenPort = {}\n",
+            tunnel.listen_port
+        );
+        for peer in &tunnel.peers {
+            writeln!(
+                text,
+                "\n[Peer]\nPublicKey = {}\nAllowedIPs = {}\nPersistentKeepalive = {}",
+                peer.public_key,
+                peer.allowed_ips.join(", "),
+                peer.persistent_keepalive
+            )
+            .map_err(io_error)?;
+            if let Some(endpoint) = &peer.endpoint {
+                writeln!(text, "Endpoint = {endpoint}").map_err(io_error)?;
+            }
+        }
+        atomic(
+            &output.join(format!("{}.conf", tunnel.interface)),
+            text.as_bytes(),
+        )?;
+    }
+    Ok(config.wireguard.len())
 }
 
 fn response(status: u16, body: Value) -> Response {
@@ -520,16 +622,31 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
         return Err((403, "CSRF 驗證失敗"));
     }
     let mut reply = match (request.method.as_str(), request.path.as_str()) {
+        ("GET", "/wireguard/keys") => {
+            let keys: Result<BTreeMap<_, _>, _> = data
+                .wireguard_keys
+                .iter()
+                .map(|(name, private)| public_key(private).map(|public| (name, public)))
+                .collect();
+            response(
+                200,
+                json!({"public_keys":keys.map_err(|_| (500,"WireGuard 金鑰無效"))?}),
+            )
+        }
         ("GET", "/config") => response(
             200,
             json!({"config":crate::parse_config(&data.config).map_err(|_|(500,"設定資料無效"))?,"revision":data.revision,"pending_reboot":pending(paths,&data.config)}),
         ),
         ("POST", "/config") => {
             let change: SaveConfig = parse(request)?;
-            crate::validate(&change.config).map_err(|_| (400, "路由器設定未通過驗證"))?;
+            if let Err(error) = crate::validate(&change.config) {
+                return Ok(response(400, json!({"error":error})));
+            }
             if change.revision != data.revision {
                 return Err((409, "設定已由其他操作更新，請重新載入"));
             }
+            data.wireguard_keys = reconcile_keys(&change.config, &data.wireguard_keys)
+                .map_err(|_| (400, "WireGuard 金鑰或 peer 設定無效"))?;
             data.config = toml::to_string(&change.config).map_err(|_| (500, "設定編碼失敗"))?;
             data.revision = data
                 .revision

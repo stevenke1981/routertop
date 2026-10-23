@@ -1,0 +1,50 @@
+{
+  "result": "PASS",
+  "url": "https://127.0.0.1:19443",
+  "started_utc": "2026-10-23T17:34:19.368491+00:00",
+  "checks": [
+    {
+      "name": "fresh_ui_enrollment",
+      "result": "PASS"
+    },
+    {
+      "name": "vlan_ui_create_edit_delete_persistence",
+      "result": "PASS"
+    },
+    {
+      "name": "wireguard_interface_peer_crud_and_public_key_stability",
+      "result": "PASS"
+    },
+    {
+      "name": "firewall_typed_crud_order_enable_disable_and_base_preservation",
+      "result": "PASS"
+    },
+    {
+      "name": "advanced_mobile_responsive",
+      "result": "PASS"
+    },
+    {
+      "name": "advanced_reload_retains_config",
+      "result": "PASS"
+    },
+    {
+      "name": "reboot_preserves_advanced_config_public_key_certificate_and_original_admin",
+      "result": "PASS",
+      "revision": 21
+    },
+    {
+      "name": "private_key_fields_absent_and_no_browser_runtime_errors",
+      "result": "PASS"
+    }
+  ],
+  "screenshots": [
+    "vlan-desktop.png",
+    "wireguard-desktop.png",
+    "firewall-desktop.png",
+    "firewall-mobile.png",
+    "wireguard-after-reboot.png"
+  ],
+  "packet_handshake_testing": "NOT_RUN by UI harness",
+  "elapsed_seconds": 47.62,
+  "finished_utc": "2026-10-23T17:35:06.984698+00:00"
+}

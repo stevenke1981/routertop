@@ -1,0 +1,16 @@
+{"case": "live WAN preflight rejects peer-route and local-WG overlap without route changes", "status": "PASS"}
+{"case": "generated VLAN/WireGuard setup and private file permissions", "status": "PASS"}
+{"case": "802.1Q VLAN20 DHCP address, mask, router and DNS", "status": "PASS"}
+{"case": "same VLAN traffic across independent tagged trunk ports", "status": "PASS"}
+{"case": "VLAN-to-VLAN and VLAN-to-untagged-LAN isolation", "status": "PASS"}
+{"case": "VLAN internet opt-in NAT and disabled VLAN internet denial", "status": "PASS"}
+{"case": "kernel WireGuard handshake and encrypted tunnel ICMP", "status": "PASS"}
+{"case": "VPN-to-VLAN forwarding denied without an explicit rule", "status": "PASS"}
+{"case": "explicit VPN forwarding rule permits tunneled VLAN HTTP and ICMP", "status": "PASS"}
+{"case": "unrecognized WireGuard peer cannot handshake or send tunneled traffic", "status": "PASS"}
+{"case": "ordered drop before accept denies a new TCP flow", "status": "PASS"}
+{"case": "reordering accept before drop permits a new TCP flow", "status": "PASS"}
+{"case": "disabling the accept rule restores denial", "status": "PASS"}
+{"case": "deleting drop rule and re-enabling accept permits traffic", "status": "PASS"}
+{"case": "deleting the accept rule restores default isolation", "status": "PASS"}
+{"status": "PASS", "passed_cases": 15}

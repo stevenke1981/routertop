@@ -38,10 +38,40 @@ fn write_rendered(config: &routertop::Config, directory: &Path) -> Result<(), St
         ("nftables.nft", rendered.nftables),
         ("dnsmasq.conf", rendered.dnsmasq),
         ("sysctl.conf", rendered.sysctl),
+        ("network-setup.sh", rendered.network_setup),
     ] {
         fs::write(directory.join(name), text).map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+fn check_live_wan(config: &routertop::Config) -> Result<(), String> {
+    if !cfg!(target_os = "linux") {
+        return Err("network-check requires Linux".into());
+    }
+    let output = Command::new("ip")
+        .args(["-j", "-4", "address", "show", "dev", &config.wan.interface])
+        .output()
+        .map_err(|error| format!("WAN address query: {error}"))?;
+    if !output.status.success() {
+        return Err("cannot inspect WAN addresses".into());
+    }
+    let devices: Vec<serde_json::Value> =
+        serde_json::from_slice(&output.stdout).map_err(|error| error.to_string())?;
+    let mut addresses = Vec::new();
+    for device in devices {
+        let entries = device["addr_info"]
+            .as_array()
+            .ok_or("missing WAN address list")?;
+        for entry in entries {
+            if entry["family"] == "inet" {
+                let address = entry["local"].as_str().ok_or("missing WAN IPv4 address")?;
+                let prefix = entry["prefixlen"].as_u64().ok_or("missing WAN prefix")?;
+                addresses.push(format!("{address}/{prefix}"));
+            }
+        }
+    }
+    routertop::network::validate_wan_subnets(config, &addresses)
 }
 
 fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
@@ -59,10 +89,23 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
         return Err("apply requires root".into());
     }
     if Path::new("/run/routertop/applied").exists() {
-        return Err("already provisioned; live network reconfiguration is not supported in 0.1; rebuild or update the config volume and reboot".into());
+        return Err(
+            "already provisioned; save configuration and reboot to activate network changes".into(),
+        );
     }
     let stage = Path::new("/run/routertop/staged");
     write_rendered(config, stage)?;
+    if !config.wireguard.is_empty() {
+        if routertop::web::stored_config(Path::new("/data/routertop"))?
+            != toml::to_string(config).map_err(|e| e.to_string())?
+        {
+            return Err("WireGuard boot configuration must match the persistent bundle".into());
+        }
+        routertop::web::write_wireguard_configs(
+            Path::new("/data/routertop"),
+            Path::new("/run/routertop/wireguard"),
+        )?;
+    }
     run("nft", &["-c", "-f", "/run/routertop/staged/nftables.nft"])?;
     run(
         "dnsmasq",
@@ -82,6 +125,8 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
         }
         run("hostname", &[&config.hostname])?;
         run("ifup", &["-a"])?;
+        check_live_wan(config)?;
+        run("sh", &["/run/routertop/staged/network-setup.sh"])?;
         run("sysctl", &["-p", "/etc/sysctl.conf"])?;
         run("dnsmasq", &["--conf-file=/etc/dnsmasq.conf"])?;
         fs::create_dir_all("/etc/routertop").map_err(|e| e.to_string())?;
@@ -97,6 +142,15 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
 
 fn execute(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, file] if cmd == "network-check" => {
+            let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
+            check_live_wan(&config)
+        }
+        [cmd, data, output] if cmd == "wg-configs" => {
+            require_local_root()?;
+            routertop::web::write_wireguard_configs(Path::new(data), Path::new(output))?;
+            Ok(())
+        }
         [cmd] if cmd == "cgi" => routertop::web::run_cgi(),
         [cmd, data, config] if cmd == "storage-init" => {
             require_local_root()?;
@@ -132,7 +186,7 @@ fn execute(args: &[String]) -> Result<(), String> {
         }
         [] => Err("use routertop --help".into()),
         [cmd] if cmd == "--help" || cmd == "help" => {
-            println!("RouterTop {}\ncheck CONFIG\nrender CONFIG --output DIRECTORY\nexport CONFIG\napply CONFIG --boot\nstatus\nstorage-init DATA CONFIG\nstored-config DATA\nbootstrap-token [DATA]\n\nWeb management stores validated configuration on the data volume; reboot to activate changes.", env!("CARGO_PKG_VERSION"));
+            println!("RouterTop {}\ncheck CONFIG\nrender CONFIG --output DIRECTORY\nexport CONFIG\napply CONFIG --boot\nstatus\nstorage-init DATA CONFIG\nstored-config DATA\nwg-configs DATA OUTPUT\nnetwork-check CONFIG\nbootstrap-token [DATA]\n\nWeb management stores validated configuration on the data volume; reboot to activate changes.", env!("CARGO_PKG_VERSION"));
             Ok(())
         }
         [cmd] if cmd == "--version" => {

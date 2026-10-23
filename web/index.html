@@ -56,6 +56,9 @@
       <nav class="navigation" aria-label="主要導覽">
         <button class="nav-item active" type="button" data-panel="overview" aria-current="page"><span class="nav-icon" aria-hidden="true">◫</span>系統總覽<span class="nav-arrow" aria-hidden="true">›</span></button>
         <button class="nav-item" type="button" data-panel="network"><span class="nav-icon" aria-hidden="true">⇄</span>網路設定<span class="nav-arrow" aria-hidden="true">›</span></button>
+        <button class="nav-item" type="button" data-panel="vlans"><span class="nav-icon" aria-hidden="true">▦</span>VLAN 網路<span class="nav-arrow" aria-hidden="true">›</span></button>
+        <button class="nav-item" type="button" data-panel="wireguard"><span class="nav-icon" aria-hidden="true">⌁</span>WireGuard VPN<span class="nav-arrow" aria-hidden="true">›</span></button>
+        <button class="nav-item" type="button" data-panel="firewall"><span class="nav-icon" aria-hidden="true">▱</span>防火牆規則<span class="nav-arrow" aria-hidden="true">›</span></button>
         <button class="nav-item" type="button" data-panel="security"><span class="nav-icon" aria-hidden="true">◇</span>帳號安全<span class="nav-arrow" aria-hidden="true">›</span></button>
       </nav>
       <div class="sidebar-bottom"><p class="eyebrow">SMALL FOOTPRINT. FULL CONTROL.</p><p>RouterTop <span id="sidebar-version">—</span></p><span class="muted">Linux · Rust · Alpine</span></div>
@@ -80,7 +83,7 @@
 
         <section id="panel-network" class="page-panel" hidden aria-labelledby="network-title">
           <div class="page-heading"><div><p class="eyebrow">NETWORK CONFIGURATION</p><h1 id="network-title" tabindex="-1">網路設定</h1><p class="muted">編輯已儲存的設定；重新啟動後才會套用。</p></div><span class="badge" id="config-revision">尚未讀取</span></div>
-          <form id="network-form">
+          <form id="network-form" method="post">
             <fieldset id="network-fields" disabled><legend class="sr-only">路由器網路設定</legend>
               <section class="card form-card"><div class="form-section-title"><span class="section-number">01</span><div><h2>裝置與連線</h2><p>指定 WAN 與 LAN 的實體網路介面。</p></div></div><div class="field-grid"><div class="field span-two"><label for="hostname">主機名稱</label><input id="hostname" name="hostname" autocomplete="off" spellcheck="false" required maxlength="63"><p class="field-help">作為區域網路中的裝置識別名稱。</p></div><div class="field"><label for="wan-interface">WAN 介面</label><input id="wan-interface" name="wan-interface" autocomplete="off" spellcheck="false" required><p class="field-help">對外網路，透過 DHCP 取得位址。</p></div><div class="field"><label for="lan-interface">LAN 介面</label><input id="lan-interface" name="lan-interface" autocomplete="off" spellcheck="false" required><p class="field-help">供內部裝置連線的網路介面。</p></div><div class="field span-two"><label for="lan-address">LAN 位址與網路前綴</label><input id="lan-address" name="lan-address" placeholder="192.168.88.1/24" autocomplete="off" spellcheck="false" required><p class="field-help">修改後，重新啟動時需要使用新的 LAN 位址開啟管理頁面。</p></div></div></section>
               <section class="card form-card"><div class="form-section-title"><span class="section-number">02</span><div><h2>DHCP 位址分配</h2><p>自動分配區域網路裝置的 IP 位址。</p></div></div><div class="field-grid"><div class="field"><label for="dhcp-start">起始 IP 位址</label><input id="dhcp-start" name="dhcp-start" autocomplete="off" spellcheck="false" required></div><div class="field"><label for="dhcp-end">結束 IP 位址</label><input id="dhcp-end" name="dhcp-end" autocomplete="off" spellcheck="false" required></div><div class="field"><label for="lease-hours">租約時間（小時）</label><input id="lease-hours" name="lease-hours" type="number" min="1" step="1" required></div></div></section>
@@ -88,6 +91,27 @@
             </fieldset>
             <div class="save-bar"><div><strong>儲存後，重新啟動才會生效</strong><p id="dirty-state">尚未修改設定</p></div><div class="button-row"><button id="reload-config" class="button secondary" type="button">重新讀取</button><button id="save-config" class="button primary" type="submit" disabled>儲存設定</button></div></div>
           </form>
+        </section>
+
+        <section id="panel-vlans" class="page-panel" hidden aria-labelledby="vlans-title">
+          <div class="page-heading"><div><p class="eyebrow">SEGMENT YOUR NETWORK</p><h1 id="vlans-title" tabindex="-1">VLAN 網路</h1><p class="muted">以 VLAN 標籤建立獨立子網路。</p></div><button id="add-vlans" class="button primary advanced-control" type="button" disabled>＋ 新增</button></div>
+          <div class="notice">預設與其他內部網路隔離。允許上網只開放對 WAN 的轉送；跨網段存取需要額外防火牆規則。</div>
+          <div id="vlans-list" class="advanced-list" aria-live="polite"></div>
+          <div class="save-bar"><div><strong>所有變更儲存後，重新啟動才會生效</strong><p class="advanced-dirty">尚未修改設定</p></div><div class="button-row"><button class="button secondary advanced-reload advanced-control" type="button" disabled>重新讀取</button><button class="button primary advanced-save advanced-control" type="button" disabled>儲存全部變更</button></div></div>
+        </section>
+
+        <section id="panel-wireguard" class="page-panel" hidden aria-labelledby="wireguard-title">
+          <div class="page-heading"><div><p class="eyebrow">PRIVATE CONNECTIONS</p><h1 id="wireguard-title" tabindex="-1">WireGuard VPN</h1><p class="muted">建立 IPv4 分流 VPN 與遠端對等端。</p></div><button id="add-wireguard" class="button primary advanced-control" type="button" disabled>＋ 新增</button></div>
+          <div class="notice">私鑰由路由器產生與保管，網頁只顯示公鑰。先儲存介面以取得公鑰，再新增對等端；不支援預設路由。</div>
+          <div id="wireguard-list" class="advanced-list" aria-live="polite"></div>
+          <div class="save-bar"><div><strong>所有變更儲存後，重新啟動才會生效</strong><p class="advanced-dirty">尚未修改設定</p></div><div class="button-row"><button class="button secondary advanced-reload advanced-control" type="button" disabled>重新讀取</button><button class="button primary advanced-save advanced-control" type="button" disabled>儲存全部變更</button></div></div>
+        </section>
+
+        <section id="panel-firewall" class="page-panel" hidden aria-labelledby="firewall-title">
+          <div class="page-heading"><div><p class="eyebrow">CONTROL YOUR TRAFFIC</p><h1 id="firewall-title" tabindex="-1">防火牆規則</h1><p class="muted">依順序管理輸入與轉送規則。</p></div><button id="add-firewall" class="button primary advanced-control" type="button" disabled>＋ 新增</button></div>
+          <div class="notice">規則由上而下比對。系統保留 LAN 管理、DHCP/DNS、VPN 接聽與已建立連線；自訂 forward 規則先於預設 LAN 上網規則。</div>
+          <div id="firewall-list" class="advanced-list" aria-live="polite"></div>
+          <div class="save-bar"><div><strong>所有變更儲存後，重新啟動才會生效</strong><p class="advanced-dirty">尚未修改設定</p></div><div class="button-row"><button class="button secondary advanced-reload advanced-control" type="button" disabled>重新讀取</button><button class="button primary advanced-save advanced-control" type="button" disabled>儲存全部變更</button></div></div>
         </section>
 
         <section id="panel-security" class="page-panel" hidden aria-labelledby="security-title">
@@ -99,6 +123,9 @@
       <footer class="app-footer"><span>RouterTop · 區域網路管理</span><span>輕巧運行，自在掌控。</span></footer>
     </div>
   </div>
+  <dialog id="editor-dialog" aria-labelledby="editor-title">
+    <form id="editor-form" method="post"><header class="editor-heading"><div><p class="eyebrow">CONFIGURATION EDITOR</p><h2 id="editor-title">編輯設定</h2></div><button id="editor-close" class="text-button" type="button" aria-label="取消編輯">✕</button></header><p id="editor-help" class="muted"></p><div id="editor-fields" class="field-grid"></div><p id="editor-error" class="message error" role="alert" hidden></p><div class="editor-footer"><button id="editor-cancel" class="button secondary" type="button">取消</button><button id="editor-apply" class="button primary" type="submit">加入變更</button></div></form>
+  </dialog>
   <noscript><p class="message error">管理介面需要啟用 JavaScript 才能登入與儲存設定。</p></noscript>
 </body>
 </html>

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-VERSION=0.2.0
+VERSION=0.3.0
 OUTPUT="$REPO/packaging/alpine/routertop-$VERSION.tar.gz"
 [ ! -e "$OUTPUT" ] || { echo "Refusing to overwrite $OUTPUT" >&2; exit 1; }
 for path in Cargo.toml Cargo.lock crates configs LICENSE; do
