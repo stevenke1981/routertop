@@ -1,0 +1,28 @@
+# RouterTop IPv4 development router. WAN uses DHCP; LAN is static.
+hostname = "routertop"
+
+[wan]
+interface = "eth0"
+
+[lan]
+interface = "eth1"
+address = "192.168.88.1/24"
+
+[dhcp]
+start = "192.168.88.100"
+end = "192.168.88.199"
+lease_hours = 12
+
+[dns]
+upstream = ["1.1.1.1", "9.9.9.9"]
+
+[firewall]
+# HTTPS management starts only with a persistent data volume, LAN only.
+https_port = 443
+# SSH daemon is not installed. If separately enabled, only LAN may connect.
+# ssh_port = 22
+
+# Optional static routes use a directly connected LAN gateway.
+# [[routes]]
+# destination = "10.20.0.0/16"
+# gateway = "192.168.88.2"

@@ -1,0 +1,57 @@
+#!/bin/sh
+set -eu
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin
+fail() {
+    echo "ROUTERTOP_BOOT_FAILED: $*; use the local recovery console."
+    exit 1
+}
+trap 'sysctl -w net.ipv4.ip_forward=0 >/dev/null 2>&1 || true; echo "ROUTERTOP_BOOT_FAILED: forwarding disabled; local recovery available."' EXIT
+mkdir -p /run/routertop /var/lib/misc /var/log
+# These drivers cover QEMU virtio and emulated Intel Ethernet. Hardware images
+# must add their drivers/firmware explicitly; missing optional drivers are OK.
+modprobe virtio_pci || true
+modprobe virtio_net || true
+modprobe virtio_blk || true
+modprobe e1000 || true
+ip link set lo up
+echo "RouterTop development image: local consoles are passwordless root."
+echo "System root runs in RAM; an explicitly provisioned data volume stores settings."
+# Optional explicit configuration partition, mounted read-only. Never discover
+# and mount arbitrary host disks; never format or write the supplied partition.
+for option in $(cat /proc/cmdline); do
+    case "$option" in
+        routertop.configdev=*)
+            configdev=${option#routertop.configdev=}
+            case "$configdev" in
+                /dev/vd[b-z][1-9]|/dev/sd[b-z][1-9]) ;;
+                *) fail 'configdev must name an explicit secondary partition, e.g. /dev/vdb1' ;;
+            esac
+            modprobe ext4
+            mkdir -p /run/config-media
+            mount -t ext4 -o ro,noload,nosuid,nodev,noexec "$configdev" /run/config-media
+            routertop check /run/config-media/routertop.toml
+            cp /run/config-media/routertop.toml /etc/routertop/routertop.toml
+            umount /run/config-media
+            ;;
+    esac
+done
+/usr/sbin/routertop-storage
+routertop check /etc/routertop/routertop.toml
+hostname "$(routertop hostname /etc/routertop/routertop.toml)"
+routertop render /etc/routertop/routertop.toml --output /run/routertop
+cp /run/routertop/interfaces /etc/network/interfaces
+cp /run/routertop/nftables.nft /etc/nftables.nft
+cp /run/routertop/dnsmasq.conf /etc/dnsmasq.conf
+cp /run/routertop/sysctl.conf /etc/sysctl.conf
+# Firewall is mandatory before bringing up WAN or enabling forwarding.
+nft -c -f /etc/nftables.nft
+nft -f /etc/nftables.nft
+dnsmasq --test
+# Bounded WAN acquisition: BusyBox udhcpc runs in the background if no lease.
+ifup -a
+sysctl -p /etc/sysctl.conf
+dnsmasq --user=dnsmasq --group=dnsmasq --pid-file=/run/dnsmasq.pid
+touch /run/routertop/applied
+/usr/sbin/routertop-management
+trap - EXIT
+echo "ROUTERTOP_READY: local console; LAN default 192.168.88.1/24; WAN DHCP."

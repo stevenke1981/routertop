@@ -1,0 +1,324 @@
+{
+  "analysis_kind": "LIVE_STRUCTURE_AND_CONFIGURATION",
+  "backends_started": false,
+  "configured_backends": [
+    {
+      "extensions": [
+        "rs"
+      ],
+      "id": "rust",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "py",
+        "pyi"
+      ],
+      "id": "python",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "go"
+      ],
+      "id": "go",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "cs"
+      ],
+      "id": "csharp",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "lua"
+      ],
+      "id": "lua",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "js",
+        "jsx",
+        "mjs",
+        "cjs"
+      ],
+      "id": "javascript",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "ts",
+        "tsx",
+        "mts",
+        "cts"
+      ],
+      "id": "typescript",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "sh",
+        "bash"
+      ],
+      "id": "bash",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "slint"
+      ],
+      "id": "slint",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "c",
+        "h"
+      ],
+      "id": "c",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "cc",
+        "cpp",
+        "cxx",
+        "hpp",
+        "hh",
+        "hxx"
+      ],
+      "id": "cpp",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "toml"
+      ],
+      "id": "toml",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "yaml",
+        "yml"
+      ],
+      "id": "yaml",
+      "probe": "NOT_RUN"
+    },
+    {
+      "extensions": [
+        "md",
+        "markdown"
+      ],
+      "id": "markdown",
+      "probe": "NOT_RUN"
+    }
+  ],
+  "directories_truncated": false,
+  "evidence": [
+    {
+      "bytes": 4077,
+      "path": "Cargo.lock",
+      "sha256": "a45cc64a1fac66f4b3c6d4921b2ed2ca7525d843bddc7b680aac949c0dd0e0fd",
+      "status": "READ"
+    },
+    {
+      "bytes": 151,
+      "path": "Cargo.toml",
+      "sha256": "2117e9a866c09cfe267dc2d4d2dfb79e0ac3494ce1edf2537648bbf32d778e30",
+      "status": "READ"
+    },
+    {
+      "bytes": 3300,
+      "path": "README.md",
+      "sha256": "a2db9501893f68be65d6890147973207326bcd1a7412196510a1ef73aecdbe54",
+      "status": "READ"
+    },
+    {
+      "bytes": 4570,
+      "path": "image/README.md",
+      "sha256": "d5b5b56d30b89d73652633cee7153f5bf932096cfd8a5f44f6794fdde3cf1961",
+      "status": "READ"
+    },
+    {
+      "bytes": 214,
+      "path": "crates/routertop/Cargo.toml",
+      "sha256": "7de760302f750aae0c2bf080c5c8c3fb0bb0654fae800bd68f7ec0c47dd5dccc",
+      "status": "READ"
+    }
+  ],
+  "evidence_truncated": false,
+  "extensions": {
+    "cfg": 1,
+    "env": 2,
+    "lock": 1,
+    "md": 4,
+    "ps1": 1,
+    "py": 1,
+    "rs": 3,
+    "sh": 3,
+    "toml": 3,
+    "txt": 1,
+    "yml": 1
+  },
+  "file_count": 29,
+  "inspections": "NOT_RUN",
+  "language_hints": [
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "EXTENSION_HINT",
+      "host_backend_configured": true,
+      "id": "rust",
+      "marker_hints": [
+        "Cargo.toml",
+        "crates/routertop/Cargo.toml"
+      ],
+      "observed_extensions": [
+        "rs"
+      ],
+      "source_file_count": 3,
+      "suggested_server": "rust-analyzer",
+      "unconfigured_extensions": []
+    },
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "EXTENSION_HINT",
+      "host_backend_configured": true,
+      "id": "python",
+      "marker_hints": [],
+      "observed_extensions": [
+        "py"
+      ],
+      "source_file_count": 1,
+      "suggested_server": "basedpyright-langserver",
+      "unconfigured_extensions": []
+    },
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "EXTENSION_HINT",
+      "host_backend_configured": true,
+      "id": "bash",
+      "marker_hints": [],
+      "observed_extensions": [
+        "sh"
+      ],
+      "source_file_count": 3,
+      "suggested_server": "bash-language-server",
+      "unconfigured_extensions": []
+    },
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "EXTENSION_HINT",
+      "host_backend_configured": true,
+      "id": "yaml",
+      "marker_hints": [],
+      "observed_extensions": [
+        "yml"
+      ],
+      "source_file_count": 1,
+      "suggested_server": "yaml-language-server",
+      "unconfigured_extensions": []
+    },
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "MARKER_HINT_ONLY",
+      "host_backend_configured": true,
+      "id": "slint",
+      "marker_hints": [
+        "Cargo.toml",
+        "crates/routertop/Cargo.toml"
+      ],
+      "observed_extensions": [],
+      "source_file_count": 0,
+      "suggested_server": "slint-lsp",
+      "unconfigured_extensions": []
+    },
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "EXTENSION_HINT",
+      "host_backend_configured": true,
+      "id": "toml",
+      "marker_hints": [],
+      "observed_extensions": [
+        "toml"
+      ],
+      "source_file_count": 3,
+      "suggested_server": "taplo",
+      "unconfigured_extensions": []
+    },
+    {
+      "backend_probe": "NOT_RUN",
+      "detection": "EXTENSION_HINT",
+      "host_backend_configured": true,
+      "id": "markdown",
+      "marker_hints": [],
+      "observed_extensions": [
+        "md"
+      ],
+      "source_file_count": 4,
+      "suggested_server": "marksman",
+      "unconfigured_extensions": []
+    }
+  ],
+  "limitations": [
+    "Structural hints are not semantic symbol analysis or dependency parsing.",
+    "Ignore rules, path policy and scan/evidence limits restrict visibility; absent evidence is not proof of absence.",
+    "No background watcher or atomic multi-file snapshot. structure_sha256 covers paths and returned evidence only.",
+    "No repository commands/configuration executed and no backend installed or probed. Semantic work requires a host-configured LSP."
+  ],
+  "next_steps": [
+    {
+      "probe": false,
+      "project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8",
+      "tool": "get_capabilities"
+    },
+    {
+      "project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8",
+      "relative_path": ".github/workflows/ci.yml",
+      "tool": "get_symbols_overview"
+    }
+  ],
+  "permissions": {
+    "debug": false,
+    "formatters": false,
+    "inspections": false,
+    "shell": false,
+    "write": false
+  },
+  "project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8",
+  "root": "\\\\?\\E:\\routertop",
+  "sample_files": [
+    ".gitattributes",
+    ".github/workflows/ci.yml",
+    ".gitignore",
+    "Cargo.lock",
+    "Cargo.toml",
+    "LICENSE",
+    "README.md",
+    "configs/routertop.toml"
+  ],
+  "scan_limit": 10000,
+  "scan_truncated": false,
+  "snapshot": "LIVE_NON_ATOMIC",
+  "structure_sha256": "f97922cf0f47ef8543d0d15b4468556fc25dd045396f4efa6eaef612a99df327",
+  "tests": "NOT_RUN",
+  "top_level_directories": [
+    ".github",
+    "configs",
+    "crates",
+    "docs",
+    "image",
+    "packaging",
+    "scripts"
+  ],
+  "trace": {
+    "elapsed_ms": 8,
+    "id": "bd7e3cf8-5b81-4f4c-9ad2-53014244b4a2",
+    "result_bytes": 4910,
+    "result_sha256": "f828f6af08c7641516199c7bf63501dd99720c5afb53f274f696db55ef9cbc6d"
+  },
+  "unconfigured_language_hints": []
+}

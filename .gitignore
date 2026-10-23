@@ -1,0 +1,8 @@
+/target/
+/dist/
+/.cache/
+/.worktrees/
+/evidence/*.log
+/evidence/**/*.log
+/packaging/alpine/*.tar.gz
+__pycache__/

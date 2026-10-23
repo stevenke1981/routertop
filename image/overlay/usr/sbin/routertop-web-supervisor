@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+if [ ! -f /run/routertop/web-enabled ]; then
+    sleep 30
+    exit 0
+fi
+lighttpd -D -f /run/routertop/lighttpd.conf &
+web_pid=$!
+trap 'kill "$web_pid" 2>/dev/null || true' EXIT HUP INT TERM
+while kill -0 "$web_pid" 2>/dev/null; do
+    if [ -f /run/routertop/web/reboot.request ] && [ ! -L /run/routertop/web/reboot.request ]; then
+        rm /run/routertop/web/reboot.request
+        sleep 2
+        sync
+        reboot
+        sleep 30
+    fi
+    sleep 1
+done
+wait "$web_pid"

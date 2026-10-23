@@ -1,0 +1,11 @@
+{
+  "result": "PASS",
+  "checks": {
+    "/cgi-bin/routertop.cgi/session": 200,
+    "/cgi-bin/routertop.cgi/config": 401,
+    "/cgi-bin/routertop.cgi/status": 401,
+    "oversized_request": 413,
+    "WAN_HTTPS": "DENIED",
+    "TLS_1_2": "TLSv1.2"
+  }
+}

@@ -1,0 +1,32 @@
+#!/bin/sh
+set -eu
+umask 077
+datadev=
+for option in $(cat /proc/cmdline); do
+    case "$option" in routertop.datadev=*) datadev=${option#routertop.datadev=};; esac
+done
+if [ -z "$datadev" ]; then
+    # Only the deliberately provisioned, uniquely labelled RouterTop volume.
+    matches=$(blkid | awk '/LABEL="ROUTERTOP_DATA"/ {sub(/:$/, "", $1); print $1}')
+    set -- $matches
+    [ "$#" -le 1 ] || { echo 'Multiple RouterTop data volumes; select routertop.datadev explicitly.' >&2; exit 1; }
+    [ "$#" -eq 1 ] || { echo 'No persistent data volume; HTTPS management disabled.'; exit 0; }
+    datadev=$1
+fi
+case "$datadev" in
+    /dev/vd[a-z][1-9]|/dev/sd[a-z][1-9]|/dev/nvme[0-9]n[0-9]p[1-9]) ;;
+    *) echo 'Invalid explicit data partition' >&2; exit 1;;
+esac
+[ -b "$datadev" ] || { echo 'Data partition is missing' >&2; exit 1; }
+modprobe ext4
+mkdir -p /data
+mount -t ext4 -o rw,nosuid,nodev,noexec "$datadev" /data
+mkdir -p /data/routertop /run/routertop/web
+chmod 0700 /data/routertop /run/routertop/web
+routertop storage-init /data/routertop /etc/routertop/routertop.toml
+routertop stored-config /data/routertop > /etc/routertop/routertop.toml.new
+chmod 0644 /etc/routertop/routertop.toml.new
+mv /etc/routertop/routertop.toml.new /etc/routertop/routertop.toml
+chown -R 1000:1000 /data/routertop /run/routertop/web
+touch /run/routertop/persistent
+echo 'Persistent configuration loaded. First use: run routertop bootstrap-token at this console.'

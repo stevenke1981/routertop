@@ -1,0 +1,58 @@
+#!/bin/sh
+set -eu
+umask 077
+[ -f /run/routertop/persistent ] || exit 0
+set -- $(routertop web-info /etc/routertop/routertop.toml)
+lan_ip=$1
+https_port=$2
+[ "$https_port" != 0 ] || exit 0
+mkdir -p /data/tls /run/routertop/http
+chmod 0700 /data/tls
+chmod 0755 /run/routertop/http
+chown 0:0 /run/routertop/http
+touch /run/routertop/http/error.log /run/routertop/http/cgi.log
+chmod 0600 /run/routertop/http/error.log /run/routertop/http/cgi.log
+chown 1000:1000 /run/routertop/http/error.log /run/routertop/http/cgi.log
+if [ ! -e /data/tls/server.pem ]; then
+    openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+        -keyout /data/tls/key.tmp -out /data/tls/cert.tmp -days 3650 \
+        -subj '/CN=RouterTop local management' \
+        -addext "subjectAltName=IP:$lan_ip,DNS:routertop" >/dev/null 2>&1
+    cat /data/tls/key.tmp /data/tls/cert.tmp > /data/tls/server.pem.tmp
+    chmod 0600 /data/tls/server.pem.tmp
+    sync
+    mv /data/tls/server.pem.tmp /data/tls/server.pem
+    rm /data/tls/key.tmp /data/tls/cert.tmp
+    sync
+fi
+cat > /run/routertop/lighttpd.conf <<EOF
+server.modules = ( "mod_openssl", "mod_cgi", "mod_setenv" )
+server.document-root = "/usr/share/routertop/www"
+server.bind = "$lan_ip"
+server.port = $https_port
+server.username = "routertop"
+server.groupname = "routertop"
+server.errorlog = "/run/routertop/http/error.log"
+server.breakagelog = "/run/routertop/http/cgi.log"
+server.max-connections = 32
+server.max-request-size = 32
+server.max-read-idle = 15
+server.max-write-idle = 15
+server.follow-symlink = "enable"
+server.upload-dirs = ( "/tmp" )
+index-file.names = ( "index.html" )
+dir-listing.activate = "disable"
+mimetype.assign = ( ".html" => "text/html; charset=utf-8", ".css" => "text/css", ".js" => "text/javascript" )
+cgi.assign = ( ".cgi" => "" )
+ssl.engine = "enable"
+ssl.pemfile = "/data/tls/server.pem"
+ssl.openssl.ssl-conf-cmd = ( "MinProtocol" => "TLSv1.2" )
+setenv.add-response-header = (
+    "X-Content-Type-Options" => "nosniff",
+    "Referrer-Policy" => "no-referrer",
+    "Content-Security-Policy" => "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+)
+EOF
+lighttpd -tt -f /run/routertop/lighttpd.conf
+touch /run/routertop/web-enabled
+echo "HTTPS management prepared on LAN: https://$lan_ip:$https_port"

@@ -1,0 +1,70 @@
+{
+  "started_utc": "2026-10-23T16:42:00.446144+00:00",
+  "url": "https://127.0.0.1:19443",
+  "browser": "installed Chrome / Playwright",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "fresh_enrollment_and_console_token",
+      "result": "PASS"
+    },
+    {
+      "name": "ui_enrollment_persistent_status_and_secure_cookie",
+      "result": "PASS",
+      "active_hostname": "routertop"
+    },
+    {
+      "name": "ui_save_preserves_fields_and_distinguishes_pending_from_active",
+      "result": "PASS",
+      "saved_revision": 2
+    },
+    {
+      "name": "responsive_mobile_no_horizontal_overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "logout_revokes_old_cookie",
+      "result": "PASS"
+    },
+    {
+      "name": "ui_wrong_password_rejected_then_valid_login",
+      "result": "PASS",
+      "login_seconds": 0.732
+    },
+    {
+      "name": "password_change_revokes_old_cookie",
+      "result": "PASS"
+    },
+    {
+      "name": "ui_password_change_and_new_password_login",
+      "result": "PASS"
+    },
+    {
+      "name": "api_unauthenticated_csrf_origin_revision_invalid_config_denials",
+      "result": "PASS"
+    },
+    {
+      "name": "reboot_revokes_old_cookie",
+      "result": "PASS"
+    },
+    {
+      "name": "actual_reboot_preserves_admin_config_revision_certificate",
+      "result": "PASS",
+      "reboot_seconds": 25.47
+    },
+    {
+      "name": "browser_javascript_no_runtime_errors",
+      "result": "PASS"
+    }
+  ],
+  "screenshots": [
+    "desktop-overview.png",
+    "desktop-network-pending.png",
+    "mobile-overview.png",
+    "desktop-after-reboot.png"
+  ],
+  "certificate_sha256_before": "cfa3622c5eab094daa7a729c014c0b894a0a27d7aa27ac6205a1d1f23dd7ea41",
+  "certificate_sha256_after": "cfa3622c5eab094daa7a729c014c0b894a0a27d7aa27ac6205a1d1f23dd7ea41",
+  "elapsed_seconds": 36.43,
+  "finished_utc": "2026-10-23T16:42:36.873869+00:00"
+}

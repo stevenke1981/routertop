@@ -1,0 +1,35 @@
+name: verify
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  rust:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo test --locked
+      - run: cargo clippy --all-targets --locked -- -D warnings
+  alpine-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build inside Alpine
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src alpine:3.24.3 sh -ec '
+            apk add cargo rust gcc musl-dev cpio gzip findutils coreutils kmod grub grub-bios grub-efi xorriso mtools e2fsprogs sfdisk
+            cargo test --locked
+            cargo build --locked --release
+            ROUTERTOP_BINARY=/src/target/release/routertop sh scripts/build-image.sh
+            sh scripts/make-data-disk.sh dist/x86_64/routertop-data-blank.img
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: routertop-x86_64-development
+          path: dist/x86_64/

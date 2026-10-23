@@ -1,0 +1,14 @@
+alpine-baselayout
+alpine-keys
+apk-tools
+busybox
+libgcc
+ca-certificates-bundle
+linux-virt
+iproute2
+nftables
+dnsmasq
+ifupdown-ng
+kmod
+lighttpd
+openssl

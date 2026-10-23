@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="same-origin">
+  <title>RouterTop · 路由器管理</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div id="auth-screen" class="auth-screen">
+    <section class="auth-intro" aria-label="RouterTop">
+      <a class="brand" href="/" aria-label="RouterTop 首頁"><span class="brand-mark" aria-hidden="true">r<span>↗</span></span><span>Router<span class="teal">Top</span></span></a>
+      <div class="intro-copy"><p class="eyebrow">YOUR NETWORK. YOUR CONTROL.</p><h1>網路的每一站，<br>都在掌握之中。</h1><p>輕巧的 Linux 路由系統。<br>從連線、位址分配到安全設定，在這裡管理。</p></div>
+      <div class="network-art" aria-hidden="true"><span class="art-node node-a"></span><span class="art-node node-b"></span><span class="art-core">RT</span><span class="art-node node-c"></span><span class="art-node node-d"></span></div>
+      <p class="intro-footer">ALPINE LINUX <span> / </span> RUST <span> / </span> ROUTERTOP</p>
+    </section>
+    <main class="auth-main" id="auth-main">
+      <div class="auth-card">
+        <div id="loading-panel"><span class="spinner" aria-hidden="true"></span><h2>正在連接路由器</h2><p class="muted">確認管理介面與登入狀態…</p></div>
+        <section id="setup-panel" hidden aria-labelledby="setup-title">
+          <p class="eyebrow">WELCOME ABOARD</p><h2 id="setup-title">建立管理員帳號</h2><p class="muted">先完成首次設定，讓這台路由器只由你管理。</p>
+          <div class="notice">請從路由器的實體主控台取得首次設定權杖。權杖只供首次註冊使用，不會顯示在網頁上。</div>
+          <form id="setup-form" method="post">
+            <label for="setup-token">首次設定權杖</label><input id="setup-token" name="token" autocomplete="off" spellcheck="false" required>
+            <label for="setup-password">管理員密碼</label><input id="setup-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" aria-describedby="setup-password-help" required>
+            <p class="field-help" id="setup-password-help">至少 12 個字元；最多 128 位元組。帳號固定為 admin。</p>
+            <label for="setup-confirm">再次輸入密碼</label><input id="setup-confirm" name="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+            <button class="button primary full-width" type="submit">建立帳號並登入 <span aria-hidden="true">→</span></button>
+          </form>
+        </section>
+        <section id="login-panel" hidden aria-labelledby="login-title">
+          <p class="eyebrow">LOCAL NETWORK MANAGEMENT</p><h2 id="login-title">歡迎回來</h2><p class="muted">登入 RouterTop，查看與管理你的網路。</p>
+          <form id="login-form" method="post">
+            <label for="login-username">管理員帳號</label><input id="login-username" name="username" value="admin" autocomplete="username" readonly>
+            <label for="login-password">密碼</label><input id="login-password" name="password" type="password" autocomplete="current-password" required>
+            <button class="button primary full-width" type="submit">登入管理介面 <span aria-hidden="true">→</span></button>
+          </form>
+          <p class="auth-footnote">此介面僅供區域網路管理。請妥善保管管理員密碼。</p>
+        </section>
+        <p id="auth-error" class="message error" role="alert" hidden></p>
+        <p id="auth-message" class="message" role="status" hidden></p>
+        <button id="retry-connection" class="button secondary full-width" type="button" hidden>重新連線</button>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-screen" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="RouterTop 首頁"><span class="brand-mark" aria-hidden="true">r<span>↗</span></span><span>Router<span class="teal">Top</span></span></a>
+      <div class="device-label"><span class="status-dot" aria-hidden="true"></span><span id="sidebar-hostname">路由器</span><span class="device-tag">LOCAL</span></div>
+      <p class="nav-label">管理中心</p>
+      <nav class="navigation" aria-label="主要導覽">
+        <button class="nav-item active" type="button" data-panel="overview" aria-current="page"><span class="nav-icon" aria-hidden="true">◫</span>系統總覽<span class="nav-arrow" aria-hidden="true">›</span></button>
+        <button class="nav-item" type="button" data-panel="network"><span class="nav-icon" aria-hidden="true">⇄</span>網路設定<span class="nav-arrow" aria-hidden="true">›</span></button>
+        <button class="nav-item" type="button" data-panel="security"><span class="nav-icon" aria-hidden="true">◇</span>帳號安全<span class="nav-arrow" aria-hidden="true">›</span></button>
+      </nav>
+      <div class="sidebar-bottom"><p class="eyebrow">SMALL FOOTPRINT. FULL CONTROL.</p><p>RouterTop <span id="sidebar-version">—</span></p><span class="muted">Linux · Rust · Alpine</span></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><p>管理中心 <span class="crumb-separator">/</span> <strong id="breadcrumb">系統總覽</strong></p><div class="account"><span class="avatar" aria-hidden="true">A</span><span>admin</span><button id="logout-button" class="text-button" type="button">登出</button></div></header>
+      <main id="main" tabindex="-1">
+        <div id="global-message" class="message" role="status" aria-live="polite" hidden></div>
+        <div id="global-error" class="message error" role="alert" hidden></div>
+        <div id="pending-banner" class="pending-banner" hidden><span><strong>有已儲存的設定尚未套用</strong><br>重新啟動後，新設定才會生效。連線將會暫時中斷。</span><button class="button warning reboot-button" type="button">重新啟動</button></div>
+
+        <section id="panel-overview" class="page-panel" aria-labelledby="overview-title">
+          <div class="page-heading"><div><p class="eyebrow">NETWORK AT A GLANCE</p><h1 id="overview-title" tabindex="-1">系統總覽</h1><p class="muted">查看路由器目前的運作狀態。</p></div><button id="refresh-button" class="button secondary" type="button"><span aria-hidden="true">↻</span> 更新狀態</button></div>
+          <div class="metrics-grid">
+            <article class="metric-card"><div class="metric-top"><span>運行時間</span><span class="metric-icon" aria-hidden="true">◷</span></div><p class="metric-value" id="uptime-value">—</p><p class="metric-detail">自上次開機起</p></article>
+            <article class="metric-card"><div class="metric-top"><span>記憶體使用</span><span class="metric-icon" aria-hidden="true">▤</span></div><p class="metric-value" id="memory-value">—</p><div class="meter" role="meter" aria-label="記憶體使用率" aria-valuemin="0" aria-valuemax="100" id="memory-meter"><span id="memory-fill"></span></div><p class="metric-detail" id="memory-detail">等待狀態資料</p></article>
+            <article class="metric-card"><div class="metric-top"><span>設定儲存</span><span class="metric-icon" aria-hidden="true">▣</span></div><p class="metric-value compact" id="persistence-value">—</p><p class="metric-detail" id="persistence-detail">等待儲存狀態</p></article>
+          </div>
+          <div class="overview-grid"><article class="card"><div class="card-header"><div><h2>裝置資訊</h2><p>這台路由器目前執行中的系統。</p></div><span class="badge" id="active-badge">讀取中</span></div><dl class="detail-list"><div><dt>使用中的主機名稱</dt><dd id="active-hostname">—</dd></div><div><dt>系統版本</dt><dd id="version-value">—</dd></div><div><dt>已儲存設定版本</dt><dd id="revision-value">—</dd></div><div><dt>設定套用狀態</dt><dd id="apply-value">—</dd></div></dl></article><article class="card quick-card"><span class="large-icon" aria-hidden="true">⇄</span><h2>讓網路依你的方式運作</h2><p class="muted">調整 WAN、LAN、DHCP 與 DNS。設定會先儲存到裝置，重新啟動後生效。</p><button class="button secondary" type="button" data-panel="network">開啟網路設定 <span aria-hidden="true">→</span></button><p class="small-note">儲存設定不會立即變更目前的連線。</p></article></div>
+          <p class="section-footnote" id="status-updated">尚未取得狀態</p>
+        </section>
+
+        <section id="panel-network" class="page-panel" hidden aria-labelledby="network-title">
+          <div class="page-heading"><div><p class="eyebrow">NETWORK CONFIGURATION</p><h1 id="network-title" tabindex="-1">網路設定</h1><p class="muted">編輯已儲存的設定；重新啟動後才會套用。</p></div><span class="badge" id="config-revision">尚未讀取</span></div>
+          <form id="network-form">
+            <fieldset id="network-fields" disabled><legend class="sr-only">路由器網路設定</legend>
+              <section class="card form-card"><div class="form-section-title"><span class="section-number">01</span><div><h2>裝置與連線</h2><p>指定 WAN 與 LAN 的實體網路介面。</p></div></div><div class="field-grid"><div class="field span-two"><label for="hostname">主機名稱</label><input id="hostname" name="hostname" autocomplete="off" spellcheck="false" required maxlength="63"><p class="field-help">作為區域網路中的裝置識別名稱。</p></div><div class="field"><label for="wan-interface">WAN 介面</label><input id="wan-interface" name="wan-interface" autocomplete="off" spellcheck="false" required><p class="field-help">對外網路，透過 DHCP 取得位址。</p></div><div class="field"><label for="lan-interface">LAN 介面</label><input id="lan-interface" name="lan-interface" autocomplete="off" spellcheck="false" required><p class="field-help">供內部裝置連線的網路介面。</p></div><div class="field span-two"><label for="lan-address">LAN 位址與網路前綴</label><input id="lan-address" name="lan-address" placeholder="192.168.88.1/24" autocomplete="off" spellcheck="false" required><p class="field-help">修改後，重新啟動時需要使用新的 LAN 位址開啟管理頁面。</p></div></div></section>
+              <section class="card form-card"><div class="form-section-title"><span class="section-number">02</span><div><h2>DHCP 位址分配</h2><p>自動分配區域網路裝置的 IP 位址。</p></div></div><div class="field-grid"><div class="field"><label for="dhcp-start">起始 IP 位址</label><input id="dhcp-start" name="dhcp-start" autocomplete="off" spellcheck="false" required></div><div class="field"><label for="dhcp-end">結束 IP 位址</label><input id="dhcp-end" name="dhcp-end" autocomplete="off" spellcheck="false" required></div><div class="field"><label for="lease-hours">租約時間（小時）</label><input id="lease-hours" name="lease-hours" type="number" min="1" step="1" required></div></div></section>
+              <section class="card form-card"><div class="form-section-title"><span class="section-number">03</span><div><h2>DNS 解析</h2><p>指定路由器使用的上游 DNS 伺服器。</p></div></div><div class="field"><label for="dns-upstream">上游 DNS 位址</label><textarea id="dns-upstream" name="dns-upstream" rows="3" autocomplete="off" spellcheck="false" required aria-describedby="dns-help"></textarea><p id="dns-help" class="field-help">每行一個 IP 位址，也可使用逗號分隔。</p></div></section>
+            </fieldset>
+            <div class="save-bar"><div><strong>儲存後，重新啟動才會生效</strong><p id="dirty-state">尚未修改設定</p></div><div class="button-row"><button id="reload-config" class="button secondary" type="button">重新讀取</button><button id="save-config" class="button primary" type="submit" disabled>儲存設定</button></div></div>
+          </form>
+        </section>
+
+        <section id="panel-security" class="page-panel" hidden aria-labelledby="security-title">
+          <div class="page-heading"><div><p class="eyebrow">ACCOUNT & ACCESS</p><h1 id="security-title" tabindex="-1">帳號安全</h1><p class="muted">更新管理員密碼，保護路由器的管理權限。</p></div></div>
+          <section class="card security-card"><div class="card-header"><div><h2>變更管理員密碼</h2><p>帳號：admin。變更成功後，所有工作階段都會登出。</p></div><span class="badge">管理員</span></div><form id="password-form" method="post"><label for="current-password">目前密碼</label><input id="current-password" type="password" autocomplete="current-password" required><label for="new-password">新密碼</label><input id="new-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" aria-describedby="password-help" required><p id="password-help" class="field-help">至少 12 個字元；最多 128 位元組。請勿與其他服務共用密碼。</p><label for="confirm-password">再次輸入新密碼</label><input id="confirm-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required><button class="button primary" type="submit">更新密碼</button></form></section>
+          <section class="card reboot-card"><div><h2>重新啟動路由器</h2><p class="muted">網路連線將暫時中斷，並套用已儲存的設定。</p></div><button class="button secondary reboot-button" type="button">重新啟動</button></section>
+        </section>
+      </main>
+      <footer class="app-footer"><span>RouterTop · 區域網路管理</span><span>輕巧運行，自在掌控。</span></footer>
+    </div>
+  </div>
+  <noscript><p class="message error">管理介面需要啟用 JavaScript 才能登入與儲存設定。</p></noscript>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "platform": "Windows x86_64",
+  "version": "0.2.0",
+  "commands": [
+    {"command": "cargo fmt --all", "exit_code": 0},
+    {"command": "cargo test --locked", "exit_code": 0, "unit_tests": 8, "cli_tests": 2, "web_integration_tests": 14},
+    {"command": "cargo clippy --all-targets -- -D warnings", "exit_code": 0}
+  ],
+  "odin": {"project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8", "operation": "find_symbol Durable in crates/routertop/src/web.rs", "source": "lsp_not_regex", "successful_documents": 1, "backend_errors": []},
+  "scope": "Recorded from actual local tool outputs; this does not substitute for appliance/browser acceptance."
+}

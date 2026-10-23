@@ -1,0 +1,31 @@
+{
+  "product": "RouterTop",
+  "version": "0.2.0",
+  "scope": "x86_64 development: persistence, authentication, Web management",
+  "iso_sha256": "a3201620579b35b4d2b01447db1c78a15e3428644cbc0f08db5a05694b570ace",
+  "binary_sha256": "22d931733aac6f7bfd6cbca830a838ee9b40f6a771835d02a6d576c9cfc79e7e",
+  "windows_tests": 24,
+  "linux_tests": 24,
+  "browser_checks": 12,
+  "bios_256_mib": "PASS",
+  "uefi_256_mib": "PASS",
+  "browser_real_reboot": "PASS",
+  "cold_boot_persistence": "PASS",
+  "corrupt_store_fail_closed": "PASS",
+  "diskless_management_disabled": "PASS",
+  "network_namespace_dhcp_dns_nat_lan_wan_policy": "PASS",
+  "actual_wan_https_denied": "PASS",
+  "artifact_hashes_verified": "PASS",
+  "review": "PASS (scoped static)",
+  "source_binding_verified_files": 6,
+  "not_run": [
+    "ARM",
+    "physical hardware",
+    "power-loss stress",
+    "remote CI",
+    "signed apk release",
+    "public deployment"
+  ],
+  "evidence": "E:/routertop/docs/acceptance-v0.2.md",
+  "build_manifest_boot_test": "NOT_RUN at build time; this separate record contains later acceptance"
+}

@@ -1,0 +1,94 @@
+{
+  "task_id": "ROUTERTOP-001",
+  "actor_instance": "root",
+  "receiver_instance": "user",
+  "kind": "handoff",
+  "result": "PASS",
+  "scope": "x86_64 development baseline only; full RouterOS parity remains incomplete",
+  "simulation": false,
+  "observed_at": "2026-10-24T00:00:29.1277765+08:00",
+  "head_sha": null,
+  "head_reason": "New repository; Git author identity not configured",
+  "acceptance_ids": [
+    "rust-tests",
+    "linux-build",
+    "iso-bios",
+    "iso-uefi",
+    "two-vm-network",
+    "netns-firewall",
+    "size-budget"
+  ],
+  "artifact": {
+    "bytes": 64022528,
+    "path": "dist/x86_64/routertop-x86_64.iso",
+    "sha256": "07b139231a20d6c85cfa880a9dc9aed1c136173dca2dadcfe4fc3bf00bd6f696"
+  },
+  "checks": [
+    {
+      "tests": 9,
+      "name": "Windows Rust tests",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "tests": 9,
+      "log": "evidence/linux-final.log",
+      "name": "Linux Rust tests",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/image-build2.log",
+      "name": "Alpine release and image",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/iso-bios-boot.log",
+      "name": "BIOS ISO 512MiB",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/iso-uefi-boot.log",
+      "name": "UEFI ISO 256MiB",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/two-vm-routing.log",
+      "name": "Second VM DHCP DNS NAT",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/image-build.log",
+      "name": "Namespace firewall and network",
+      "result": "PASS",
+      "note": "Network test prefix passed; later initial image build failed and was fixed in image-build2.log",
+      "exit_code": 0
+    },
+    {
+      "name": "Independent review",
+      "result": "PASS",
+      "scope": "static review and targeted fix verification"
+    },
+    {
+      "name": "ARM physical hardware config disk signed APK remote CI",
+      "result": "NOT_RUN",
+      "exit_code": null
+    }
+  ],
+  "unresolved": [
+    "Full RouterOS feature parity not implemented",
+    "Read-only config disk runtime test not run",
+    "Authentication, live rollback, persistent updates not implemented",
+    "Physical x64 and ARM support not accepted"
+  ],
+  "next_action": "Implement and accept persistent configuration, authenticated management and incremental routing modules",
+  "external_side_effects": {
+    "performed": false,
+    "authorized": false
+  },
+  "cleanup": "All four task-created QEMU guests shut down normally; loopback HTTP helper stopped"
+}
