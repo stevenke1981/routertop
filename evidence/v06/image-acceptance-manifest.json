@@ -1,0 +1,30 @@
+{
+  "result": "PASS",
+  "candidate": "r5",
+  "iso": {
+    "bytes": 66705408,
+    "sha256": "f9d596313d93269c2b9ce95ba2b0b76b3d6981e3ae3b7918812013d02304f549"
+  },
+  "binary": {
+    "bytes": 1262208,
+    "sha256": "2871c1788ce734ed665900ef53094ea04ec146fa2deeb6ef5458c1dfaf763799"
+  },
+  "browser_report": "browser/browser-v06-report.json",
+  "browser_groups": 10,
+  "iso_lifecycle_groups": 6,
+  "visual_audits": 5,
+  "firmware": [
+    "BIOS",
+    "UEFI"
+  ],
+  "memory_mib": 256,
+  "booted_iso_path": "E:/routertop/dist/v0.6/routertop-x86_64.iso",
+  "cold_boot": {
+    "result": "PASS",
+    "firmware": "UEFI",
+    "identity_preserved": true,
+    "pppoe_credential_preserved": true,
+    "private_credential_permissions": "0600"
+  },
+  "version_boundary": "ISO path/build/source/artifact binding verified separately; private digests are compared in memory, not published"
+}

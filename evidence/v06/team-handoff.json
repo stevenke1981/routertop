@@ -24,11 +24,17 @@
     "r4_browser_groups": 10,
     "r4_iso_lifecycle_groups": 6,
     "visual_audits": 5,
-    "ui_fixture_groups": 6
+    "ui_fixture_groups": 6,
+    "r5_standard_packets": 17,
+    "r5_pd_only_packets": 6,
+    "r5_browser_groups": 10,
+    "r5_iso_lifecycle_groups": 6,
+    "r5_cli_root_tests": 2,
+    "r5_cli_unprivileged_tests": 2
   },
   "artifact": {
     "path": "artifact-verification.json",
-    "sha256": "1df7dc23d2bd9ef0a9f56a5ac11f4bf494ea09ff92f1af7f4b0dbd17b8f1aca6",
+    "sha256": "7d35f0909196bac770c1a3d3c9a13ac340273b388100f07e3e2c939eac9d5c16",
     "encoding": "normalized LF JSON"
   },
   "review": "../../docs/review-v0.6.md",
@@ -55,5 +61,7 @@
     "AC4",
     "AC5",
     "AC6-local"
-  ]
+  ],
+  "final_candidate": "r5",
+  "runtime_binary_sha256": "2871c1788ce734ed665900ef53094ea04ec146fa2deeb6ef5458c1dfaf763799"
 }

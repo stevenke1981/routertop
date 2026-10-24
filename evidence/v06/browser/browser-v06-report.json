@@ -1,7 +1,7 @@
 {
   "result": "PASS",
   "mode": "real_appliance",
-  "started_utc": "2026-10-24T07:53:57.498348+00:00",
+  "started_utc": "2026-10-24T08:10:44.449640+00:00",
   "checks": [
     {
       "name": "fresh_enrollment_and_config_load",
@@ -518,7 +518,7 @@
     ],
     "memory_kib": {
       "MemTotal": 220724,
-      "MemAvailable": 114844
+      "MemAvailable": 114916
     },
     "private_material_preserved": true,
     "underlay_dhcpv4_delta": 0,
@@ -541,5 +541,5 @@
     ],
     "unique_prefix_length": 64
   },
-  "elapsed_seconds": 134.13
+  "elapsed_seconds": 132.97
 }

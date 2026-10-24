@@ -1,0 +1,22 @@
+{
+  "result": "PASS",
+  "candidate": "r5",
+  "platform": "Disposable Alpine 3.24.3 / Linux6.18.58-0-virt",
+  "checks": [
+    {
+      "name": "cargo test --locked --test cli",
+      "effective_user": "root",
+      "tests": 2,
+      "exit_code": 0,
+      "log": "/build/v06-cli-r5.log"
+    },
+    {
+      "name": "compiled CLI integration binary --test-threads=1",
+      "effective_user": "nobody",
+      "tests": 2,
+      "exit_code": 0,
+      "log": "/build/v06-cli-unprivileged-r5.log"
+    }
+  ],
+  "scope": "Public DHCP export succeeds without root; PPPoE credential export requires root and denied stdout is empty"
+}

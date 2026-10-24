@@ -1,0 +1,7 @@
+{"case": "public rendering contains no PPP password and no DHCPv4 underlay client", "status": "PASS"}
+{"case": "private PPP credential options use root-only permissions", "status": "PASS"}
+{"case": "pppoe-pd-only: acquired IA_PD without IA_NA, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "PD-only ISP returns NoAddrsAvail for IA_NA; IPv6CP default and LAN/VLAN IPv6 HTTP work without WAN GUA", "status": "PASS"}
+{"case": "pppoe-pd-only: acquired IA_PD without IA_NA, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "PD-only PPP reconnect changes delegated prefix and restores LAN/VLAN IPv6 traffic with stable identity", "status": "PASS"}
+{"status": "PASS", "passed_cases": 6}

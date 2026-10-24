@@ -35,5 +35,25 @@
   },
   "linux_mode_assertions": "NOT_RUN on Windows; executed separately on Linux",
   "candidate": "r4",
-  "resolved_test_fixture_issue": "Parallel temporary-directory names collided on Windows clock ticks; per-process atomic sequence makes each test directory unique."
+  "resolved_test_fixture_issue": "Parallel temporary-directory names collided on Windows clock ticks; per-process atomic sequence makes each test directory unique.",
+  "r5_cli_compatibility": {
+    "result": "PASS",
+    "checks": [
+      {
+        "name": "cargo test --locked --test cli",
+        "platform": "Windows",
+        "tests": 2,
+        "exit_code": 0
+      },
+      {
+        "name": "cargo clippy --all-targets --locked -- -D warnings",
+        "platform": "Windows",
+        "exit_code": 0
+      }
+    ],
+    "source_sha256": {
+      "crates/routertop/src/main.rs": "2e29e02c1296905be407131babd147aa13ad002e88e003c98244e8fd641cbb8f",
+      "crates/routertop/tests/cli.rs": "cbd460fba16b4042e4a94c1c2c281cc07d8e9bc7bb68e88a7f7dbe7917d942d4"
+    }
+  }
 }

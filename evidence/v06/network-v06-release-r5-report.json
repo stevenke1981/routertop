@@ -1,0 +1,22 @@
+{
+  "result": "PASS",
+  "candidate": "r5",
+  "binary_sha256": "2871c1788ce734ed665900ef53094ea04ec146fa2deeb6ef5458c1dfaf763799",
+  "checks": {
+    "standard": {
+      "exit_code": 0,
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 17
+      }
+    },
+    "pd_only": {
+      "exit_code": 0,
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 6
+      }
+    }
+  },
+  "harness_sha256": "7c6cd101559372cf4d69fa82433d72c48f12a1acc34a4bd99449112b38ad2372"
+}

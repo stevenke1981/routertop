@@ -323,7 +323,9 @@ fn execute(args: &[String]) -> Result<(), String> {
             } else if cmd == "hostname" {
                 println!("{}", config.hostname);
             } else {
-                require_local_root()?;
+                if config.wan.mode == routertop::WanProtocol::Pppoe {
+                    require_local_root()?;
+                }
                 print!(
                     "{}",
                     toml::to_string_pretty(&config).map_err(|e| e.to_string())?

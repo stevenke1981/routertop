@@ -1,23 +1,23 @@
 {
   "result": "PASS",
-  "candidate": "r4",
-  "observed_utc": "2026-10-24T07:52:59.284642+00:00",
+  "candidate": "r5",
+  "observed_utc": "2026-10-24T08:10:14.230154+00:00",
   "artifacts": {
     "routertop": {
       "bytes": 1262208,
-      "sha256": "9b088b194e417c1c8bcda0607321932e7f5a9f7d270a3eaa2e5b8cf9c11103b2"
+      "sha256": "2871c1788ce734ed665900ef53094ea04ec146fa2deeb6ef5458c1dfaf763799"
     },
     "routertop-x86_64.iso": {
       "bytes": 66705408,
-      "sha256": "284b81fa9ae3f9b1bb77012aa002e19d8e52dec0a83e3ebd1fc9158979b0ceb7"
+      "sha256": "f9d596313d93269c2b9ce95ba2b0b76b3d6981e3ae3b7918812013d02304f549"
     },
     "vmlinuz": {
       "bytes": 12641280,
       "sha256": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85"
     },
     "initramfs.gz": {
-      "bytes": 40942157,
-      "sha256": "e9216965abf0e191b10cd0cf35c973c4407de4f0564537b0dbcb7182dc4e0158"
+      "bytes": 40942148,
+      "sha256": "ccb0e4047d1498556a3ad3fe9619b84f0f3cebaf17edaa72f3e3fb572bdddfde"
     },
     "routertop-data-blank.img": {
       "bytes": 34603008,
@@ -29,11 +29,11 @@
     },
     "build-manifest.json": {
       "bytes": 480,
-      "sha256": "d371726c1abb60000b8d92841236e439d9dd3afd97e31149b719c0f87a6d765b"
+      "sha256": "e77b5f8a62fa3924aca93584c9d51eda56f1ab672c373467f236fb1aa3fb9d72"
     },
     "SHA256SUMS": {
       "bytes": 488,
-      "sha256": "f5fdaaeb1fddb1c1af31501aed0fa66a05a2a72eb80cba038961d26140d2690a"
+      "sha256": "8f54d5ed13fd34afe653a01570d4a71142bcf8988da025702589354ad4dc09ff"
     }
   },
   "normalized_lf_source_sha256": {
@@ -42,7 +42,7 @@
     "crates/routertop/src/console.rs": "6791db9f3591a8b22d3606bf8b00b855ce278dcfc8f786cb3f95911ea3f72866",
     "crates/routertop/src/ipv6.rs": "f4064a1d38bb35d3cc667a93fc8ba3600ca616bcfa7f3eaedcdd0ac50db45734",
     "crates/routertop/src/lib.rs": "b36b9cdc6ca44e5c75d4c6e5a0d5c53c753f8a34c011e31bf4c0818bdb9fd68d",
-    "crates/routertop/src/main.rs": "dc99571af0e182fe8f37f3913622afce3a24e4df375d40c29631673dfe2368f8",
+    "crates/routertop/src/main.rs": "e767d13af30176e3903c9758119e021a4ba612d0f614fe1a7364ae2c462a0b47",
     "crates/routertop/src/network.rs": "45266beb04b2316d9963262ab2c5c4550fe8327460240244e7fab4bc568d6e02",
     "crates/routertop/src/pd.rs": "512f6b03c557d4da5bb92b3a8b4c0e43f0a0f1be323fcb6455b2c239bfb96b79",
     "crates/routertop/src/pppoe.rs": "b872a002b93aedf5cb2e1af039256376f32b121ed5b0b2a8354450be07f2e04a",
@@ -78,6 +78,6 @@
   "runtime_packages": 65,
   "web_bytes": 98544,
   "iso_delta_vs_v05_bytes": 385024,
-  "compressed_boot_bytes": 53583437,
+  "compressed_boot_bytes": 53583428,
   "image_boot_evidence": "browser/browser-v06-report.json"
 }
