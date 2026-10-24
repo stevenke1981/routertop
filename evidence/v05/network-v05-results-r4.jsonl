@@ -1,0 +1,17 @@
+{"case": "pd-direct: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "real client DNS resolves through learned IPv6 DNS with static upstream unavailable", "status": "PASS"}
+{"case": "pd-direct: DHCPv6/RA coexist with unsolicited WAN denial", "status": "PASS"}
+{"case": "pd-direct: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "real DHCPv6 RENEW changes prefix; new LAN/VLAN routes work and old source is denied", "status": "PASS"}
+{"case": "invalid /64 grant fails closed without PD aliasing or IPv4 DNS restart storm", "status": "PASS"}
+{"case": "pd-direct: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "valid delegation recovers after the server issued an undersized prefix", "status": "PASS"}
+{"case": "WAN link loss withdraws delegated router addresses and blocks stale client forwarding", "status": "PASS"}
+{"case": "pd-direct: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "WAN reconnect reacquires real delegation with unchanged persistent identity", "status": "PASS"}
+{"case": "server silence expires actual DHCPv6 lease and removes delegated addresses/default advertisement", "status": "PASS"}
+{"case": "pd-full: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "full tunnel ignores WAN-learned DHCPv6/RDNSS resolvers", "status": "PASS"}
+{"case": "pd-full: DHCPv6/RA coexist with unsolicited WAN denial", "status": "PASS"}
+{"case": "dynamic PD + WireGuard: real VPN exit and no plaintext fallback after tunnel deletion", "status": "PASS"}
+{"status": "PASS", "passed_cases": 16}

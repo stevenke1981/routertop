@@ -1,0 +1,3 @@
+#!/bin/sh
+# dhcpcd passes structured environment values; Rust parses them without eval.
+exec /usr/sbin/routertop ipv6-event "${ROUTERTOP_CONFIG:-/etc/routertop/routertop.toml}" "${ROUTERTOP_PD_RUNTIME:-/run/routertop/pd}"

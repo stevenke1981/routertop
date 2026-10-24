@@ -775,7 +775,7 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
                 .map_err(|_| (500, "無法讀取系統主機名稱"))?;
             response(
                 200,
-                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true}),
+                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true,"ipv6_dynamic":crate::pd::read_status()}),
             )
         }
         ("POST", "/logout") => {

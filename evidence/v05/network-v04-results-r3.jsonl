@@ -1,0 +1,18 @@
+{"case": "static-ipv6: real LAN and tagged VLAN SLAAC; RA default policy", "status": "PASS"}
+{"case": "LAN DHCP positive control succeeds; actual VLAN DHCPv4 discovers hit default deny with no lease", "status": "PASS"}
+{"case": "IPv6 ND, routed ICMP/HTTP, custom LAN input allow and WAN default deny", "status": "PASS"}
+{"case": "IPv6 inter-LAN/VLAN default isolation with live target", "status": "PASS"}
+{"case": "typed IPv6 firewall preserves drop/accept ordering on new flows", "status": "PASS"}
+{"case": "IPv6 Packet Too Big reaches client and subsequent HTTP obeys learned PMTU", "status": "PASS"}
+{"case": "dual-full: real LAN and tagged VLAN SLAAC; RA default policy", "status": "PASS"}
+{"case": "dual-full: real handshake, marked WAN transport and VPN-only HTTP exit", "status": "PASS"}
+{"case": "dual-full: router-originated DNS exits through WireGuard", "status": "PASS"}
+{"case": "dual-full: local LAN management stays reachable", "status": "PASS"}
+{"case": "dual-full: deleting tunnel blocks both-family plaintext fallback, preserves local management", "status": "PASS"}
+{"case": "ipv4-full: real LAN and tagged VLAN SLAAC; RA default policy", "status": "PASS"}
+{"case": "IPv4-only VPN blocks client/router IPv6 even with explicit underlay routes", "status": "PASS"}
+{"case": "ipv4-full: real handshake, marked WAN transport and VPN-only HTTP exit", "status": "PASS"}
+{"case": "ipv4-full: router-originated DNS exits through WireGuard", "status": "PASS"}
+{"case": "ipv4-full: local LAN management stays reachable", "status": "PASS"}
+{"case": "ipv4-full: deleting tunnel blocks both-family plaintext fallback, preserves local management", "status": "PASS"}
+{"status": "PASS", "passed_cases": 17}

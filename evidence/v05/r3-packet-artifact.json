@@ -1,0 +1,19 @@
+{
+  "product": "RouterTop",
+  "architecture": "x86_64",
+  "alpine_branch": "v3.24",
+  "rust_target": "x86_64-alpine-linux-musl",
+  "kernel_bytes": 12641280,
+  "initramfs_bytes": 40558076,
+  "compressed_boot_bytes": 53199356,
+  "routertop_sha256": "0a43d3e5547874d70cd1f0dce55cd062f6ac80b69f79071278a2b49b485d084f",
+  "source_date_epoch": 1792713600,
+  "package_lock": "packages.txt",
+  "boot_test": "NOT_RUN",
+  "signed": false,
+  "configuration_persistence": "ext4-data-volume-required",
+  "management": "LAN-HTTPS",
+  "version": "0.5.0",
+  "scope": "r3 real PD packet acceptance; before explicit IPv4 client selection fix",
+  "packet_report": "network-v05-results-r3.jsonl"
+}

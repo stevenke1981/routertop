@@ -39,6 +39,7 @@ fn write_rendered(config: &routertop::Config, directory: &Path) -> Result<(), St
         ("dnsmasq.conf", rendered.dnsmasq),
         ("sysctl.conf", rendered.sysctl),
         ("network-setup.sh", rendered.network_setup),
+        ("dhcpcd.conf", rendered.dhcpcd),
     ] {
         fs::write(directory.join(name), text).map_err(|e| e.to_string())?;
     }
@@ -95,6 +96,22 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
     }
     let stage = Path::new("/run/routertop/staged");
     write_rendered(config, stage)?;
+    let auto = config
+        .ipv6
+        .as_ref()
+        .is_some_and(|v| v.wan_mode == routertop::WanMode::Auto);
+    if auto {
+        if !Path::new("/run/routertop/persistent").is_file() {
+            return Err("dynamic IPv6 requires persistent storage".into());
+        }
+        routertop::pd::initialize(
+            config,
+            Path::new("/run/routertop/pd"),
+            Path::new("/data/routertop-dhcpcd/duid"),
+        )?;
+        fs::copy(stage.join("dhcpcd.conf"), "/run/routertop/dhcpcd.conf")
+            .map_err(|e| e.to_string())?;
+    }
     if !config.wireguard.is_empty() {
         if routertop::web::stored_config(Path::new("/data/routertop"))?
             != toml::to_string(config).map_err(|e| e.to_string())?
@@ -131,6 +148,9 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
         run("dnsmasq", &["--conf-file=/etc/dnsmasq.conf"])?;
         fs::create_dir_all("/etc/routertop").map_err(|e| e.to_string())?;
         fs::write("/etc/routertop/routertop.toml", source).map_err(|e| e.to_string())?;
+        if auto {
+            run("/usr/sbin/routertop-ipv6-start", &[])?;
+        }
         fs::write("/run/routertop/applied", "boot provisioned\n").map_err(|e| e.to_string())?;
         Ok(())
     })();
@@ -143,6 +163,20 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
 
 fn execute(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, file, dir, identity] if cmd == "ipv6-init" => {
+            require_local_root()?;
+            let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
+            routertop::pd::initialize(&config, Path::new(dir), Path::new(identity))
+        }
+        [cmd, file, dir] if cmd == "ipv6-monitor" || cmd == "ipv6-event" => {
+            require_local_root()?;
+            let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
+            if cmd == "ipv6-event" {
+                routertop::pd::event(&config, Path::new(dir), &env::vars().collect())
+            } else {
+                routertop::pd::monitor(&config, Path::new(dir))
+            }
+        }
         [cmd, data, runtime] if cmd == "console" => {
             routertop::console::run(Path::new(data), Path::new(runtime))
         }

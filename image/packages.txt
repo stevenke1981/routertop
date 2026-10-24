@@ -8,6 +8,7 @@ linux-virt
 iproute2
 nftables
 dnsmasq
+dhcpcd
 ifupdown-ng
 kmod
 lighttpd

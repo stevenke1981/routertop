@@ -57,6 +57,14 @@ fi
 if ! grep -q '^dnsmasq:' "$ROOT/etc/passwd"; then
     chroot "$ROOT" /usr/sbin/adduser -S -D -H -s /sbin/nologin -G dnsmasq dnsmasq
 fi
+# Match dhcpcd's Alpine pre-install account creation; --no-scripts skipped it.
+# Let Alpine allocate IDs, and retain the package's root-owned chroot directory.
+if ! grep -q '^dhcpcd:' "$ROOT/etc/group"; then
+    chroot "$ROOT" /usr/sbin/addgroup -S dhcpcd
+fi
+if ! grep -q '^dhcpcd:' "$ROOT/etc/passwd"; then
+    chroot "$ROOT" /usr/sbin/adduser -S -D -H -h /var/lib/dhcpcd -s /sbin/nologin -G dhcpcd -g dhcpcd dhcpcd
+fi
 mkdir -p "$ROOT/var/lib/misc"
 chroot "$ROOT" /usr/sbin/addgroup -g 1000 routertop
 chroot "$ROOT" /usr/sbin/adduser -D -H -u 1000 -s /sbin/nologin -G routertop routertop
@@ -66,6 +74,7 @@ install -m 0644 "$REPO/configs/routertop.toml" "$ROOT/etc/routertop/routertop.to
 chmod 0755 "$ROOT/init" "$ROOT/usr/sbin/routertop-boot" "$ROOT/usr/sbin/routertop-storage" "$ROOT/usr/sbin/routertop-management" "$ROOT/usr/sbin/routertop-web-supervisor"
 chmod 0755 "$ROOT/usr/sbin/routertop-wan-check"
 chmod 0755 "$ROOT/usr/sbin/routertop-console"
+chmod 0755 "$ROOT/usr/sbin/routertop-ipv6-start" "$ROOT/usr/sbin/routertop-ipv6-hook" "$ROOT/usr/sbin/routertop-dns-supervisor"
 for event in bound renew; do
     mkdir -p "$ROOT/etc/udhcpc/post-$event"
     ln -s /usr/sbin/routertop-wan-check "$ROOT/etc/udhcpc/post-$event/10-routertop"
@@ -103,7 +112,7 @@ KERNEL_BYTES=$(wc -c < "$OUT/vmlinuz" | tr -d ' ')
 INITRAMFS_BYTES=$(wc -c < "$OUT/initramfs.gz" | tr -d ' ')
 BINARY_HASH=$(sha256sum "$ROUTERTOP_BINARY" | cut -d ' ' -f 1)
 cat > "$OUT/build-manifest.json" <<EOF
-{"product":"RouterTop","architecture":"$ARCH","alpine_branch":"$ALPINE_BRANCH","rust_target":"$BINARY_RUST_TARGET","kernel_bytes":$KERNEL_BYTES,"initramfs_bytes":$INITRAMFS_BYTES,"compressed_boot_bytes":$((KERNEL_BYTES + INITRAMFS_BYTES)),"routertop_sha256":"$BINARY_HASH","source_date_epoch":$SOURCE_DATE_EPOCH,"package_lock":"packages.txt","boot_test":"NOT_RUN","signed":false,"configuration_persistence":"ext4-data-volume-required","management":"LAN-HTTPS","version":"0.4.0"}
+{"product":"RouterTop","architecture":"$ARCH","alpine_branch":"$ALPINE_BRANCH","rust_target":"$BINARY_RUST_TARGET","kernel_bytes":$KERNEL_BYTES,"initramfs_bytes":$INITRAMFS_BYTES,"compressed_boot_bytes":$((KERNEL_BYTES + INITRAMFS_BYTES)),"routertop_sha256":"$BINARY_HASH","source_date_epoch":$SOURCE_DATE_EPOCH,"package_lock":"packages.txt","boot_test":"NOT_RUN","signed":false,"configuration_persistence":"ext4-data-volume-required","management":"LAN-HTTPS","version":"0.5.0"}
 EOF
 (cd "$OUT" && sha256sum vmlinuz initramfs.gz packages.txt repositories.txt build-manifest.json > SHA256SUMS; if [ -f routertop-x86_64.iso ]; then sha256sum routertop-x86_64.iso >> SHA256SUMS; fi)
 echo "Built $OUT: compressed kernel + root $((KERNEL_BYTES + INITRAMFS_BYTES)) bytes (64 MiB aspirational budget)."

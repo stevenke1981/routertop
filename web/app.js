@@ -3,7 +3,7 @@
 (() => {
   const API = '/cgi-bin/routertop.cgi';
   const $ = (id) => document.getElementById(id);
-  const state = { csrf: null, config: null, revision: null, authenticated: false, dirty: false, busy: false, publicKeys: {}, ipv6Vlans: [] };
+  const state = { csrf: null, config: null, revision: null, authenticated: false, dirty: false, busy: false, publicKeys: {}, ipv6Vlans: [], pdVlans: [] };
   const panelNames = { overview: '系統總覽', network: '網路設定', ipv6: 'IPv6', vlans: 'VLAN 網路', wireguard: 'WireGuard VPN', firewall: '防火牆規則', security: '帳號安全' };
 
   function text(id, value) { $(id).textContent = String(value); }
@@ -22,12 +22,15 @@
     state.dirty = false;
     state.publicKeys = {};
     state.ipv6Vlans = [];
+    state.pdVlans = [];
     $('editor-dialog').close();
     ['vlans-list', 'wireguard-list', 'firewall-list', 'ipv6-vlans-list', 'editor-fields'].forEach((id) => $(id).replaceChildren());
     $('network-form').reset();
     $('ipv6-form').reset();
     $('ipv6-fields').disabled = true;
     $('ipv6-enabled').disabled = true;
+    ['mode', 'wan', 'prefix', 'lan', 'dns'].forEach((name) => text('ipv6-runtime-' + name, '尚未取得'));
+    message('ipv6-runtime-error', '');
     $('network-fields').disabled = true;
     $('save-config').disabled = true;
     $('pending-banner').hidden = true;
@@ -146,6 +149,15 @@
     text('persistence-detail', data.persistent ? '已連接設定儲存空間' : '無法確認設定儲存空間');
     text('console-auth-status', data.console_auth_required === true ? '已啟用（必要）' : '無法確認驗證狀態');
     text('console-password-status', data.console_password_shared === true ? '與 Web admin 密碼相同' : '無法確認共用密碼狀態');
+    const dynamic = data.ipv6_dynamic;
+    const leases = Array.isArray(dynamic?.delegated) ? dynamic.delegated : [];
+    const labels = { waiting: '等待上游提供 IPv6', bound: '已取得動態 IPv6', degraded: '連線資訊不完整' };
+    text('ipv6-runtime-mode', dynamic ? (labels[dynamic.state] || '無法確認連線狀態') : '目前未使用動態 WAN');
+    text('ipv6-runtime-wan', dynamic?.wan_addresses?.join('\n') || '—');
+    text('ipv6-runtime-prefix', [...new Set(leases.map((lease) => lease.prefix))].join('\n') || '尚未取得');
+    text('ipv6-runtime-lan', leases.map((lease) => `${lease.interface} · ${lease.address}`).join('\n') || '—');
+    text('ipv6-runtime-dns', dynamic?.dns_servers?.join('\n') || '—');
+    message('ipv6-runtime-error', typeof dynamic?.error === 'string' ? dynamic.error : '');
     setPending(Boolean(data.pending_reboot));
     text('status-updated', '最近更新：' + new Date().toLocaleTimeString('zh-TW', { hour12: false }));
   }
@@ -160,7 +172,13 @@
     state.config.firewall.rules ??= [];
     state.config.ipv6 ??= null;
     state.ipv6Vlans = structuredClone(config.ipv6?.vlans || []);
+    state.pdVlans = structuredClone(config.ipv6?.pd?.vlans || []);
     $('ipv6-enabled').checked = Boolean(config.ipv6);
+    $('ipv6-wan-mode').value = config.ipv6?.wan_mode || 'static';
+    $('ipv6-dns-auto').checked = config.ipv6?.dns_auto ?? true;
+    $('ipv6-pd-enabled').checked = Boolean(config.ipv6?.pd);
+    $('ipv6-pd-prefix-length').value = config.ipv6?.pd?.prefix_length ?? 56;
+    $('ipv6-pd-lan-subnet').value = config.ipv6?.pd?.lan_subnet_id ?? 0;
     $('ipv6-wan-address').value = config.ipv6?.wan_address || '';
     $('ipv6-wan-gateway').value = config.ipv6?.wan_gateway || '';
     $('ipv6-lan-address').value = config.ipv6?.lan_address || '';
@@ -221,7 +239,26 @@
     document.querySelectorAll('.advanced-dirty').forEach((item) => { item.textContent = value; });
   }
   function markDirty() { state.dirty = true; draftMessage('有尚未儲存的變更（包含其他設定分頁）'); }
+  function pdEnabled() { return $('ipv6-wan-mode').value === 'auto' && $('ipv6-pd-enabled').checked; }
+  function pdSubnetMax() {
+    const length = Number($('ipv6-pd-prefix-length').value);
+    return Number.isInteger(length) && length >= 48 && length <= 64 ? 2 ** (64 - length) - 1 : 0;
+  }
+  function syncIpv6Mode() {
+    const auto = $('ipv6-wan-mode').value === 'auto';
+    const pd = pdEnabled();
+    [['ipv6-static-wan', auto], ['ipv6-auto-wan', !auto], ['ipv6-pd-fields', !pd], ['ipv6-static-lan', pd]].forEach(([id, inactive]) => {
+      $(id).hidden = inactive; $(id).disabled = inactive;
+    });
+    $('ipv6-pd-lan-subnet').max = String(pdSubnetMax());
+    text('ipv6-mode-badge', !$('ipv6-enabled').checked ? '設定：未啟用' : auto ? (pd ? '設定：自動 · 前綴委派' : '設定：自動 WAN') : '設定：固定 IPv6');
+    text('ipv6-pd-help', `要求 /${$('ipv6-pd-prefix-length').value || '—'} 時，子網 ID 範圍為 0–${pdSubnetMax()}，LAN 與 VLAN 不可重複。上游實際委派的前綴也需要足夠容納所有子網路。`);
+    text('ipv6-lan-help', pd ? 'LAN 位址由上游委派前綴與 LAN 子網 ID 組成，取得後才會廣播。' : 'LAN 使用 /64 網段，裝置可透過 SLAAC 自行取得位址。');
+    text('ipv6-vlans-title', pd ? 'VLAN 子網分配' : 'VLAN IPv6 位址');
+    text('ipv6-vlans-help', pd ? '以固定子網 ID，從委派前綴分配各 VLAN 的 /64。' : '為既有 VLAN 指定獨立的 /64 網段。');
+  }
   function advancedBusy() {
+    syncIpv6Mode();
     document.querySelectorAll('.advanced-control').forEach((item) => {
       item.disabled = state.busy || !state.config || !state.authenticated || item.dataset.locked === 'true';
     });
@@ -267,11 +304,12 @@
     if (!state.config) return;
     const config = state.config;
     ['vlans-list', 'wireguard-list', 'firewall-list', 'ipv6-vlans-list'].forEach((id) => $(id).replaceChildren());
-    if (!state.ipv6Vlans.length) emptyList($('ipv6-vlans-list'), '尚未設定 VLAN IPv6 位址。請先建立 VLAN，再指定 /64 網段。');
-    state.ipv6Vlans.forEach((vlan, index) => {
-      const { card, controls } = itemCard('ipv6-vlan', vlan.interface, vlan.address);
+    const ipv6Vlans = pdEnabled() ? state.pdVlans : state.ipv6Vlans;
+    if (!ipv6Vlans.length) emptyList($('ipv6-vlans-list'), pdEnabled() ? '尚未分配 VLAN 子網 ID。請先建立 VLAN，再新增分配。' : '尚未設定 VLAN IPv6 位址。請先建立 VLAN，再指定 /64 網段。');
+    ipv6Vlans.forEach((vlan, index) => {
+      const { card, controls } = itemCard('ipv6-vlan', vlan.interface, pdEnabled() ? `委派子網 ID：${vlan.subnet_id} · /64` : vlan.address);
       card.dataset.interface = vlan.interface;
-      controls.append(actionButton('編輯', () => openEditor('ipv6-vlan', index), `編輯 IPv6 VLAN ${vlan.interface}`), actionButton('刪除', () => removeItem(state.ipv6Vlans, index, `${vlan.interface} IPv6 位址`), `刪除 IPv6 VLAN ${vlan.interface}`));
+      controls.append(actionButton('編輯', () => openEditor('ipv6-vlan', index), `編輯 IPv6 VLAN ${vlan.interface}`), actionButton('刪除', () => removeItem(ipv6Vlans, index, `${vlan.interface} IPv6 分配`), `刪除 IPv6 VLAN ${vlan.interface}`));
       $('ipv6-vlans-list').append(card);
     });
     if (!config.vlans.length) emptyList($('vlans-list'), '尚未建立 VLAN。新增網路後，可設定標籤、位址與獨立 DHCP 範圍。');
@@ -369,9 +407,10 @@
     text('editor-help', '加入變更只會更新草稿。請在分頁按「儲存全部變更」，重新啟動後生效。');
     if (kind === 'ipv6-vlan') {
       if (!state.config.vlans.length) { message('global-error', '請先在 VLAN 網路分頁新增 VLAN，再設定其 IPv6 位址。'); return; }
-      const value = state.ipv6Vlans[index] || { interface: state.config.vlans[0].interface, address: '' };
+      const value = (pdEnabled() ? state.pdVlans : state.ipv6Vlans)[index] || { interface: state.config.vlans[0].interface, address: '', subnet_id: '' };
       addField('interface', 'VLAN 介面', value.interface, { required: true, choices: state.config.vlans.map((vlan) => [vlan.interface, vlan.interface]) });
-      addField('address', 'IPv6 位址 /64', value.address, { required: true, placeholder: '例如 fd20:20::1/64' });
+      if (pdEnabled()) addField('subnet-id', '子網 ID', value.subnet_id, { required: true, type: 'number', min: 0, max: pdSubnetMax(), help: '使用十進位整數；不可與 LAN 或其他 VLAN 重複。' });
+      else addField('address', 'IPv6 位址 /64', value.address, { required: true, placeholder: '例如 fd20:20::1/64' });
     } else if (kind === 'vlan') {
       const value = state.config.vlans[index] || { interface: '', parent: $('lan-interface').value, id: '', address: '', dhcp: null, internet: false };
       addField('interface', 'VLAN 介面名稱', value.interface, { required: true, placeholder: '例如 vlan20' });
@@ -435,9 +474,10 @@
       }
       let value, items, target = index;
       if (kind === 'ipv6-vlan') {
-        items = state.ipv6Vlans;
-        value = { interface: optionalField('interface'), address: optionalField('address') };
+        items = pdEnabled() ? state.pdVlans : state.ipv6Vlans;
+        value = pdEnabled() ? { interface: optionalField('interface'), subnet_id: numberField('subnet-id') } : { interface: optionalField('interface'), address: optionalField('address') };
         if (items.some((vlan, row) => row !== index && vlan.interface === value.interface)) throw new Error('每個 VLAN 只能指定一個 IPv6 網段。');
+        if (pdEnabled() && (value.subnet_id === Number($('ipv6-pd-lan-subnet').value) || items.some((vlan, row) => row !== index && vlan.subnet_id === value.subnet_id))) throw new Error('LAN 與 VLAN 的子網 ID 不可重複。');
       } else if (kind === 'vlan') {
         items = state.config.vlans;
         value = { interface: optionalField('interface'), parent: optionalField('parent'), id: numberField('id'), address: optionalField('address'), dhcp: $('edit-dhcp-enabled').checked ? { start: optionalField('dhcp-start'), end: optionalField('dhcp-end'), lease_hours: numberField('lease-hours') } : null, internet: $('edit-internet').checked };
@@ -487,6 +527,7 @@
   $('add-vlans').addEventListener('click', () => openEditor('vlan'));
   $('add-ipv6-vlan').addEventListener('click', () => openEditor('ipv6-vlan'));
   $('ipv6-form').addEventListener('input', () => { markDirty(); advancedBusy(); });
+  ['ipv6-wan-mode', 'ipv6-pd-enabled'].forEach((id) => $(id).addEventListener('change', renderAdvanced));
   $('ipv6-form').addEventListener('submit', (event) => { event.preventDefault(); saveAll(); });
   $('add-wireguard').addEventListener('click', () => openEditor('wireguard'));
   $('add-firewall').addEventListener('click', () => openEditor('rule'));
@@ -521,12 +562,12 @@
     catch (error) { message(state.authenticated ? 'global-error' : 'auth-error', errorText(error)); }
     finally { button.disabled = false; }
   });
-  $('refresh-button').addEventListener('click', async () => {
-    const button = $('refresh-button'); button.disabled = true; clearMessages();
+  ['refresh-button', 'ipv6-refresh'].forEach((id) => $(id).addEventListener('click', async () => {
+    const button = $(id); button.disabled = true; clearMessages();
     try { await loadStatus(); }
     catch (error) { message(state.authenticated ? 'global-error' : 'auth-error', errorText(error)); }
     finally { button.disabled = false; }
-  });
+  }));
   $('network-form').addEventListener('input', markDirty);
   $('reload-config').addEventListener('click', async () => {
     if (state.busy) return;
@@ -551,7 +592,13 @@
     config.dhcp.end = $('dhcp-end').value.trim();
     config.dhcp.lease_hours = Number($('lease-hours').value);
     config.dns.upstream = $('dns-upstream').value.split(/[\s,]+/).filter(Boolean);
-    config.ipv6 = $('ipv6-enabled').checked ? { wan_address: $('ipv6-wan-address').value.trim() || null, wan_gateway: $('ipv6-wan-gateway').value.trim() || null, lan_address: $('ipv6-lan-address').value.trim(), vlans: structuredClone(state.ipv6Vlans), dns_upstream: $('ipv6-dns').value.split(/[\s,]+/).filter(Boolean) } : null;
+    const autoIpv6 = $('ipv6-wan-mode').value === 'auto';
+    const pd = pdEnabled() ? { prefix_length: Number($('ipv6-pd-prefix-length').value), lan_subnet_id: Number($('ipv6-pd-lan-subnet').value), vlans: structuredClone(state.pdVlans) } : null;
+    if ($('ipv6-enabled').checked && pd) {
+      const ids = [pd.lan_subnet_id, ...pd.vlans.map((vlan) => vlan.subnet_id)];
+      if (ids.some((id) => !Number.isInteger(id) || id < 0 || id > pdSubnetMax()) || new Set(ids).size !== ids.length) { message('global-error', 'LAN 與 VLAN 的子網 ID 必須各自不同，且符合要求的前綴長度。'); return; }
+    }
+    config.ipv6 = $('ipv6-enabled').checked ? { ...state.config.ipv6, wan_mode: autoIpv6 ? 'auto' : 'static', dns_auto: autoIpv6 && $('ipv6-dns-auto').checked, wan_address: autoIpv6 ? null : $('ipv6-wan-address').value.trim() || null, wan_gateway: autoIpv6 ? null : $('ipv6-wan-gateway').value.trim() || null, lan_address: pd ? '' : $('ipv6-lan-address').value.trim(), vlans: pd ? [] : structuredClone(state.ipv6Vlans), dns_upstream: $('ipv6-dns').value.split(/[\s,]+/).filter(Boolean), pd } : null;
     if (!Number.isSafeInteger(config.dhcp.lease_hours) || config.dhcp.lease_hours < 1) { message('global-error', '租約時間必須是大於零的整數。'); return; }
     state.busy = true; $('network-fields').disabled = true; $('save-config').disabled = true; $('reload-config').disabled = true;
     advancedBusy();

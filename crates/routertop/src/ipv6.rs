@@ -9,11 +9,41 @@ pub const FULL_TUNNEL_TABLE: u32 = 51820;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Ipv6Config {
+    #[serde(default)]
+    pub wan_mode: WanMode,
+    #[serde(default = "yes")]
+    pub dns_auto: bool,
+    #[serde(default)]
+    pub pd: Option<PrefixDelegation>,
     pub wan_address: Option<String>,
     pub wan_gateway: Option<String>,
+    #[serde(default)]
     pub lan_address: String,
     pub vlans: Vec<Ipv6Vlan>,
     pub dns_upstream: Vec<String>,
+}
+fn yes() -> bool {
+    true
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum WanMode {
+    #[default]
+    Static,
+    Auto,
+}
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct PrefixDelegation {
+    pub prefix_length: u8,
+    pub lan_subnet_id: u32,
+    pub vlans: Vec<DelegatedVlan>,
+}
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct DelegatedVlan {
+    pub interface: String,
+    pub subnet_id: u32,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -35,19 +65,19 @@ impl Net6 {
             u128::MAX << (128 - self.prefix)
         }
     }
-    fn first(self) -> u128 {
+    pub(crate) fn first(self) -> u128 {
         self.ip & self.mask()
     }
     fn last(self) -> u128 {
         self.first() | !self.mask()
     }
-    fn contains(self, ip: u128) -> bool {
+    pub(crate) fn contains(self, ip: u128) -> bool {
         ip >= self.first() && ip <= self.last()
     }
-    fn overlaps(self, other: Self) -> bool {
+    pub(crate) fn overlaps(self, other: Self) -> bool {
         self.first() <= other.last() && other.first() <= self.last()
     }
-    fn text(self) -> String {
+    pub(crate) fn text(self) -> String {
         format!("{}/{}", Ipv6Addr::from(self.first()), self.prefix)
     }
 }
@@ -85,14 +115,14 @@ pub(crate) fn network(value: &str) -> Result<Net6, String> {
     }
     Ok(net)
 }
-fn global_or_ula(ip: u128) -> bool {
+pub(crate) fn global_or_ula(ip: u128) -> bool {
     let first = (ip >> 112) as u16;
     first & 0xe000 == 0x2000 || first & 0xfe00 == 0xfc00
 }
 fn link_local(ip: u128) -> bool {
     (ip >> 118) == 0x3fa
 }
-fn host(value: &str, min: u32, max: u32) -> Result<Net6, String> {
+pub(crate) fn host(value: &str, min: u32, max: u32) -> Result<Net6, String> {
     let net = cidr6(value)?;
     if !(min..=max).contains(&net.prefix)
         || !global_or_ula(net.ip)
@@ -154,6 +184,7 @@ pub(crate) fn validate(config: &Config) -> Result<(), String> {
     // All statically connected IPv6 subnets are disjoint, including WAN.
     let mut local: Vec<(&str, Net6, bool)> = Vec::new();
     if let Some(v6) = &config.ipv6 {
+        crate::pd::validate(config, v6)?;
         if v6.vlans.len() > 16 || v6.dns_upstream.len() > 8 {
             return Err("IPv6 allows at most 16 VLAN prefixes and 8 DNS upstreams".into());
         }
@@ -164,10 +195,12 @@ pub(crate) fn validate(config: &Config) -> Result<(), String> {
                 if gateway==wan.ip||(!link_local(gateway)&&(!global_or_ula(gateway)||!wan.contains(gateway))) {return Err("IPv6 WAN gateway must be on-link global/ULA or link-local and not the router".into());}
                 local.push((&config.wan.interface,wan,false));
             }
-            (None,None) if full.is_some_and(full_v6)=>{}
+            (None,None) if full.is_some_and(full_v6)||v6.wan_mode==WanMode::Auto=>{}
             _=>return Err("IPv6 WAN address/gateway must be a pair; omission requires a dual-stack full tunnel".into()),
         }
-        local.push((&config.lan.interface, host(&v6.lan_address, 64, 64)?, false));
+        if v6.pd.is_none() {
+            local.push((&config.lan.interface, host(&v6.lan_address, 64, 64)?, false));
+        }
         let mut names = HashSet::new();
         for vlan in &v6.vlans {
             if !config
@@ -253,6 +286,7 @@ pub(crate) fn validate(config: &Config) -> Result<(), String> {
 }
 
 pub(crate) struct Extra {
+    pub sets: String,
     pub setup: String,
     pub input: String,
     pub forward: String,
@@ -265,6 +299,7 @@ pub(crate) struct Extra {
 }
 pub(crate) fn render(config: &Config) -> Result<Extra, String> {
     let mut out = Extra {
+        sets: String::new(),
         setup: String::new(),
         input: String::new(),
         forward: String::new(),
@@ -285,19 +320,29 @@ pub(crate) fn render(config: &Config) -> Result<Extra, String> {
         out.input.push_str("        meta nfproto ipv6 meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept\n        meta nfproto ipv6 ip6 hoplimit 255 meta l4proto ipv6-icmp icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } accept\n");
     }
     if let Some(v6) = &config.ipv6 {
+        if v6.wan_mode == WanMode::Auto {
+            out.sets
+                .push_str("    set auto_wan { type ifname; flags timeout; timeout 5s; }\n");
+            writeln!(out.guard,"        meta nfproto ipv6 oifname \"{wan}\" oifname != @auto_wan drop\n        meta nfproto ipv6 iifname \"{wan}\" iifname != @auto_wan drop").expect("String write");
+            writeln!(out.input,"        iifname \"{wan}\" ip6 saddr fe80::/10 ip6 hoplimit 255 meta l4proto ipv6-icmp icmpv6 type nd-router-advert accept\n        iifname \"{wan}\" meta nfproto ipv6 udp sport 547 udp dport 546 accept").expect("String write");
+        }
         if let (Some(address), Some(gateway)) = (&v6.wan_address, &v6.wan_gateway) {
             writeln!(out.setup,"ip -6 address add '{address}' dev '{wan}'\nip -6 route replace default via '{gateway}' dev '{wan}'").expect("String write");
         }
         out.dnsmasq.push_str("enable-ra\n");
-        render_lan(
-            &mut out,
-            &config.lan.interface,
-            &v6.lan_address,
-            true,
-            destination,
-            full,
-            v6_egress_allowed,
-        )?;
+        if v6.pd.is_none() {
+            render_lan(
+                &mut out,
+                &config.lan.interface,
+                &v6.lan_address,
+                true,
+                destination,
+                full,
+                v6_egress_allowed,
+            )?;
+        } else {
+            crate::pd::render_lans(config, &mut out, destination, v6_egress_allowed)?;
+        }
         for subnet in &v6.vlans {
             let internet = config
                 .vlans
@@ -367,6 +412,17 @@ pub(crate) fn render(config: &Config) -> Result<Extra, String> {
             .collect::<Vec<_>>()
             .join(", ");
         out.output=format!("    chain output {{\n        type filter hook output priority 0; policy accept;\n        oifname \"{wan}\" meta nfproto ipv4 meta mark {FULL_TUNNEL_MARK} udp sport {{ {ports} }} accept\n        oifname \"{wan}\" meta nfproto ipv4 udp sport 68 udp dport 67 accept\n        oifname \"{wan}\" meta nfproto ipv6 ip6 hoplimit 255 meta l4proto ipv6-icmp icmpv6 type {{ nd-neighbor-solicit, nd-neighbor-advert }} accept\n        oifname \"{wan}\" counter drop comment \"full-tunnel router WAN blocked\"\n    }}\n");
+        if config
+            .ipv6
+            .as_ref()
+            .is_some_and(|v6| v6.wan_mode == WanMode::Auto)
+        {
+            let exception=format!("        oifname \"{wan}\" meta nfproto ipv6 udp sport 546 udp dport 547 accept\n        oifname \"{wan}\" ip6 daddr ff02::2 ip6 hoplimit 255 meta l4proto ipv6-icmp icmpv6 type nd-router-solicit accept\n");
+            out.output = out.output.replace(
+                &format!("        oifname \"{wan}\" counter drop"),
+                &format!("{exception}        oifname \"{wan}\" counter drop"),
+            );
+        }
         let lan = crate::cidr(&config.lan.address, "lan.address")?.network_text();
         writeln!(
             out.forward,

@@ -11,6 +11,9 @@ fn base() -> Config {
 }
 fn v6() -> Ipv6Config {
     Ipv6Config {
+        wan_mode: routertop::WanMode::Static,
+        pd: None,
+        dns_auto: true,
         wan_address: Some("2001:db8:1::2/64".into()),
         wan_gateway: Some("2001:db8:1::1".into()),
         lan_address: "2001:db8:88::1/64".into(),

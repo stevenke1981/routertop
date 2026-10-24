@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$ImageDirectory = (Join-Path $PSScriptRoot '../dist/v0.4'),
+    [string]$ImageDirectory = (Join-Path $PSScriptRoot '../dist/v0.5'),
     [string]$Qemu = 'qemu-system-x86_64',
     [int]$MemoryMiB = 512,
     [string]$DataDisk,

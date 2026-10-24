@@ -1,0 +1,11 @@
+{
+  "unit_exit": 0,
+  "network_v05_exit": 0,
+  "result": "PASS",
+  "candidate": "r4",
+  "release_artifact_sha256": "d9d554fb2e41ec020a10bea96dc8ace77a0f7466b2c07ae18f6869c4faad6686",
+  "affected_unit": "default_policy_is_scoped_and_fail_closed",
+  "affected_unit_passed": 1,
+  "packet_assertions_passed": 16,
+  "packet_report": "network-v05-results-r4.jsonl"
+}

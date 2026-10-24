@@ -1,0 +1,24 @@
+#!/bin/sh
+# Only restart the existing dnsmasq process when RA default availability
+# changes; constructor contexts independently track address lease lifetimes.
+set -eu
+marker=/run/routertop/pd/dnsmasq-restart
+while :; do
+    if [ -f "$marker" ]; then
+        rm -f "$marker"
+        if [ -f /run/dnsmasq.pid ]; then
+            pid=$(cat /run/dnsmasq.pid)
+            case "$pid" in ''|*[!0-9]*) exit 1 ;; esac
+            kill -TERM "$pid" 2>/dev/null || true
+            attempts=0
+            while kill -0 "$pid" 2>/dev/null && [ "$attempts" -lt 30 ]; do
+                sleep 0.1
+                attempts=$((attempts + 1))
+            done
+            kill -0 "$pid" 2>/dev/null && exit 1
+        fi
+        dnsmasq --test
+        dnsmasq --user=dnsmasq --group=dnsmasq --pid-file=/run/dnsmasq.pid
+    fi
+    sleep 1
+done

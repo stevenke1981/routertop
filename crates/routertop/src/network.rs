@@ -551,11 +551,13 @@ pub(crate) fn render_network(config: &Config) -> Result<NetworkRendered, String>
             )
             .expect("String write");
             writeln!(rendered.dnsmasq,"dhcp-option=tag:rt-{name},option:router,{ip}\ndhcp-option=tag:rt-{name},option:dns-server,{ip}").expect("String write");
-        } else if !config
-            .ipv6
-            .as_ref()
-            .is_some_and(|v6| v6.vlans.iter().any(|vlan| vlan.interface == *name))
-        {
+        } else if !config.ipv6.as_ref().is_some_and(|v6| {
+            v6.vlans.iter().any(|vlan| vlan.interface == *name)
+                || v6
+                    .pd
+                    .as_ref()
+                    .is_some_and(|pd| pd.vlans.iter().any(|vlan| vlan.interface == *name))
+        }) {
             // dnsmasq 2.92 also suppresses constructor RA contexts with
             // no-dhcpv4-interface. SLAAC-only VLANs instead omit the IPv4 pool
             // and the DHCPv4 input allowance above.

@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+config=/etc/routertop/routertop.toml
+runtime=/run/routertop/pd
+# Empty rendered client configuration means legacy/static mode.
+[ -s /run/routertop/dhcpcd.conf ] || exit 0
+[ -f /run/routertop/persistent ] || { echo 'Dynamic IPv6 requires a persistent data volume for client identity.' >&2; exit 1; }
+routertop ipv6-init "$config" "$runtime" /data/routertop-dhcpcd/duid
+mkdir -p /var/lib/dhcpcd /run/dhcpcd
+# Managed kernel lifetimes and the nft timeout sets remain finite on failures.
+dhcpcd -6 -b -f "$runtime/dhcpcd.conf"
+routertop ipv6-monitor "$config" "$runtime" >>/var/log/routertop-ipv6.log 2>&1 &
+echo "$!" > "$runtime/monitor.pid"
+/usr/sbin/routertop-dns-supervisor >>/var/log/routertop-dns.log 2>&1 &

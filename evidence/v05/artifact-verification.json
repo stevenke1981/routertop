@@ -1,0 +1,77 @@
+{
+  "result": "PASS",
+  "candidate": "r4",
+  "observed_utc": "2026-10-24T05:52:44.314662+00:00",
+  "artifacts": {
+    "routertop": {
+      "bytes": 1217152,
+      "sha256": "d9d554fb2e41ec020a10bea96dc8ace77a0f7466b2c07ae18f6869c4faad6686"
+    },
+    "routertop-x86_64.iso": {
+      "bytes": 66320384,
+      "sha256": "35a509558a50e4640ae904d0ba1db256c749626cbe9a785e8965ddd1741979b6"
+    },
+    "vmlinuz": {
+      "bytes": 12641280,
+      "sha256": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85"
+    },
+    "initramfs.gz": {
+      "bytes": 40558131,
+      "sha256": "8a099d0ef57f9d709d2e864985e1896246282c144b410bf299a4c2f6c2f161fe"
+    },
+    "routertop-data-blank.img": {
+      "bytes": 34603008,
+      "sha256": "51372078bd39dba7b5b7c2f4a3179d53205e2af9a78be4980ede920654a6b8f5"
+    },
+    "packages.txt": {
+      "bytes": 1242,
+      "sha256": "70aae3008bf3ddd94e4932d1b69eaf60c6af0682639decac81df172574979ac5"
+    },
+    "build-manifest.json": {
+      "bytes": 480,
+      "sha256": "3854bfd5d4f95ad3489f5231f724e5dfe1a61eabb9906d320c27e3496e4f15c2"
+    },
+    "SHA256SUMS": {
+      "bytes": 488,
+      "sha256": "a87ac8c2ae9353d4660d9beed0d00392566d6f23d7198060d13737738d220b46"
+    }
+  },
+  "normalized_lf_source_sha256": {
+    "Cargo.toml": "2117e9a866c09cfe267dc2d4d2dfb79e0ac3494ce1edf2537648bbf32d778e30",
+    "Cargo.lock": "bc76a75b192195ee541637d8f0869b8d8cabfac388fd93b71468111d591b3d9a",
+    "crates/routertop/src/console.rs": "6791db9f3591a8b22d3606bf8b00b855ce278dcfc8f786cb3f95911ea3f72866",
+    "crates/routertop/src/ipv6.rs": "4a20d9c56ca47ae2d5ca3bc8162fa20f62d2eda0119bf48bdf5f14092ade67cf",
+    "crates/routertop/src/lib.rs": "49ad437517ee78f019572e47f7c5655aadc3d1c749cde97386ac91ce53dbd72f",
+    "crates/routertop/src/main.rs": "31b12b3d126b3309bbdde86d87cb830547a2ba4d51ce691620698d5a867f2ee6",
+    "crates/routertop/src/network.rs": "df9bffe01f8f7507f02162fb00ad23433b7e439fd352017effbdfe7bff22984c",
+    "crates/routertop/src/pd.rs": "13e4ee4b79712f597f30b1713dc19944f322908c3849785c8171c88693f87e2c",
+    "crates/routertop/src/web.rs": "09e9f844188ac437d9b056cf078597c73149d2150e12c44e196c7b08375234d7",
+    "configs/routertop.toml": "702298cfe9f1c551b579d0214df49afe924d1377f07d06d8a6f8880cae38aa63",
+    "scripts/build-image.sh": "b00f298962a5724fdbcb8114cefc5e68ea3b5f7669ee62d748cfb467d901905a",
+    "image/grub.cfg": "5108c1f2cf6a9f748cfa97728c92ccc2a3fa626081b3de755ea5a1ecf17acff2",
+    "image/packages.txt": "e2816c2d57a6702c8559049a883400e1805156f19be79f73b1ef003e37ade883",
+    "image/README.md": "42b720e61aa4e1536824ac7e34f66679012d519830c0a902ad4980f5f415dd4a",
+    "image/overlay/init": "23a883d1b13022b479d4502d95dc5503ec9e80625c1c661d76586b87aa2262aa",
+    "image/profiles/aarch64.env": "9d262645b05e154d71f1eefd1b5674a99a8fc51f2de94243f3b175949f0a4e31",
+    "image/profiles/x86_64.env": "4673ea46bb03c9a9365902b858567cb29dee94c680a498efbc807d2c9ca599fa",
+    "image/overlay/etc/inittab": "15ec397bc9ef7d1bdd7a08f319c1893a444b8140bebb1189ce72bb67d6611eac",
+    "image/overlay/etc/routertop-release": "46b8c38384267be969df0be33510c0860cea5ee231e5124927fb5c7633338361",
+    "image/overlay/usr/sbin/routertop-boot": "c44e10ba4e7b703e9d0777a6d38a1bec72ff89c69947f2e8b70361c14af2e8ec",
+    "image/overlay/usr/sbin/routertop-console": "2be22802536840a2872fb765f26116ea4df4ad50a8471b1a1cc38836d4d890ed",
+    "image/overlay/usr/sbin/routertop-dns-supervisor": "19354fc7aa9039fd96503c32144395a1bcce2a0d1ea27a5dff21e50e059403c5",
+    "image/overlay/usr/sbin/routertop-ipv6-hook": "569a6bbc18eae74ab3dc1f387f6db9a9d5a6badeadffbf776087adedf2318eba",
+    "image/overlay/usr/sbin/routertop-ipv6-start": "3ad00d07fc6853bcc095486dc28189936b566b658917647506cebfe1a7952f16",
+    "image/overlay/usr/sbin/routertop-management": "de9151078bc1b19034a918226257c1de5b203d0be8d919cbff15b8ac84a2c8ac",
+    "image/overlay/usr/sbin/routertop-storage": "3913602c7e2c551dff0060488d8962ffbf31d4d78a8f827841dd808a14f1ec39",
+    "image/overlay/usr/sbin/routertop-wan-check": "0aeb5cccf2fe684151fdd8c18011b1eb0b65b40b74e2d02aa57f9a10258db816",
+    "image/overlay/usr/sbin/routertop-web-supervisor": "a19903ed54f1daf3dadbaad7f83417bb3bf26fe07e5470541cb9901d1223e00e",
+    "web/app.js": "2996e3548abab1b0d8f5c85e9b7d945739570c3274b6f22cf6465d2d4c38b857",
+    "web/index.html": "daedc14029ee97d82765adbf5590187257c2247b12fc244b721f7e9b09d48902",
+    "web/style.css": "c0d1fcf27cf87dff5eff66dcec6a30226d659247a90f410033150032c8694539"
+  },
+  "runtime_packages": 61,
+  "web_bytes": 93531,
+  "iso_delta_vs_v04_bytes": 225280,
+  "compressed_boot_bytes": 53199411,
+  "image_boot_evidence": "browser/browser-v05-report.json"
+}

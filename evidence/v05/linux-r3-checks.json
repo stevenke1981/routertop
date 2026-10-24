@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "platform": "Alpine x86_64 Linux 6.18.58 / Rust 1.96.1",
+  "candidate": "r3",
+  "command": "cargo test --locked",
+  "exit_code": 0,
+  "tests_passed": 76,
+  "release_artifact_sha256": "0a43d3e5547874d70cd1f0dce55cd062f6ac80b69f79071278a2b49b485d084f",
+  "scope": "Full r3 Rust regression; subsequent r4 changes only explicit IPv4 DHCP program selection and its assertion, validated separately."
+}

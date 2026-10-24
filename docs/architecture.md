@@ -1,4 +1,4 @@
-# 架構決策：RouterTop 0.4
+# 架構決策：RouterTop 0.5
 
 ## 基礎系統與資料平面
 
@@ -10,7 +10,7 @@ VLAN、VPN 與防火牆使用有界、拒絕未知欄位的型別模型。所有
 
 ## IPv6 與全通道路由
 
-`Config.ipv6` 預設為空。啟用時使用靜態 WAN 位址／gateway、LAN `/64` 及對應既有 VLAN 的 `/64`。gateway 可為同網段 global／ULA 或由 WAN 介面限定的 link-local 位址；不接收任意 zone／shell 字串。前綴須正規化且互不重疊。此版沒有 DHCPv6-PD；只有雙協定全通道允許省略 WAN IPv6 位址與 gateway。
+`Config.ipv6` 預設為空。靜態模式使用 WAN 位址／gateway、LAN `/64` 及對應既有 VLAN 的 `/64`。gateway 可為同網段 global／ULA 或由 WAN 介面限定的 link-local 位址；不接收任意 zone／shell 字串。前綴須正規化且互不重疊。`wan_mode` 預設 static，相容既有資料；auto 模式省略 WAN 位址與 gateway，由 dhcpcd 取得。`pd` 可指定 /48–/64 申請長度和 LAN／VLAN 唯一子網編號，與手動內網 IPv6 位址互斥。雙協定全通道也允許省略靜態 WAN IPv6 位址與 gateway。
 
 dnsmasq 在指定 LAN／VLAN 供應 RA-only SLAAC 與 RDNSS，不提供此版未實作的 stateful DHCPv6。IPv4 DHCP 停用但需提供 SLAAC 的 VLAN 不建立 IPv4 位址池，也不產生 DHCPv4 input 放行；省略會在目前 dnsmasq 2.92 套件連帶阻止 IPv6 constructor 的 `no-dhcpv4-interface`。沒有 IPv6 的停用 VLAN 仍使用 `no-dhcp-interface`。IPv6 firewall 預設拒絕，保留 ND、錯誤訊息、PMTU 與各網段限定的 DNS；HTTPS 管理仍綁 LAN IPv4。自訂規則明確帶 `family`，拒絕混用網段及 ICMP 家族。
 
@@ -18,7 +18,7 @@ WireGuard 可增加 IPv6 介面位址與 IPv6 peer 路由。分流路由不得�
 
 全通道最多一個介面，該介面僅一個 peer，需 IPv4 default，可選 IPv6 default，外層 endpoint 暫限 literal IPv4。`full_tunnel` 與遠端 peer 對外功能 `internet` 互斥。所有 WG socket 在 full mode 使用保留 mark `0x5254`；default routes 放入 table `51820`，priority 100 查 main 並 suppress default，priority 110 讓未標記封包查 VPN table。如此保留本地管理、非預設路由及已標記的 WireGuard 加密 transport。
 
-nft forward 在 established／related 前拒絕直接 WAN；output 對 WAN 僅保留已標記且來源埠符合已配置 WG 的 UDP、DHCPv4 與必要 IPv6 ND，其他封包拒絕。這些規則不隨 WG link 刪除，所以政策路由消失不等於允許明文回退。IPv4-only 全通道拒絕 IPv6 轉送，但保留 LAN ND／RA，RA router lifetime 設為零。此設計的實際握手、轉送及斷線結果需由封包驗收確認。
+nft forward 在 established／related 前拒絕直接 WAN；output 對 WAN 僅保留已標記且來源埠符合已配置 WG 的 UDP、DHCPv4、動態模式限定的 DHCPv6／RS 與必要 IPv6 ND，其他封包拒絕。這些規則不隨 WG link 刪除，所以政策路由消失不等於允許明文回退。IPv4-only 全通道拒絕 IPv6 轉送，但保留 LAN ND／RA，RA router lifetime 設為零。此設計的實際握手、轉送及斷線結果需由封包驗收確認。
 
 IPv4 內網經全通道使用 masquerade；IPv6 NAT66 為明確選項，關閉時需要 VPN 端的回程路由。VLAN 的 internet 開關仍控制是否能使用對外出口；full mode 時其出口改為 VPN。沒有任意使用者自訂政策路由或自動 failover 的宣稱。
 
@@ -62,6 +62,12 @@ Web 儲存只更新持久 bundle。作用中配置仍在 `/etc/routertop/routert
 
 重啟才載入已儲存配置。`apply --boot` 僅供首次開機，拒絕運作中的任意重套。此版尚未提供即時網路交易、確認逾時 rollback 或 A/B 系統升級。
 
+## 動態 IPv6 生命週期
+
+套件 dhcpcd 處理 DHCPv6 IA_NA／IA_PD 與 RA；Rust 不實作 DHCP 客戶端。上游事件經固定 hook 交給嚴格解析器，不 eval 環境內容。Rust 對實際委派大小、網段衝突與有效期限再次驗證，將目前有效的 LAN／VLAN 前綴放入有限 timeout 的 nft 集合；集合更新失敗或 monitor 停止時不永久保留通行權。動態來源 gate 先於 established／自訂規則；原有 WG 直接 WAN 阻擋仍保留。
+
+DHCPv6 identity 位於 root-only `/data/routertop-dhcpcd/duid`，以持久資料卷保留；租約、DNS、狀態與產生配置留在 `/run/routertop/pd`。前綴變更不改寫使用者設定或 revision。dnsmasq constructor 依介面位址時效宣告子網，失去上游時撤回預設出口。動態 DNS 只使用仍有效資料，WG full mode 不採用上游學習 DNS。Web 的公開 runtime status 不包含 DUID、私鑰或 hook 環境。
+
 ## 平台、建置與證據
 
 0.4 Web 介面將資訊整理為淺灰側欄、白色分組面板及藍色主要操作，使用系統字型、可見鍵盤焦點與響應式排列。設計借鑑 macOS「系統設定」，保留 RouterTop 名稱與圖示，不使用 Apple 素材；[設計記錄](design-v0.4.md) 與實際瀏覽器驗收分開。
@@ -70,4 +76,4 @@ Web 儲存只更新持久 bundle。作用中配置仍在 `/etc/routertop/routert
 
 Cargo.lock 固定 Rust dependency resolution；apk 驗證 Alpine 簽章。產物附套件版本、repository、binary hash、kernel/root bytes 與 artifact hashes。精確重建仍需保存 APK snapshot 及工具鏈。
 
-開發依 agent-team workflow 分工與獨立 worktree，Odin 作為程式導航及分析輔助；實際編譯、服務、VM、瀏覽器、console 與封包證據分開記錄。0.4 的實測與體積記錄於 [驗收紀錄](acceptance-v0.4.md)，目前不得推定尚未完成的項目通過；[0.3](acceptance-v0.3.md)、[0.2](acceptance-v0.2.md) 與 [0.1](acceptance.md) 紀錄保留。
+開發依 agent-team workflow 分工與獨立 worktree，Odin 作為程式導航及分析輔助；實際編譯、服務、VM、瀏覽器、console 與封包證據分開記錄。0.5 的實測與體積記錄於 [驗收紀錄](acceptance-v0.5.md)，目前不得推定尚未完成的項目通過；[0.3](acceptance-v0.3.md)、[0.2](acceptance-v0.2.md) 與 [0.1](acceptance.md) 紀錄保留。

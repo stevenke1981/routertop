@@ -46,6 +46,10 @@ cp /run/routertop/interfaces /etc/network/interfaces
 cp /run/routertop/nftables.nft /etc/nftables.nft
 cp /run/routertop/dnsmasq.conf /etc/dnsmasq.conf
 cp /run/routertop/sysctl.conf /etc/sysctl.conf
+if [ -s /run/routertop/dhcpcd.conf ]; then
+    [ -f /run/routertop/persistent ] || fail 'dynamic IPv6 requires persistent storage'
+    routertop ipv6-init /etc/routertop/routertop.toml /run/routertop/pd /data/routertop-dhcpcd/duid
+fi
 # Firewall is mandatory before bringing up WAN or enabling forwarding.
 nft -c -f /etc/nftables.nft
 nft -f /etc/nftables.nft
@@ -56,6 +60,7 @@ routertop network-check /etc/routertop/routertop.toml
 sh /run/routertop/network-setup.sh
 sysctl -p /etc/sysctl.conf
 dnsmasq --user=dnsmasq --group=dnsmasq --pid-file=/run/dnsmasq.pid
+/usr/sbin/routertop-ipv6-start
 touch /run/routertop/applied
 /usr/sbin/routertop-management
 trap - EXIT

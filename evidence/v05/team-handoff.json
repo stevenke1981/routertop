@@ -1,0 +1,46 @@
+{
+  "task_id": "routertop-v05",
+  "base_sha": "029a08477fac33030b927e88cd96d41abb168d38",
+  "head_sha": null,
+  "head_identity": "final source hashes in artifact-verification.json; commit recorded by delivery",
+  "actor_instance": "root",
+  "receiver_instance": "user",
+  "kind": "handoff",
+  "result": "PASS",
+  "simulation": false,
+  "owners": {
+    "core": "Rust model/runtime, boot/client lifecycle, contract and unit tests",
+    "image": "light Web controls and browser harness",
+    "network_test": "isolated real packet fixtures and Linux acceptance",
+    "pd_review": "independent scoped review and two focused runtime-fix checks",
+    "root": "integration/build/actual ISO/browser lifecycle/publishing"
+  },
+  "checks": {
+    "windows_final_tests": 75,
+    "linux_r3_regression_tests": 76,
+    "linux_r4_affected_test": 1,
+    "r3_network03": 15,
+    "r3_network04": 17,
+    "r4_pd_packets": 16,
+    "final_browser_groups": 9,
+    "final_iso_lifecycle_groups": 6,
+    "visual_audits": 5,
+    "browser_fixture_groups": 5
+  },
+  "artifact": "artifact-verification.json",
+  "review": "../../docs/review-v0.5.md",
+  "odin": {
+    "project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8",
+    "structure_trace": "060f703c-b97f-4e83-9531-8425688a794e",
+    "symbols_trace": "f8144b67-6cb4-4298-a70d-fc07d95ada4e",
+    "scope": "read-only navigation; not test evidence"
+  },
+  "unresolved": [
+    "ARM and physical ISP interoperability NOT_RUN",
+    "Single dynamic WAN; learned link-local DNS unsupported"
+  ],
+  "external_side_effects": {
+    "authorized": true,
+    "scope": "commit and push public source; actual outcome recorded in delivery"
+  }
+}

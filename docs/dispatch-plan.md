@@ -1,5 +1,7 @@
 # RouterTop implementation contract
 
+Current v0.5 scope, owners and acceptance gates are in [plan-v0.5.md](plan-v0.5.md). The original initial-image contract below is retained as historical context; the user has authorized v0.5 commit and public push.
+
 Requested: compact Linux / Alpine / apk router OS, Rust control plane, x86_64 first, ARM reserved, agent team and Odin assistance.
 
 Initial tree: empty. No existing product or acceptance evidence.

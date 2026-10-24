@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "platform": "Windows",
+  "source_base": "029a08477fac33030b927e88cd96d41abb168d38",
+  "observed_utc": "2026-10-24T05:40:44.996390+00:00",
+  "tests_passed": 75,
+  "checks": [
+    "cargo test --locked",
+    "cargo fmt --all -- --check",
+    "cargo clippy --all-targets --locked -- -D warnings",
+    "node --check web/app.js",
+    "python py_compile browser-v05-smoke.py appliance-pd-checks.py"
+  ],
+  "exit_code": 0,
+  "pd_rs_sha256": "13e4ee4b79712f597f30b1713dc19944f322908c3849785c8171c88693f87e2c",
+  "candidate": "r4",
+  "lib_rs_sha256": "49ad437517ee78f019572e47f7c5655aadc3d1c749cde97386ac91ce53dbd72f"
+}

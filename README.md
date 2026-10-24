@@ -1,12 +1,12 @@
 # RouterTop
 
-以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.4 加入 IPv6、WireGuard 全通道、必要的本機 console 登入，並改用受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
+以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.5 加入 IPv6 自動 WAN 與 DHCPv6-PD，延續 WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
 
 ## 已實作範圍
 
 - IPv4 DHCP WAN、固定 LAN、DHCP 伺服器、DNS 轉送、NAT、狀態防火牆與 LAN gateway 靜態路由。
 - 實體 WAN／LAN 上的 802.1Q VLAN、選配 DHCP 與對外 NAT，預設跨網段隔離。
-- 靜態 IPv6 WAN、LAN／VLAN `/64`、RA／SLAAC、IPv6 DNS 轉送及必要的 ND／PMTU 規則；此版不含 DHCPv6-PD。
+- 靜態或自動 IPv6 WAN、DHCPv6-PD `/48`–`/64` 申請、LAN／VLAN 獨立 `/64`、RA／SLAAC、IPv6 DNS 轉送及必要的 ND／PMTU 規則。
 - IPv4／IPv6 split-tunnel WireGuard，或一個明確啟用的全通道介面；全通道 IPv4 NAT、可選 NAT66 與防止直接 WAN 回退的規則。
 - IPv4／IPv6 input／forward 規則新增、編輯、刪除、排序及啟停，可比對介面、網段、協定與目的埠。
 - Rust 嚴格設定驗證、CLI、設定產生器及 CGI 管理 API；繁體中文 Web UI 使用淺灰側欄、白色分組面板與藍色重點，不依賴外部 CDN 或前端框架。
@@ -17,15 +17,15 @@
 
 預設 WAN 為 `eth0`，LAN 為 `eth1`／`192.168.88.1/24`，DHCP 範圍為 `.100` 至 `.199`。HTTPS 預設僅綁定 LAN 位址的 443 埠；SSH 未安裝或啟用，`ssh_port` 只控制防火牆放行。
 
-實作項目不等於驗收通過。0.4 的實際產物、體積、測試及未執行項目記錄於 [0.4 驗收紀錄](docs/acceptance-v0.4.md)。本機實測：65／66 項 Windows／Linux 測試、17 項 IPv6／全通道封包、console、Chrome、BIOS／UEFI 256 MiB 通過；ISO 63.03 MiB，kernel + root 50.52 MiB。[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 紀錄保留為各版本證據。
+實作項目不等於驗收通過。0.5 的實際產物、體積、測試及未執行項目記錄於 [0.5 驗收紀錄](docs/acceptance-v0.5.md)。[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
 
 ## 首次啟動與登入
 
 1. 在 Linux 建立一個全新的資料磁碟檔：`sh scripts/make-data-disk.sh routertop-data.img`。需要 `mkfs.ext4`、`sfdisk` 等工具；輸出為 33 MiB 一般檔案，內含 32 MiB ext4 分割區及 `ROUTERTOP_DATA` 標籤。工具拒絕覆寫既有路徑。
-2. 將資料磁碟與 0.4 映像交給 Windows 啟動器：
+2. 將資料磁碟與 0.5 映像交給 Windows 啟動器：
 
    ```powershell
-   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.4 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.5 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
    ```
 
 3. 首次 console 顯示 `Setup choice [create/token]:`。選 `create` 並輸入、確認 12–128 位元組密碼，即可建立管理員；若想從 Web 註冊，選 `token`，在可信實體終端取得一次性註冊權杖。
@@ -46,7 +46,9 @@ Web 儲存會寫入資料卷並顯示是否待重啟；不會立即改動運作�
 
 VLAN 與 split-tunnel VPN 的網際網路存取需要明確啟用；跨 VLAN、VPN 到 LAN／VLAN 的連線需要 forward 放行規則。一般自訂規則在 established／related 之後依畫面順序匹配；input 系統保留 LAN 管理、DHCP／DNS、VPN listener 與必要 IPv6 控制訊息。全通道的直接 WAN 阻擋則放在 established／related 之前，不讓既有直接連線繞過。啟用 VPN 時須先取得 WAN IPv4 租約；開機與 DHCP 更新檢查網段衝突，衝突時停止轉送。
 
-IPv6 啟用後，WAN 使用靜態位址與 gateway，gateway 可為綁定 WAN 介面的 link-local 位址；LAN／VLAN 使用不重疊的 `/64`，由 dnsmasq 提供 RA／SLAAC。此版沒有 DHCPv6-PD 或自動向 ISP 申請前綴，需先備妥可用的 IPv6 網段與上游路由。雙協定全通道可省略 WAN IPv6 位址及 gateway，透過 IPv4 外層 WireGuard 承載 IPv6。管理 HTTPS 仍限 LAN IPv4。
+IPv6 WAN 可選靜態或自動取得。自動模式使用 dhcpcd 處理 RA、SLAAC 與 DHCPv6；啟用 PD 時向 ISP 申請 `/48`–`/64` 前綴，再以唯一子網編號配置 LAN／VLAN 的 `/64`。例如 `/56` 可用編號 0–255；實際上游授予的前綴仍需容納全部編號，否則拒絕配置。PD 與手動 LAN／VLAN IPv6 位址互斥。Web 顯示目前位址、委派子網、DNS 與等待／異常狀態。
+
+自動模式需要資料卷保存 root 專用的 DHCPv6 客戶端身分；租約和運作狀態留在 RAM，重開機重新向上游取得。上游更新時同步核心位址、有限時效的防火牆集合及 RA；Web 儲存的模式和子網編號不隨租約改寫。自動學習 DNS 可關閉；WireGuard 全通道不採用上游自動 DNS，應設定 VPN 可達的 DNS。靜態模式與 IPv4 外層承載的雙協定全通道仍保留。管理 HTTPS 仍限 LAN IPv4。
 
 全通道最多一個介面，使用單一 peer、必填 `0.0.0.0/0`，可加 `::/0`；endpoint 暫限 IPv4 位址與埠。與原有 `internet`（讓遠端 peer 對外）模式互斥。IPv4 LAN 流量經 VPN NAT；IPv6 可選 NAT66，不選時 VPN 端必須具備回到 LAN／VLAN 前綴的路由。其他分流 WG 可共存。隧道失效時應維持 WAN 阻擋，DNS 也須使用可經隧道到達的伺服器；實際防洩漏證據見 0.4 驗收紀錄。只設定 IPv4 全通道時，IPv6 轉送會停用於防火牆，LAN 的 ND／RA 仍保留但不宣告可用的 IPv6 預設出口。
 
@@ -66,7 +68,7 @@ cargo run -- export configs/routertop.toml
 
 `status` 讀取 Linux 網卡、路由與 nft table。`apply CONFIG --boot` 僅供 appliance 初次開機配置，已配置的系統拒絕再次套用。`storage-init`、`stored-config`、`wg-configs DATA OUTPUT` 與 `bootstrap-token` 是 Linux root console 管理指令。`wg-configs` 產生含私鑰的 0600 檔案，僅供開機服務使用。
 
-完整步驟見 [映像建置說明](image/README.md)。0.4 apk recipe 只打包 Rust CLI、預設設定與授權；Web 靜態資源、TLS 服務、儲存掛載及 console／開機整合由 OS 映像建置加入，不能把安裝 CLI apk 當成完整 OS 安裝。
+完整步驟見 [映像建置說明](image/README.md)。0.5 apk recipe 只打包 Rust CLI、預設設定與授權；Web 靜態資源、TLS 服務、儲存掛載及 console／開機整合由 OS 映像建置加入，不能把安裝 CLI apk 當成完整 OS 安裝。
 
 壓縮 kernel + root 的初始目標為 64 MiB；ISO、資料磁碟與 RAM 需求分開計量。實際值見驗收紀錄。ARM 只預留 profile，建置入口會拒絕尚未驗證的 ARM 映像。
 
