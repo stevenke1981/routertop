@@ -27,6 +27,28 @@ PREFIX_B = "2001:db8:200::/56"
 REMOTE = "2001:db8:99::9"
 
 
+def client_log_summary(log):
+    """Emit only fixed labels; never copy a client log line or identifier."""
+    stages = ("private-mounts", "private-run", "private-database", "client-exec")
+    errors = {
+        "missing_path": ("no such file or directory", "mount point does not exist"),
+        "permission_denied": ("permission denied", "operation not permitted"),
+        "invalid_option": ("unrecognized option", "unknown option", "invalid option"),
+        "missing_user": ("user not found", "unknown user", "no such user", "getpwnam"),
+        "privsep_failure": ("privsep", "chroot", "ps_root_start", "ps_managersandbox"),
+        "address_in_use": ("address already in use",),
+        "unsupported": ("not supported", "function not implemented"),
+        "startup_failure": ("failed to start", "cannot execute", "exec format error"),
+    }
+    lowered = log.lower()
+    return {
+        "stages": [stage for stage in stages if "ROUTERTOP_CLIENT_STAGE=" + stage in log],
+        "error_categories": [name for name, patterns in errors.items()
+                             if any(pattern in lowered for pattern in patterns)],
+        "log_present": bool(log),
+    }
+
+
 class Lab(old.Lab):
     def __init__(self, binary, full):
         super().__init__(binary, "pd-full" if full else "pd-direct")
@@ -40,6 +62,7 @@ class Lab(old.Lab):
         self.dns_process = None
         self.dns_error = None
         self.dns_restarts = 0
+        self.client_process = None
         self.environment_names = self.work / "hook-environment-names"
         self.dhcp_environment_names = self.work / "hook-dhcp-environment-names"
         self.hook_errors = self.work / "hook-errors"
@@ -203,10 +226,13 @@ persistent_keepalive = 0
         database.mkdir(mode=0o755)
         # dhcpcd's fixed PID/database paths are isolated in a private mount
         # namespace. The builder's /run, resolver and identity remain untouched.
-        wrapper = self.secret_file("dhcpcd-start", "#!/bin/sh\nset -eu\nmount --make-rprivate /\nmount -t tmpfs tmpfs /run\n"
-                                   "mount --bind \"$1\" /var/lib/dhcpcd\nexec dhcpcd -B -6 -f \"$2\"\n")
+        wrapper = self.secret_file("dhcpcd-start", "#!/bin/sh\nset -eu\n"
+                                   "echo ROUTERTOP_CLIENT_STAGE=private-mounts\nmount --make-rprivate /\n"
+                                   "echo ROUTERTOP_CLIENT_STAGE=private-run\nmount -t tmpfs tmpfs /run\n"
+                                   "echo ROUTERTOP_CLIENT_STAGE=private-database\nmount --bind \"$1\" /var/lib/dhcpcd\n"
+                                   "echo ROUTERTOP_CLIENT_STAGE=client-exec\nexec dhcpcd -B -6 -f \"$2\"\n")
         wrapper.chmod(0o700)
-        self.start("router", ["unshare", "-m", "sh", wrapper, database, client_config], "dhcpcd.log")
+        self.client_process = self.start("router", ["unshare", "-m", "sh", wrapper, database, client_config], "dhcpcd.log")
 
     def restart_dns(self):
         if self.dns_process is not None and self.dns_process.poll() is None:
@@ -242,6 +268,9 @@ persistent_keepalive = 0
     def wait_for(self, predicate, label, timeout=45):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
+            if self.client_process is not None and self.client_process.poll() is not None:
+                raise Failure("DHCPv6 client exited before acceptance (exit "
+                              + str(self.client_process.returncode) + ")")
             if self.dns_error:
                 raise Failure("test DNS supervisor failed: " + self.dns_error)
             if predicate():
@@ -302,6 +331,13 @@ persistent_keepalive = 0
         # Explicit public state and fixed protocol-neutral errors only. Raw
         # dhcpcd logs contain DUID/IAID and are deliberately never emitted.
         value = {"diagnostics": label, "mode": self.mode, "status": self.public_status()}
+        client_log = self.work / "dhcpcd.log"
+        if client_log.exists():
+            with client_log.open("rb") as stream:
+                summary = client_log_summary(stream.read(65536).decode("utf-8", errors="replace"))
+            summary["exit_code"] = self.client_process.poll() if self.client_process else None
+            summary["database_directory_exists"] = Path("/var/lib/dhcpcd").is_dir()
+            value["client_startup"] = summary
         value["network"] = {}
         for role in ("router", "client", "vlan", "wan"):
             value["network"][role] = {
