@@ -1,4 +1,4 @@
-# 架構決策：RouterTop 0.7
+# 架構決策：RouterTop 0.8
 
 ## 基礎系統與資料平面
 
@@ -84,4 +84,10 @@ The validated WAN model distinguishes physical underlay from logical `ppp0`. ppp
 
 ## 雙 WAN 主備監督
 
-保留 wan 為主線，新增可選 wan_backup／failover。Rust supervisor 管理兩個取得位址的客戶端與唯一主要 IPv4 預設路由；各自路由表與裝置綁定 probe 防止檢查跨線誤判。主備出口 nft 集合具有有限生命週期，監督程式停止或路由更新失敗時不保留永久放行。ppp0／ppp1 使用獨立私密 peer 檔案，兩組密碼在 Web 分別清空回傳並依槽位、介面與帳號保留。主線 IPv6／PD 在備援期間撤回；單 WAN 的既有 IPv6 生命週期維持。詳細配置與驗收見 [0.7 WAN 契約](network-v0.7-contract.md)及 [0.7 驗收](acceptance-v0.7.md)。
+保留 wan 為主線，新增可選 wan_backup／failover。Rust supervisor 管理兩個取得位址的客戶端與唯一主要 IPv4 預設路由；各自路由表與裝置綁定 probe 防止檢查跨線誤判。主備出口 nft 集合具有有限生命週期，監督程式停止或路由更新失敗時不保留永久放行。ppp0／ppp1 使用獨立私密 peer 檔案，兩組密碼在 Web 分別清空回傳並依槽位、介面與帳號保留。預設主線限定政策仍在備援期間撤回 IPv6／PD；新增 active-standby 政策讓使用中線路取得並持有前綴。單 WAN 的既有 IPv6 生命週期維持。詳細配置與驗收見 [0.7 WAN 契約](network-v0.7-contract.md)及 [0.7 驗收](acceptance-v0.7.md)。
+
+## 雙供應線路 IPv6／PD
+
+`ipv6.provider_policy` 預設 `primary-only`；明確選擇 `active-standby` 後，以既有 WAN 健康狀態選擇 IPv6 供應線路。共用 PD 佈局、單一客戶端與 monitor，透過 boot／generation／slot／interface／incarnation 拒絕延遲事件。撤除舊授權、客戶端、前綴、路由與 DNS 後，才啟動新世代。兩個持久 DUID 對應固定主／備槽位，租約與使用中世代保持 RAM 狀態。詳細規格見 [0.8 契約](network-v0.8-contract.md)，實際測試結果另列。
+
+檔案系統的後續優化以 [SquashFS（zstd／xz）＋overlay／獨立設定分割區](image-size-roadmap.md) 為第一優先，再處理核心、套件、qcow2／sparse 與進階 initramfs；不把路線規劃當成本版已完成的儲存格式遷移。

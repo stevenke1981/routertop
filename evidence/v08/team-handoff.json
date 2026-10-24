@@ -1,0 +1,58 @@
+{
+  "task": "RouterTop0.8 dual-WAN IPv6 and DHCPv6-PD",
+  "result": "PARTIAL development-source delivery",
+  "base_sha": "fcc8c02b742ffeac4531423f78be82cd098c4966",
+  "candidate": "rc2",
+  "source_archive_sha256": "6a9dd160ec55cdcfa9e4b00365364d03871a6238982beb2b62f02f7c3d9c32b6",
+  "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+  "owners": {
+    "root": "Integration, plan/contract/docs, source/artifact binding, VM environment, publication",
+    "v08_core": "R2 provider lifecycle and R3 public CGI projection",
+    "v08_web": "Web/backend/tests; actual Chrome and ISO lifecycle harness",
+    "v08_test": "89 final optimized packet/CGI permission checks and immutable image build",
+    "v08_review": "One scoped review plus focused closure of two concrete findings"
+  },
+  "checks": {
+    "windows_rust": {
+      "result": "PASS",
+      "tests": 103,
+      "fmt_exit": 0,
+      "clippy_exit": 0
+    },
+    "optimized_linux": {
+      "result": "PASS",
+      "checks": 89,
+      "commands_exit_zero": 7
+    },
+    "browser_fixture": {
+      "result": "PASS",
+      "groups": 9,
+      "visual_audits": 5
+    },
+    "actual_iso": {
+      "result": "PARTIAL",
+      "passed": [
+        "save/reload",
+        "both PPP credentials",
+        "warm reboot/settings/revision/admin/TLS retention",
+        "old session expiry",
+        "backup IPv6/PD",
+        "initial backup IPv6 HTTP",
+        "five visual audits"
+      ],
+      "failed": [
+        "DNS (including explicit A query)"
+      ],
+      "not_run_or_open": [
+        "full same-boot failover/recovery",
+        "UEFI cold boot",
+        "final authenticated poweroff"
+      ]
+    }
+  },
+  "open_issue": "Actual ISO DNS probe fails despite working backup IPv6 HTTP. Namespace DNS packet tests pass; actual lifecycle is not declared complete.",
+  "remote": "Commit/push and exact-head hosted CI verified after this document is written; final delivery reports actual outcome.",
+  "size_priority_document": "docs/image-size-roadmap.md; SquashFS first, migration NOT_RUN",
+  "adaptive_router": "Actual architecture child medium->high succeeded; active parent unchanged.",
+  "automatic_approval_rejections": "Two read-only console diagnostic attempts blocked before execution with generic blocked by policy; no rejected payload retried through another route."
+}

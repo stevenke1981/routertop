@@ -1,0 +1,27 @@
+{"case": "dhcp-dhcp: primary real PD/SLAAC/IPv6 HTTP/DNS; standby has no IPv6 default", "status": "PASS"}
+{"case": "dhcp-dhcp: carrier loss selects backup real PD/DNS and blocks retired primary source", "status": "PASS"}
+{"case": "dhcp-dhcp: reconnect restores changed primary prefix and DNS with stable identity", "status": "PASS"}
+{"case": "dhcp-dhcp: carrier-up upstream blackhole switches real IPv6 prefix and learned DNS", "status": "PASS"}
+{"case": "dhcp-dhcp: both providers down fail closed for LAN and router IPv6; management survives", "status": "PASS"}
+{"case": "dhcp-dhcp: recovery restores real IPv6/DNS without rewriting saved settings", "status": "PASS"}
+{"case": "dhcp-pppoe: primary real PD/SLAAC/IPv6 HTTP/DNS; standby has no IPv6 default", "status": "PASS"}
+{"case": "dhcp-pppoe: carrier loss selects backup real PD/DNS and blocks retired primary source", "status": "PASS"}
+{"case": "dhcp-pppoe: reconnect restores changed primary prefix and DNS with stable identity", "status": "PASS"}
+{"case": "dhcp-pppoe: carrier-up upstream blackhole switches real IPv6 prefix and learned DNS", "status": "PASS"}
+{"case": "dhcp-pppoe: both providers down fail closed for LAN and router IPv6; management survives", "status": "PASS"}
+{"case": "dhcp-pppoe: recovery restores real IPv6/DNS without rewriting saved settings", "status": "PASS"}
+{"case": "pppoe-dhcp: absent PPP primary boots with actual backup PD/DNS and exactly one DHCPv6 manager", "status": "PASS"}
+{"case": "pppoe-dhcp: primary real PD/SLAAC/IPv6 HTTP/DNS; standby has no IPv6 default", "status": "PASS"}
+{"case": "pppoe-dhcp: carrier loss selects backup real PD/DNS and blocks retired primary source", "status": "PASS"}
+{"case": "pppoe-dhcp: reconnect restores changed primary prefix and DNS with stable identity", "status": "PASS"}
+{"case": "pppoe-dhcp: carrier-up upstream blackhole switches real IPv6 prefix and learned DNS", "status": "PASS"}
+{"case": "pppoe-dhcp: both providers down fail closed for LAN and router IPv6; management survives", "status": "PASS"}
+{"case": "pppoe-dhcp: recovery restores real IPv6/DNS without rewriting saved settings", "status": "PASS"}
+{"case": "pppoe-pppoe: absent PPP primary boots with actual backup PD/DNS and exactly one DHCPv6 manager", "status": "PASS"}
+{"case": "pppoe-pppoe: primary real PD/SLAAC/IPv6 HTTP/DNS; standby has no IPv6 default", "status": "PASS"}
+{"case": "pppoe-pppoe: carrier loss selects backup real PD/DNS and blocks retired primary source", "status": "PASS"}
+{"case": "pppoe-pppoe: reconnect restores changed primary prefix and DNS with stable identity", "status": "PASS"}
+{"case": "pppoe-pppoe: carrier-up upstream blackhole switches real IPv6 prefix and learned DNS", "status": "PASS"}
+{"case": "pppoe-pppoe: both providers down fail closed for LAN and router IPv6; management survives", "status": "PASS"}
+{"case": "pppoe-pppoe: recovery restores real IPv6/DNS without rewriting saved settings", "status": "PASS"}
+{"status": "PASS", "passed_cases": 26, "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"}

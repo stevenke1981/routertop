@@ -778,6 +778,17 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
         ("POST", "/config") => {
             let mut change: SaveConfig = parse(request)?;
             let previous = crate::parse_config(&data.config).map_err(|_| (500, "設定資料無效"))?;
+            // Older management clients do not know provider_policy. Preserve an
+            // existing opt-in unless the client sends an explicit policy.
+            let raw: Value =
+                serde_json::from_slice(&request.body).map_err(|_| (400, "JSON 格式或欄位無效"))?;
+            if raw.pointer("/config/ipv6").is_some_and(Value::is_object)
+                && raw.pointer("/config/ipv6/provider_policy").is_none()
+            {
+                if let (Some(next), Some(old)) = (&mut change.config.ipv6, &previous.ipv6) {
+                    next.provider_policy = old.provider_policy;
+                }
+            }
             preserve_wan_password(&mut change.config.wan, Some(&previous.wan));
             if let Some(backup) = &mut change.config.wan_backup {
                 preserve_wan_password(backup, previous.wan_backup.as_ref());

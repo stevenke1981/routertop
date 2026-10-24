@@ -273,7 +273,33 @@ fn execute(args: &[String]) -> Result<(), String> {
         [cmd, file, dir, identity] if cmd == "ipv6-init" => {
             require_local_root()?;
             let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
-            routertop::pd::initialize(&config, Path::new(dir), Path::new(identity))
+            routertop::pd::initialize(&config, Path::new(dir), Path::new(identity))?;
+            if routertop::provider::enabled(&config) {
+                routertop::provider::initialize(&config, Path::new(dir), Path::new(identity))?;
+            }
+            Ok(())
+        }
+        [cmd, file, dir, slot] | [cmd, file, dir, slot, _] if cmd == "ipv6-select" => {
+            require_local_root()?;
+            let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
+            let selected = match slot.as_str() {
+                "0" | "primary" => Some(0),
+                "1" | "backup" => Some(1),
+                "none" => None,
+                _ => return Err("invalid IPv6 provider slot".into()),
+            };
+            routertop::provider::select(
+                &config,
+                Path::new(file),
+                Path::new(dir),
+                selected,
+                args.get(4).map(String::as_str).unwrap_or(""),
+            )
+        }
+        [cmd, file, dir] if cmd == "ipv6-reconcile" => {
+            require_local_root()?;
+            let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
+            routertop::pd::reconcile_once(&config, Path::new(dir))
         }
         [cmd, file, dir] if cmd == "ipv6-monitor" || cmd == "ipv6-event" => {
             require_local_root()?;

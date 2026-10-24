@@ -1,0 +1,41 @@
+{
+  "task_id": "v08-core-rc2-readiness",
+  "candidate": "R3-frozen",
+  "observed_at": "2026-10-24T16:32:48.638540+00:00",
+  "base": "R2 frozen wan SHA5ccf96c7a0e392f53468d9c2bd6b89f7654a3258ef952a778c202ca3ae13323a",
+  "files": {
+    "crates/routertop/src/wan.rs": "2b9652e3efd20d68b68fdbf91c55301b57d545f7de9093673f48acd57db0944c"
+  },
+  "normalization": "CRLF bytes to LF",
+  "scope": "wan.rs only: root generation public projection, CGI checks public snapshots; focused tests embedded",
+  "checks": [
+    {
+      "command": "cargo test --lib public_ipv6",
+      "exit_code": 0,
+      "result": "PASS",
+      "count": 2
+    },
+    {
+      "command": "cargo test --test wan --test provider",
+      "exit_code": 0,
+      "result": "PASS",
+      "count": 13
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "not_run": [
+    "Linux uid1000 authenticated CGI OLD/NEW contrast assigned test agent",
+    "RC2 actual image/packet verification assigned root/test agent"
+  ],
+  "secrets": "provider.json remains0600; no boot/token/incarnation projection; event origin checks untouched",
+  "next_owner": "/root"
+}

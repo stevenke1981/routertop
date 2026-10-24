@@ -7,6 +7,7 @@ No host namespace creation or physical-interface migration is performed here.
 """
 import argparse
 import json
+import ipaddress
 import os
 from pathlib import Path
 import signal
@@ -32,6 +33,7 @@ class Isp:
         self.runtime.chmod(0o700)
         self.blackhole = None
         self.dhcp = None
+        self.ipv6_routes = set()
         run(["ip", "link", "set", args.interface, "up"])
         if args.mode == "pppoe":
             self.start([sys.executable, Path(__file__).with_name("pppoe-isp.py"),
@@ -51,10 +53,7 @@ class Isp:
             self.start([sys.executable, "-c", source, www], "http.log")
             if args.ipv6:
                 run(["sysctl", "-qw", "net.ipv6.conf.all.forwarding=1"])
-                run(["ip", "-6", "address", "replace", "2001:db8:1::1/64", "dev", args.interface])
                 run(["ip", "-6", "address", "replace", "2001:db8:99::9/128", "dev", "lo"])
-                run(["ip", "-6", "route", "replace", "2001:db8:100::/56", "via", "2001:db8:1::2"])
-                run(["ip", "-6", "route", "replace", "2001:db8:200::/56", "via", "2001:db8:1::2"])
                 source6 = ("import functools,http.server,socket,sys;socket.getfqdn=lambda _name='':'isp';"
                            "S=type('S',(http.server.ThreadingHTTPServer,),{'address_family':socket.AF_INET6});"
                            "s=S(('::',8080),functools.partial(http.server.SimpleHTTPRequestHandler,directory=sys.argv[1]),"
@@ -64,6 +63,22 @@ class Isp:
                 self.start([sys.executable, Path(__file__).with_name("dhcpv6-server.py"),
                             "--interface", args.interface, "--state-file", args.control_file,
                             "--status-file", self.runtime / "dhcpv6-status.json", "--ra"], "dhcpv6.log")
+        if args.ipv6 or args.mode == "pppoe":
+            # A persistent real TCP flow detects stale established-connection
+            # authorization when the selected uplink changes underneath it.
+            stream_source = ("import socketserver;"
+                             "H=type('H',(socketserver.BaseRequestHandler,),"
+                             "{'handle':lambda self:exec('while self.request.recv(4096): pass')});"
+                             "S=type('S',(socketserver.ThreadingTCPServer,),{'address_family':10,'allow_reuse_address':True,'daemon_threads':True});"
+                             "S(('::',8081),H).serve_forever()")
+            self.start([sys.executable, "-c", stream_source], "stream.log")
+            state = json.loads(args.control_file.read_text())
+            dns = state.get("dns_server", "2001:db8:1::1")
+            run(["ip", "-6", "address", "replace", dns + "/128", "dev", "lo"])
+            self.start(["dnsmasq", "--keep-in-foreground", "--user=root", "--conf-file=/dev/null",
+                        "--no-resolv", "--no-hosts", "--bind-interfaces", "--listen-address=" + dns,
+                        "--address=/pd.routertop.test/" + args.dns_answer,
+                        "--pid-file=" + str(self.runtime / "ipv6-dns.pid")], "ipv6-dns.log")
         run(["nft", "add", "table", "inet", "routertop_test_isp"])
         run(["nft", "add", "chain", "inet", "routertop_test_isp", "upstream",
              "{", "type", "filter", "hook", "input", "priority", "-20", ";", "policy", "accept", ";", "}"])
@@ -89,12 +104,23 @@ class Isp:
 
     def update(self):
         control = json.loads(self.args.control_file.read_text())
+        if self.args.ipv6 and self.args.mode != "pppoe":
+            upstream = ipaddress.IPv6Network(control.get("upstream_prefix", "2001:db8:1::/64"))
+            gateway = str(upstream.network_address + 1)
+            run(["ip", "-6", "address", "replace", gateway + "/64", "dev", self.args.interface])
+            prefix = control.get("prefix", "2001:db8:100::/56")
+            address = control.get("address", "2001:db8:1::2")
+            self.ipv6_routes.add(prefix)
+            for delegated in self.ipv6_routes:
+                run(["ip", "-6", "route", "replace", delegated, "via", address, "dev", self.args.interface])
         blackhole = bool(control.get("blackhole", False))
         if self.blackhole != blackhole:
             run(["nft", "flush", "chain", "inet", "routertop_test_isp", "upstream"])
             if blackhole:
                 run(["nft", "add", "rule", "inet", "routertop_test_isp", "upstream",
                      "ip", "daddr", REMOTE4, "drop"])
+                run(["nft", "add", "rule", "inet", "routertop_test_isp", "upstream",
+                     "ip6", "daddr", "2001:db8:99::9", "drop"])
             self.blackhole = blackhole
         if self.args.mode == "dhcp":
             enabled = bool(control.get("dhcp_enabled", True))
@@ -142,6 +168,7 @@ def main():
     parser.add_argument("--gateway", default="198.18.0.1")
     parser.add_argument("--client", default="198.18.0.2")
     parser.add_argument("--ipv6", action="store_true")
+    parser.add_argument("--dns-answer", default="203.0.113.5")
     args = parser.parse_args()
     if args.mode == "pppoe" and args.credentials_file is None:
         parser.error("PPPoE requires a private credentials file")

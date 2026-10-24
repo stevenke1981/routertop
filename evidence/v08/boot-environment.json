@@ -1,0 +1,49 @@
+{
+  "result": "PASS BIOS boot with qemu64; full lifecycle tracked separately",
+  "scope": "Local final ISO boot; raw logs remain private ignored files.",
+  "iso_sha256": "3f0a642e3b3380b43a76358af89132fdddf4ac4faaf12bb0e5bb71e22add1224",
+  "kernel_sha256": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85",
+  "qemu_version": "11.1.0 (v11.1.0-12130-ge470268ff4)",
+  "observations": [
+    "Default q35/TCG multi-thread boot repeatedly panicked during IO-APIC timer initialization before appliance init.",
+    "Same default VM launch of the unchanged 0.7 ISO reproduced the same kernel panic; both releases use the same kernel hash.",
+    "Single-thread TCG, pc machine, increased RAM/CPU, quiet kernel probe and hpet-off probes did not independently resolve the panic.",
+    "q35/TCG single-thread with icount shift=auto,align=off,sleep=on passed kernel initialization and reached ROUTERTOP_READY at 256 MiB/2 vCPUs. Initial first-boot DHCP acquisition needed a longer bounded wait.",
+    "Final ISO and kernel arguments were not changed. Temporary lab DHCP helper was stopped and its primary interface IPv4 address removed before PPP/IPv6 actual browser acceptance.",
+    "Controlled retry with packet builder idle still reproduced the default multi-thread TCG timer panic. RC2 fresh ISO BIOS boot and initial API200 setup-required passed with the recorded icount settings; complete lifecycle is reported separately.",
+    "Same RC2 ISO BIOS boot passed with CPU qemu64 and normal multi-thread TCG, without icount. Latest completed real Web/warm-reboot/backup-PD checks use this configuration; further lifecycle remains separate. Distributed basic launcher does not force CPU max."
+  ],
+  "successful_vm": {
+    "machine": "q35",
+    "cpu": "qemu64",
+    "acceleration": "tcg,thread=multi",
+    "icount": false,
+    "memory_mib": 256,
+    "vcpus": 2
+  },
+  "fresh_api": {
+    "http_status": 200,
+    "setup_required": true
+  },
+  "timing_reference": "https://www.qemu.org/docs/master/devel/tcg-icount.html",
+  "diagnostic_log_sha256": {
+    "bios-boot.log": "f26e3dac4d84285db77aa252a43baea100efe5fcd8a4639fba70ee447e9f2834",
+    "bios-boot-retry.log": "40054676889678fb04f55f2d320fd0cf6f632206c7f7d6cbeeff4bd27d84ac31",
+    "bios-boot-single.log": "059b06fd23a590794766d8ff937d7480de33df34c0d028fb49cb4571dcfaa470",
+    "bios-boot-icount.log": "b72ac9dfd984dfc5a9aa720a1462d1ff04fd2af53f4dbb172ebb9cdac23316dc",
+    "bios-boot-pc.log": "d35c196c20a6638a78e18f132f53da7ffe5a9f2cadbc646b9528df1a9d7ed442",
+    "bios-quiet-probe.log": "46ad8313a369a0fb540be2cbfd4776538531beaec2d5eb53ae3f7d1b786c5085",
+    "bios-boot-large.log": "244c9da0548e90df8e6d29c9d57aedb919bd638ce9a92dd38d253e70742a6af3",
+    "baseline-v07-environment.log": "f909f9f50bb0568e1c58e86efde1521470fd945c6c080c6dd532b72e5cff5ce6",
+    "bios-boot-hpet-off.log": "b664b7e8d6f4d8dd7de5277faf5b763b108d02c5ae7113b5363e895e7e7bad35",
+    "uefi-initial-boot.log": "319d8ca7472d98481f9e2a6e2947f6126baa1c7f7a70d4622665a1023de72fd6",
+    "bios-icount-with-dhcp.log": "eddb80860fdbfcf996ad7499b578001c800095814c2d38c774876a0752a5d256",
+    "bios-idle-mt.log": "e9aa4c52cbdcb11eac0f1b94a12f603ce6182879a8f7a2d4312d70b70c6cccc6",
+    "rc2-bios-boot.log": "18afc97218287dca2f110471ef1b61265603a43d0610d13dfba1a70e9ee29508",
+    "rc2-qemu64-boot.log": "02533975898da220d7762001f32f0771e3593e1baf57a293d12aea522f12c0a5"
+  },
+  "limits": "Observed environment comparison, not a diagnosis of QEMU internals or a general hardware-boot guarantee; actual final lifecycle results are recorded separately.",
+  "diagnostic_rc1_iso_sha256": "fd1e46f5853c8851e085774cc7cbb83764aa1a2e02d56f5a1239cb7b977f4258",
+  "successful_candidate": "rc2",
+  "initial_default_timer_trials_candidate": "rc1; unchanged v07 control reproduced same failure"
+}

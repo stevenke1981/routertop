@@ -1,0 +1,16 @@
+{"case": "VLAN20 primary: separate actual SLAAC /64, routed IPv6 HTTP and selected-provider DNS", "status": "PASS"}
+{"case": "dhcp-dhcp: primary real PD/SLAAC/IPv6 HTTP/DNS; standby has no IPv6 default", "status": "PASS"}
+{"case": "VLAN20 backup: separate actual SLAAC /64, routed IPv6 HTTP and selected-provider DNS", "status": "PASS"}
+{"case": "VLAN20 retired source denied; router old /64 removed", "status": "PASS"}
+{"case": "dhcp-dhcp: carrier loss selects backup real PD/DNS and blocks retired primary source", "status": "PASS"}
+{"case": "VLAN20 primary: separate actual SLAAC /64, routed IPv6 HTTP and selected-provider DNS", "status": "PASS"}
+{"case": "VLAN20 retired source denied; router old /64 removed", "status": "PASS"}
+{"case": "VLAN20 primary: separate actual SLAAC /64, routed IPv6 HTTP and selected-provider DNS", "status": "PASS"}
+{"case": "dhcp-dhcp: reconnect restores changed primary prefix and DNS with stable identity", "status": "PASS"}
+{"case": "VLAN20 backup: separate actual SLAAC /64, routed IPv6 HTTP and selected-provider DNS", "status": "PASS"}
+{"case": "VLAN20 retired source denied; router old /64 removed", "status": "PASS"}
+{"case": "dhcp-dhcp: carrier-up upstream blackhole switches real IPv6 prefix and learned DNS", "status": "PASS"}
+{"case": "dhcp-dhcp: both providers down fail closed for LAN and router IPv6; management survives", "status": "PASS"}
+{"case": "VLAN20 primary: separate actual SLAAC /64, routed IPv6 HTTP and selected-provider DNS", "status": "PASS"}
+{"case": "dhcp-dhcp: recovery restores real IPv6/DNS without rewriting saved settings", "status": "PASS"}
+{"status": "PASS", "passed_cases": 15, "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191", "harness_sha256": "99c7c2dd8d30118801e73293f4e3ae4138fbc032e19bdf1f8124551f6939d4aa"}

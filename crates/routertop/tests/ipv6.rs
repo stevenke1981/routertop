@@ -11,6 +11,7 @@ fn base() -> Config {
 }
 fn v6() -> Ipv6Config {
     Ipv6Config {
+        provider_policy: Default::default(),
         wan_mode: routertop::WanMode::Static,
         pd: None,
         dns_auto: true,

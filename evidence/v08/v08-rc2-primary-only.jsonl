@@ -1,0 +1,14 @@
+{"case": "initially absent PPP primary boots on real DHCP backup without starting a default-config IPv6 client", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: public status is secret-free; PPP peers are private with real discovery and no underlay DHCP", "status": "PASS"}
+{"case": "primary PPP IPv6CP/real DHCPv6-PD/SLAAC carry IPv6 HTTP before failover", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "backup IPv4 selection withdraws primary delegated addresses and IPv6 firewall authorization", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "primary return reacquires changed prefix and real IPv6 traffic with stable saved identity", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "upstream IPv4 blackhole also withdraws live primary PD despite PPP IPv6CP remaining up", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"status": "PASS", "passed_cases": 13, "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"}

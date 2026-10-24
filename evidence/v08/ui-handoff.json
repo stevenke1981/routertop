@@ -1,0 +1,45 @@
+{
+  "task_id": "v08-web",
+  "owner": "/root/v08_web",
+  "worktree": "E:\\routertop\\.worktrees\\v08-web",
+  "base_sha": "fcc8c02b742ffeac4531423f78be82cd098c4966",
+  "result": "PARTIAL",
+  "checks": [
+    {
+      "name": "actual Chrome API fixture",
+      "result": "PASS",
+      "exit_code": 0,
+      "groups": 9,
+      "visual_audits": 5
+    },
+    {
+      "name": "JavaScript and Python syntax; Rust fmt",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "name": "Rust web persistence regression",
+      "result": "NOT_RUN",
+      "reason": "await core provider_policy field integration"
+    },
+    {
+      "name": "actual ISO lifecycle, DHCP/PPPoE, reconnect/reboot/cold boot",
+      "result": "NOT_RUN",
+      "owner": "root integration"
+    }
+  ],
+  "owned_files": {
+    "web/app.js": "5e5291439769b9c2e4a985991a4cd4282e559256ec7866c238fe450e30f6a517",
+    "web/index.html": "988d890c9f41933d33f144638d93e840b2bcf84cd7554d5f87e0c655a81ecb34",
+    "crates/routertop/src/web.rs": "995cb990ecf5102f550af92615d4dd65847ffa991f9fc532760fce89f87bc79d",
+    "crates/routertop/tests/web.rs": "2d7939de0c6e7b843c727d8b2d78c7f699af9932938637c8a7a3800436715067",
+    "scripts/browser-v08-smoke.py": "804c509fdb609ada8a00b2f281d2a7537ebc86344f2dd3126aba05737bdbc080",
+    "scripts/appliance-v08-checks.py": "8f797db03a529fe4dd502131d26cf8088b75bdb453b2b33123327f03b3d983f0"
+  },
+  "notes": [
+    "No commit or push by worker",
+    "Legacy POST omitted provider_policy preserves existing opt-in; explicit primary-only resets",
+    "Existing light style retained; new desktop/mobile controls audited",
+    "Appliance hook implements real IPv4/IPv6 HTTP + DNS provider changes and prefix retirement, but is not yet executed"
+  ]
+}

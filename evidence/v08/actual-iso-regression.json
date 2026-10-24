@@ -1,0 +1,82 @@
+{
+  "result": "CGI privilege regression CLOSED; separate actual ISO DNS gate FAIL",
+  "rc1_binary_sha256": "50d1948c9bc4f90c96cdb05a5fd418a09c077f92ab48cff22cf7c61f7e995d26",
+  "actual_iso_failure": {
+    "stage": "initial backup-only boot with backup IPv6/PD",
+    "preceding_checks_passed": 7,
+    "expected_regression": false,
+    "report_preserved_privately": true
+  },
+  "actual_isp_observation": {
+    "backup_ipv6cp_sessions": 1,
+    "backup_dhcpv6_replies": 29,
+    "backup_dhcpv6_renews": 28,
+    "authentication_rejections": 0
+  },
+  "linux_authenticated_cgi_reproduction": {
+    "result": "PASS expected-old-regression",
+    "exit_code": 0,
+    "records": [
+      {
+        "check": "authenticated CGI public readiness",
+        "provider": "backup",
+        "root": {
+          "active": "backup",
+          "ipv6_active": "backup",
+          "ipv6_ready": true,
+          "ipv6_policy": "active-standby"
+        },
+        "uid1000": {
+          "active": "backup",
+          "ipv6_active": null,
+          "ipv6_ready": false,
+          "ipv6_policy": "active-standby"
+        },
+        "private_epoch_readable": false,
+        "expected_old_regression": true,
+        "status": "PASS"
+      },
+      {
+        "case": "root/uid1000 real backup provider readiness expected RC1 private-read denial",
+        "status": "PASS"
+      },
+      {
+        "status": "PASS",
+        "passed_cases": 1,
+        "expected_old_regression": true,
+        "binary_sha256": "50d1948c9bc4f90c96cdb05a5fd418a09c077f92ab48cff22cf7c61f7e995d26",
+        "harness_sha256": "60663d996d62ac02cc8162bb20038d4041bef42d479fe5adcdafb8e7a42323b6"
+      }
+    ],
+    "raw_log_sha256": "4ab510d57fc90890d4aef576fb9cea2ec1ce5de12c3a9caf5ca7754c3c1d292c"
+  },
+  "root_cause": "CGI UID1000 recomputed IPv6 readiness by reading root-only provider.json0600, despite valid public bound PD status.",
+  "fix": {
+    "source": "crates/routertop/src/wan.rs",
+    "sha256_lf": "2b9652e3efd20d68b68fdbf91c55301b57d545f7de9093673f48acd57db0944c",
+    "description": "Root publishes only nonsecret generation after private validation; CGI validates fresh public selected-provider/generation/device/phase snapshots. Private epoch/token/incarnation permissions unchanged."
+  },
+  "rc2_closure": "Separate final Linux permission and actual ISO reports required.",
+  "rc2_linux_closure": {
+    "result": "PASS",
+    "exit_code": 0,
+    "checks": 10,
+    "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+    "harness_sha256": "fbea9607793d9a17ae3e98bf1c6338ad0de0dff59af0946e626d153a654c17a8",
+    "raw_log_sha256": "4f5fcda5ab175e3ebe5353db7bca7facada1241ab5c6873634ca31e1a4ffe2ef",
+    "private_epoch_permission": "0600 unchanged; UID1000 still denied"
+  },
+  "rc2_actual_iso": {
+    "backup_ipv6_pd_ready": "PASS",
+    "backup_ipv6_http_marker": "PASS",
+    "dns_probe": "FAIL including explicit A query",
+    "same_boot_failover_recovery": "OPEN",
+    "uefi_cold_boot": "NOT_RUN",
+    "evidence_preserved_privately": [
+      "browser-attempt2",
+      "browser-attempt3",
+      "functional-attempt3-reboot-labelled.json",
+      "functional-attempt3-typed-a.json"
+    ]
+  }
+}

@@ -34,7 +34,7 @@
     $('ipv6-form').reset();
     $('ipv6-fields').disabled = true;
     $('ipv6-enabled').disabled = true;
-    ['mode', 'wan', 'prefix', 'lan', 'dns'].forEach((name) => text('ipv6-runtime-' + name, '尚未取得'));
+    ['mode', 'provider', 'wan', 'prefix', 'lan', 'dns'].forEach((name) => text('ipv6-runtime-' + name, '尚未取得'));
     message('ipv6-runtime-error', '');
     $('network-fields').disabled = true;
     $('save-config').disabled = true;
@@ -167,6 +167,9 @@
     text('wan-runtime-ipv6', wan?.ipv6_ready === true ? '已就緒' : wan?.mode === 'pppoe' ? '尚未就緒' : '請查看 IPv6 頁面');
     const dynamic = data.ipv6_dynamic;
     const leases = Array.isArray(dynamic?.delegated) ? dynamic.delegated : [];
+    const providerLabels = { primary: '主要 WAN', backup: '備援 WAN' };
+    const phaseLabels = { inactive: '未啟用', acquiring: '正在取得 IPv6 與委派前綴', bound: '已就緒', degraded: '連線資訊不完整' };
+    text('ipv6-runtime-provider', dynamic?.provider && providerLabels[dynamic.provider] ? `${providerLabels[dynamic.provider]}${dynamic.logical_interface ? ' · ' + dynamic.logical_interface : ''} · ${phaseLabels[dynamic.phase] || '檢查中'}` : '尚無可用 IPv6 上游');
     const labels = { waiting: '等待上游提供 IPv6', bound: '已取得動態 IPv6', degraded: '連線資訊不完整' };
     text('ipv6-runtime-mode', dynamic ? (labels[dynamic.state] || '無法確認連線狀態') : '目前未使用動態 WAN');
     text('ipv6-runtime-wan', dynamic?.wan_addresses?.join('\n') || '—');
@@ -214,6 +217,7 @@
     state.pdVlans = structuredClone(config.ipv6?.pd?.vlans || []);
     $('ipv6-enabled').checked = Boolean(config.ipv6);
     $('ipv6-wan-mode').value = config.ipv6?.wan_mode || 'static';
+    $('ipv6-provider-failover').checked = config.ipv6?.provider_policy === 'active-standby';
     $('ipv6-dns-auto').checked = config.ipv6?.dns_auto ?? true;
     $('ipv6-pd-enabled').checked = Boolean(config.ipv6?.pd);
     $('ipv6-pd-prefix-length').value = config.ipv6?.pd?.prefix_length ?? 56;
@@ -305,6 +309,8 @@
   function syncIpv6Mode() {
     const auto = $('ipv6-wan-mode').value === 'auto';
     const pd = pdEnabled();
+    $('ipv6-provider-failover').disabled = !auto || !pd || !$('wan-backup-enabled').checked;
+    text('ipv6-provider-help', !$('wan-backup-enabled').checked ? '請先在網路設定啟用備援 WAN，再啟用 IPv6 與前綴自動備援。' : !pd ? '請先啟用 DHCPv6-PD，才能使用 IPv6 與前綴自動備援。' : '使用健康的主要或備援 WAN 取得 IPv6 與 DHCPv6-PD。兩條線共用下方的前綴長度、LAN／VLAN 子網 ID 與 DNS 選項；切換時會重新取得前綴。');
     [['ipv6-static-wan', auto], ['ipv6-auto-wan', !auto], ['ipv6-pd-fields', !pd], ['ipv6-static-lan', pd]].forEach(([id, inactive]) => {
       $(id).hidden = inactive; $(id).disabled = inactive;
     });
@@ -665,7 +671,7 @@
       const ids = [pd.lan_subnet_id, ...pd.vlans.map((vlan) => vlan.subnet_id)];
       if (ids.some((id) => !Number.isInteger(id) || id < 0 || id > pdSubnetMax()) || new Set(ids).size !== ids.length) { message('global-error', 'LAN 與 VLAN 的子網 ID 必須各自不同，且符合要求的前綴長度。'); return; }
     }
-    config.ipv6 = $('ipv6-enabled').checked ? { ...state.config.ipv6, wan_mode: autoIpv6 ? 'auto' : 'static', dns_auto: autoIpv6 && $('ipv6-dns-auto').checked, wan_address: autoIpv6 ? null : $('ipv6-wan-address').value.trim() || null, wan_gateway: autoIpv6 ? null : $('ipv6-wan-gateway').value.trim() || null, lan_address: pd ? '' : $('ipv6-lan-address').value.trim(), vlans: pd ? [] : structuredClone(state.ipv6Vlans), dns_upstream: $('ipv6-dns').value.split(/[\s,]+/).filter(Boolean), pd } : null;
+    config.ipv6 = $('ipv6-enabled').checked ? { ...state.config.ipv6, provider_policy: config.wan_backup && autoIpv6 && pd && $('ipv6-provider-failover').checked ? 'active-standby' : 'primary-only', wan_mode: autoIpv6 ? 'auto' : 'static', dns_auto: autoIpv6 && $('ipv6-dns-auto').checked, wan_address: autoIpv6 ? null : $('ipv6-wan-address').value.trim() || null, wan_gateway: autoIpv6 ? null : $('ipv6-wan-gateway').value.trim() || null, lan_address: pd ? '' : $('ipv6-lan-address').value.trim(), vlans: pd ? [] : structuredClone(state.ipv6Vlans), dns_upstream: $('ipv6-dns').value.split(/[\s,]+/).filter(Boolean), pd } : null;
     if (!Number.isSafeInteger(config.dhcp.lease_hours) || config.dhcp.lease_hours < 1) { message('global-error', '租約時間必須是大於零的整數。'); return; }
     state.busy = true; $('network-fields').disabled = true; $('save-config').disabled = true; $('reload-config').disabled = true;
     advancedBusy();

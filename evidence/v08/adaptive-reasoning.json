@@ -1,0 +1,49 @@
+{
+  "result": "PASS",
+  "skill": "adaptive-reasoning-router:adaptive-sol-router",
+  "skill_version": "1.1.0",
+  "cli_version": "0.164.0",
+  "observed_utc": "2026-10-24T15:23:09.152411+00:00",
+  "scope": "Bounded read-only architecture child job; not the entire implementation",
+  "model": "gpt-6.1-sol",
+  "baseline": "medium",
+  "selected": "high",
+  "cap": "xhigh",
+  "records": [
+    {
+      "phase": "triage",
+      "effort": "medium",
+      "returncode": 0,
+      "thread_id": "01a16e7b-aaf1-7250-b26f-a5ec03bb78fa",
+      "failed": false
+    },
+    {
+      "phase": "work",
+      "effort": "high",
+      "returncode": 0,
+      "thread_id": "01a16e7b-aaf1-7250-b26f-a5ec03bb78fa",
+      "failed": false,
+      "result_status": "done"
+    }
+  ],
+  "native_session_turn_settings": [
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "medium"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    }
+  ],
+  "verification": "Read actual child-session turn_context records, not only launcher command/report",
+  "active_parent_effort": "medium; unchanged",
+  "global_config_model_provider_changed": false,
+  "raw_router_logs": "Private ignored .cache/v08 only; not published",
+  "routing_evidence": [
+    "crates/routertop/src/wan.rs: step_inner, start_v6/stop_v6 and ppp_event couple primary-only authorization, shared /run/dhcpcd/pid and serialized verified-PID lifecycle; supervisor disables backup PPP IPv6.",
+    "crates/routertop/src/pd.rs: event/reconcile recheck primary activity under the PD lock; initialize persists DUID and resets leases/DNS, requiring coordinated provider-generation and reboot semantics.",
+    "crates/routertop/src/ipv6.rs: render binds IPv6 rules to configured WAN; docs/network-v0.7-contract.md promises primary-only IPv6, legacy status and atomic persistence compatibility, making this a coupled contract-design task."
+  ],
+  "further_upgrades_allowed": 0
+}

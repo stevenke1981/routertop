@@ -363,9 +363,7 @@ fn nft(script: &str) -> Result<(), String> {
 pub fn primary_active(dir: &Path) -> bool {
     read(&dir.join("status.json"))["active"] == "primary"
 }
-pub fn step(config: &Config, source: &Path, dir: &Path) -> Result<(), String> {
-    crate::validate(config)?;
-    fs::create_dir_all(dir).map_err(|_| "cannot create WAN runtime")?;
+fn step_lock(dir: &Path) -> Result<std::fs::File, String> {
     let lock = OpenOptions::new()
         .read(true)
         .write(true)
@@ -373,7 +371,27 @@ pub fn step(config: &Config, source: &Path, dir: &Path) -> Result<(), String> {
         .truncate(false)
         .open(dir.join("step.lock"))
         .map_err(|_| "cannot open WAN lock")?;
-    lock.lock_exclusive().map_err(|_| "cannot lock WAN state")?;
+    for _ in 0..1000 {
+        if lock.try_lock_exclusive().is_ok() {
+            return Ok(lock);
+        }
+        thread::sleep(Duration::from_millis(20));
+    }
+    Err("WAN state lock timeout".into())
+}
+fn process_origin(pid: u32) -> Result<String, String> {
+    let stat = fs::read_to_string(format!("/proc/{pid}/stat"))
+        .map_err(|_| "PPP process incarnation missing")?;
+    let start = stat
+        .rsplit_once(") ")
+        .and_then(|(_, tail)| tail.split_whitespace().nth(19))
+        .ok_or("PPP process incarnation invalid")?;
+    Ok(format!("{pid}-{start}"))
+}
+pub fn step(config: &Config, source: &Path, dir: &Path) -> Result<(), String> {
+    crate::validate(config)?;
+    fs::create_dir_all(dir).map_err(|_| "cannot create WAN runtime")?;
+    let _lock = step_lock(dir)?;
     let result = step_inner(config, source, dir);
     if result.is_err() {
         // A routing/client/firewall failure cannot leave last round's default
@@ -394,8 +412,12 @@ pub fn step(config: &Config, source: &Path, dir: &Path) -> Result<(), String> {
             .is_some_and(|v| v.wan_mode == crate::WanMode::Auto)
         {
             if let Some(parent) = dir.parent() {
-                let _ = stop_v6(&parent.join("pd"));
-                let _ = crate::pd::disconnect(config, &parent.join("pd"));
+                if crate::provider::enabled(config) {
+                    let _ = crate::provider::select(config, source, &parent.join("pd"), None, "");
+                } else {
+                    let _ = stop_v6(&parent.join("pd"));
+                    let _ = crate::pd::disconnect(config, &parent.join("pd"));
+                }
             }
         }
     }
@@ -465,6 +487,10 @@ fn step_inner(config: &Config, source: &Path, dir: &Path) -> Result<(), String> 
     };
     // Close forwarding before changing a route; refresh a finite lease each round.
     if old != active {
+        if crate::provider::enabled(config) {
+            let pd = dir.parent().ok_or("WAN parent missing")?.join("pd");
+            crate::provider::select(config, source, &pd, None, "")?;
+        }
         nft("flush set inet routertop active_wan\nflush set inet routertop primary_v6\n")?;
         let _ = cmd("ip", &["-4", "route", "del", "default", "metric", "5"]);
     }
@@ -494,7 +520,7 @@ fn step_inner(config: &Config, source: &Path, dir: &Path) -> Result<(), String> 
         authorization.push_str(&format!(
             "add element inet routertop active_wan {{ \"{dev}\" timeout {ttl}s }}\n"
         ));
-        if slot == 0 {
+        if slot == 0 && !crate::provider::enabled(config) {
             authorization.push_str(&format!(
                 "add element inet routertop primary_v6 {{ \"{}\" timeout {ttl}s }}\n",
                 config.wan.device()
@@ -502,9 +528,54 @@ fn step_inner(config: &Config, source: &Path, dir: &Path) -> Result<(), String> 
         }
     }
     nft(&authorization)?;
-    let value = json!({"dual_wan":true,"active":active,"ipv6_policy":"primary-only","primary":reports[0],"backup":reports[1],"mode":config.wan.mode,"interface":config.wan.interface,"logical_interface":config.wan.device(),"state":if active=="none"{"unavailable"}else{"connected"},"ipv4_address":if active=="backup"{reports[1]["ipv4_address"].clone()}else{reports[0]["ipv4_address"].clone()},"ipv6_ready":active=="primary"&&config.ipv6.is_some()});
+    let pd = dir.parent().ok_or("WAN parent missing")?.join("pd");
+    let dynamic = crate::pd::status_at(&pd);
+    // Only the privileged coordinator reads the private epoch. Publish the
+    // generation needed to correlate the two public status snapshots, without
+    // exposing the origin token, boot identity or PPP incarnation to CGI.
+    let generation = if crate::provider::enabled(config) {
+        crate::provider::read(&pd).ok().and_then(|epoch| {
+            let slot = match active {
+                "primary" => 0,
+                "backup" => 1,
+                _ => return None,
+            };
+            (epoch.provider() == Some(active)
+                && epoch.logical_interface == device(uplinks(config)[slot], slot))
+            .then_some(epoch.generation)
+        })
+    } else {
+        None
+    };
+    let ready = if crate::provider::enabled(config) {
+        generation.is_some()
+            && dynamic["generation"].as_u64() == generation
+            && dynamic["phase"] == "bound"
+            && dynamic["provider"] == active
+    } else {
+        active == "primary" && dynamic["state"] == "bound"
+    };
+    let value = json!({"dual_wan":true,"active":active,"ipv6_policy":if crate::provider::enabled(config){"active-standby"}else{"primary-only"},"ipv6_generation":generation,"ipv6_active":if ready{json!(active)}else{Value::Null},"primary":reports[0],"backup":reports[1],"mode":config.wan.mode,"interface":config.wan.interface,"logical_interface":config.wan.device(),"state":if active=="none"{"unavailable"}else{"connected"},"ipv4_address":if active=="backup"{reports[1]["ipv4_address"].clone()}else{reports[0]["ipv4_address"].clone()},"ipv6_ready":ready});
     save(&dir.join("status.json"), &value, true)?;
-    if config.ipv6.is_some() {
+    if crate::provider::enabled(config) {
+        let pd = dir.parent().ok_or("WAN parent missing")?.join("pd");
+        let slot = match active {
+            "primary" => Some(0),
+            "backup" => Some(1),
+            _ => None,
+        };
+        let incarnation = slot
+            .map(|s| {
+                read(&dir.join(format!("ipv6-session-{s}.json")))["incarnation"]
+                    .as_str()
+                    .unwrap_or("")
+                    .to_string()
+            })
+            .unwrap_or_default();
+        let slot = slot
+            .filter(|s| uplinks(config)[*s].mode != WanProtocol::Pppoe || !incarnation.is_empty());
+        crate::provider::select(config, source, &pd, slot, &incarnation)?;
+    } else if config.ipv6.is_some() {
         let pd = dir.parent().ok_or("WAN parent missing")?.join("pd");
         if active != "primary" {
             let stopped = stop_v6(&pd);
@@ -616,9 +687,13 @@ fn client_lock(pd: &Path) -> Result<std::fs::File, String> {
         .truncate(false)
         .open(pd.join("client.lock"))
         .map_err(|_| "cannot open DHCPv6 lifecycle lock")?;
-    lock.lock_exclusive()
-        .map_err(|_| "cannot lock DHCPv6 lifecycle")?;
-    Ok(lock)
+    for _ in 0..600 {
+        if lock.try_lock_exclusive().is_ok() {
+            return Ok(lock);
+        }
+        thread::sleep(Duration::from_millis(20));
+    }
+    Err("DHCPv6 lifecycle lock timeout".into())
 }
 fn stop_existing_client(
     pidfile: &Path,
@@ -699,6 +774,41 @@ pub fn ppp_event(
         .get(slot)
         .is_none_or(|w| w.mode != WanProtocol::Pppoe)
     {
+        return Ok(());
+    }
+    let _step = step_lock(root)?;
+    let origin = if crate::provider::enabled(config) {
+        let origin = std::env::var("ROUTERTOP_PPP_SESSION")
+            .map_err(|_| "PPP origin session identity missing")?;
+        if origin.len() > 128 || !origin.bytes().all(|b| b.is_ascii_digit() || b == b'-') {
+            return Err("invalid PPP origin identity".into());
+        }
+        if read(&root.join(format!("ppp-owner-{slot}.json")))["incarnation"] != origin {
+            return Ok(());
+        }
+        Some(origin)
+    } else {
+        None
+    };
+    if crate::provider::enabled(config) && matches!(action, "ipv6-up" | "ipv6-down") {
+        let origin = origin.as_ref().unwrap();
+        let session = root.join(format!("ipv6-session-{slot}.json"));
+        let pd = root.parent().ok_or("WAN parent missing")?.join("pd");
+        if action == "ipv6-down" {
+            if read(&session)["incarnation"].as_str() != Some(origin.as_str()) {
+                return Ok(());
+            }
+            save(&session, &Value::Null, false)?;
+            if crate::provider::read(&pd)?.slot == Some(slot) {
+                crate::provider::select(config, source, &pd, None, "")?;
+            }
+        } else {
+            save(&session, &json!({"incarnation":origin}), false)?;
+            let status = read(&root.join("status.json"));
+            if status["active"] == label(slot) {
+                crate::provider::select(config, source, &pd, Some(slot), origin)?;
+            }
+        }
         return Ok(());
     }
     if action == "ipv4-up" {
@@ -803,12 +913,17 @@ pub fn supervise(config: &Config, source: &Path, dir: &Path) -> Result<(), Strin
                 crate::pppoe::private_dir(&peer_dir)?;
                 let mut selected = config.clone();
                 selected.wan = (*wan).clone();
-                if slot == 1 {
+                if slot == 1 && !crate::provider::enabled(config) {
                     selected.ipv6 = None;
                 }
                 let mut options = crate::pppoe::peer_options(&selected, &peer_dir)?;
                 options =
                     options.replace("defaultroute\nreplacedefaultroute\n", "nodefaultroute\n");
+                if crate::provider::enabled(config) {
+                    options = options
+                        .replace("defaultroute6\n", "nodefaultroute6\n")
+                        .replace("persist\nmaxfail 0\n", "maxfail 1\n");
+                }
                 if slot == 1 {
                     options = options.replace("unit 0\nifname ppp0", "unit 1\nifname ppp1");
                 }
@@ -831,10 +946,23 @@ pub fn supervise(config: &Config, source: &Path, dir: &Path) -> Result<(), Strin
                 .as_mut()
                 .is_none_or(|p| p.try_wait().ok().flatten().is_some());
             if stopped {
-                *child = Some(spawn(
+                let spawned = spawn(
                     program,
                     &args.iter().map(String::as_str).collect::<Vec<_>>(),
-                )?);
+                )?;
+                if crate::provider::enabled(config) && program == "pppd" {
+                    let slot = if args.iter().any(|s| s.contains("pppoe-1")) {
+                        1
+                    } else {
+                        0
+                    };
+                    save(
+                        &dir.join(format!("ppp-owner-{slot}.json")),
+                        &json!({"incarnation":process_origin(spawned.id())?}),
+                        false,
+                    )?;
+                }
+                *child = Some(spawned);
             }
         }
         if let Err(e) = step(config, source, dir) {
@@ -849,19 +977,175 @@ pub fn read_status(config: &Config) -> Value {
     if config.wan_backup.is_some() {
         let status = read(Path::new("/run/routertop/wan/status.json"));
         if status["dual_wan"] == true {
-            return status;
+            return ipv6_status(config, status);
         }
         return json!({"dual_wan":true,"active":"none","ipv6_policy":"primary-only","primary":{"state":"unavailable"},"backup":{"state":"unavailable"},"state":"unavailable"});
     }
     if config.wan.mode == WanProtocol::Pppoe {
-        return crate::pppoe::read_status(config);
+        return ipv6_status(config, crate::pppoe::read_status(config));
     }
-    json!({"dual_wan":false,"mode":config.wan.mode,"interface":config.wan.interface,"logical_interface":config.wan.device(),"state":if address(config.wan.device()).is_some(){"connected"}else{"unavailable"},"ipv4_address":address(config.wan.device()),"ipv6_ready":config.ipv6.is_some()})
+    ipv6_status(
+        config,
+        json!({"dual_wan":false,"mode":config.wan.mode,"interface":config.wan.interface,"logical_interface":config.wan.device(),"state":if address(config.wan.device()).is_some(){"connected"}else{"unavailable"},"ipv4_address":address(config.wan.device()),"ipv6_ready":false}),
+    )
+}
+
+fn ipv6_status(config: &Config, status: Value) -> Value {
+    ipv6_status_at(config, status, Path::new("/run/routertop/pd"))
+}
+fn ipv6_status_at(config: &Config, status: Value, pd: &Path) -> Value {
+    ipv6_status_from_public(config, status, &crate::pd::status_at(pd))
+}
+fn ipv6_status_from_public(config: &Config, mut status: Value, dynamic: &Value) -> Value {
+    if config
+        .ipv6
+        .as_ref()
+        .is_some_and(|v| v.wan_mode == crate::WanMode::Auto)
+    {
+        let actual = if crate::provider::enabled(config) {
+            // The CGI user can read these two public snapshots, but cannot
+            // read provider.json. Require the coordinator's selected provider,
+            // logical interface and generation to agree with a fresh bound PD.
+            status["active"].as_str().and_then(|active| {
+                let slot = match active {
+                    "primary" => 0,
+                    "backup" => 1,
+                    _ => return None,
+                };
+                let links = uplinks(config);
+                let selected = *links.get(slot)?;
+                let logical = device(selected, slot);
+                (status["state"] == "connected"
+                    && status[active]["state"] == "connected"
+                    && status[active]["interface"] == selected.interface
+                    && status[active]["logical_interface"] == logical
+                    && status["ipv6_generation"].as_u64().is_some()
+                    && status["ipv6_generation"].as_u64() == dynamic["generation"].as_u64()
+                    && dynamic["phase"] == "bound"
+                    && dynamic["state"] == "bound"
+                    && dynamic["logical_interface"] == logical
+                    && dynamic["provider"] == active)
+                    .then_some(if slot == 0 { "primary" } else { "backup" })
+            })
+        } else if dynamic["state"] == "bound"
+            && (config.wan_backup.is_none() || status["active"] == "primary")
+        {
+            Some("primary")
+        } else {
+            None
+        };
+        status["ipv6_ready"] = json!(actual.is_some());
+        status["ipv6_active"] = json!(actual);
+    }
+    status["ipv6_policy"] = json!(if crate::provider::enabled(config) {
+        "active-standby"
+    } else {
+        "primary-only"
+    });
+    status
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn public_ipv6_snapshots(
+        primary: WanProtocol,
+        backup: WanProtocol,
+        active: &str,
+    ) -> (Config, Value, Value) {
+        let mut config =
+            crate::parse_config(include_str!("../../../configs/routertop.toml")).unwrap();
+        config.wan.interface = "eth0".into();
+        config.wan.mode = primary;
+        config.wan.pppoe = (primary == WanProtocol::Pppoe).then(|| crate::Pppoe {
+            username: "user".into(),
+            password: "secret".into(),
+            mtu: 1492,
+        });
+        let mut standby = config.wan.clone();
+        standby.interface = "eth2".into();
+        standby.mode = backup;
+        standby.pppoe = (backup == WanProtocol::Pppoe).then(|| crate::Pppoe {
+            username: "user".into(),
+            password: "secret".into(),
+            mtu: 1492,
+        });
+        config.wan_backup = Some(standby);
+        config.failover = Some(Failover {
+            primary_target: "203.0.113.9".into(),
+            backup_target: "203.0.113.10".into(),
+            interval_seconds: 2,
+            failure_threshold: 1,
+            recovery_threshold: 1,
+        });
+        config.ipv6=Some(serde_json::from_value(json!({"provider_policy":"active-standby","wan_mode":"auto","wan_address":null,"wan_gateway":null,"lan_address":"","vlans":[],"dns_upstream":[],"pd":{"prefix_length":56,"lan_subnet_id":0,"vlans":[]}})).unwrap());
+        crate::validate(&config).unwrap();
+        let slot = usize::from(active == "backup");
+        let logical = device(uplinks(&config)[slot], slot);
+        let status = json!({"dual_wan":true,"active":active,"state":"connected","ipv6_generation":7,"ipv6_ready":false,"ipv6_active":null,"primary":{"state":"connected","interface":"eth0","logical_interface":device(&config.wan,0)},"backup":{"state":"connected","interface":"eth2","logical_interface":device(config.wan_backup.as_ref().unwrap(),1)}});
+        let dynamic = json!({"wan_mode":"auto","state":"bound","phase":"bound","provider":active,"generation":7,"logical_interface":logical,"delegated":[{"interface":"eth1","address":"2001:db8:100::1/64","prefix":"2001:db8:100::/64","valid_seconds":60,"preferred_seconds":30}]});
+        (config, status, dynamic)
+    }
+    #[test]
+    fn public_ipv6_readiness_supports_both_providers_without_private_epoch_access() {
+        for primary in [WanProtocol::Dhcp, WanProtocol::Pppoe] {
+            for backup in [WanProtocol::Dhcp, WanProtocol::Pppoe] {
+                for active in ["primary", "backup"] {
+                    let (config, status, dynamic) = public_ipv6_snapshots(primary, backup, active);
+                    // This is the CGI projection itself: only public values are
+                    // supplied, with no private epoch or lifecycle identity.
+                    let result = ipv6_status_from_public(&config, status, &dynamic);
+                    assert_eq!(result["ipv6_active"], active);
+                    assert_eq!(result["ipv6_ready"], true);
+                    assert_eq!(result["ipv6_policy"], "active-standby");
+                    for private in ["boot", "incarnation", "token", "provider_epoch"] {
+                        assert!(result.get(private).is_none());
+                    }
+                }
+            }
+        }
+    }
+    #[test]
+    fn public_ipv6_readiness_rejects_stale_generation_or_wrong_selected_link() {
+        let (config, status, dynamic) =
+            public_ipv6_snapshots(WanProtocol::Dhcp, WanProtocol::Pppoe, "backup");
+        for (key, value) in [
+            ("generation", json!(6)),
+            ("generation", Value::Null),
+            ("phase", json!("acquiring")),
+            ("phase", json!("degraded")),
+            ("state", json!("waiting")),
+            ("provider", json!("primary")),
+            ("logical_interface", json!("ppp0")),
+        ] {
+            let mut bad = dynamic.clone();
+            bad[key] = value;
+            let result = ipv6_status_from_public(&config, status.clone(), &bad);
+            assert_eq!(result["ipv6_ready"], false, "dynamic {key}");
+            assert!(result["ipv6_active"].is_null(), "dynamic {key}");
+        }
+        for (pointer, value) in [
+            ("/ipv6_generation", json!(6)),
+            ("/ipv6_generation", Value::Null),
+            ("/active", json!("primary")),
+            ("/active", json!("none")),
+            ("/state", json!("unavailable")),
+            ("/backup/state", json!("probing")),
+            ("/backup/interface", json!("eth3")),
+            ("/backup/logical_interface", json!("ppp0")),
+        ] {
+            let mut bad = status.clone();
+            *bad.pointer_mut(pointer).unwrap() = value;
+            let result = ipv6_status_from_public(&config, bad, &dynamic);
+            assert_eq!(result["ipv6_ready"], false, "WAN {pointer}");
+            assert!(result["ipv6_active"].is_null(), "WAN {pointer}");
+        }
+        // status_at returns null for missing, corrupt or older-than-10s PD
+        // status; a formerly ready WAN snapshot cannot resurrect readiness.
+        let result = ipv6_status_from_public(&config, status, &Value::Null);
+        assert_eq!(result["ipv6_ready"], false);
+        assert!(result["ipv6_active"].is_null());
+    }
     #[test]
     fn hysteresis_requires_consecutive_failures_and_successes() {
         let f = Failover {

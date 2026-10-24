@@ -1,0 +1,373 @@
+{
+  "task_id": "ROUTERTOP-V08-NETWORK-TEST-RC2",
+  "actor_instance": "/root/v08_test",
+  "receiver_instance": "/root",
+  "role": "test_engineer",
+  "kind": "handoff",
+  "base_sha": "fcc8c02b742ffeac4531423f78be82cd098c4966",
+  "head_sha": "fcc8c02b742ffeac4531423f78be82cd098c4966",
+  "working_tree_changes": true,
+  "source_revision_note": "Worker worktree SHA is baseline only. Actual runtime is bound by immutable RC2 source archive and optimized binary hashes. Root owns final integrated commit and push.",
+  "result": "PASS",
+  "simulation": false,
+  "observed_at": "2026-10-25T01:01:30.622271+08:00",
+  "acceptance_ids": [
+    "AC2",
+    "AC3"
+  ],
+  "artifact": {
+    "path": "evidence/v08/network-release.json",
+    "cache_path": "E:\\routertop\\.cache\\v08\\v08-rc2-network-final-report.json",
+    "sha256": "5a58388535383ab1bdcca6383b16d96b4899ad438a11ee4280db5f13fb61e56c",
+    "original_private_report_sha256": "2f4861aaa1b56603d80a6e3edc0dc305d212f2c0fef2aee5e203a7c46cbd8e58"
+  },
+  "source_archive": {
+    "name": "source-v08-rc2.tar.gz",
+    "sha256": "6a9dd160ec55cdcfa9e4b00365364d03871a6238982beb2b62f02f7c3d9c32b6",
+    "original_file_count": 81,
+    "original81_source_hashes_unchanged": true,
+    "wan_rs_sha256": "2b9652e3efd20d68b68fdbf91c55301b57d545f7de9093673f48acd57db0944c",
+    "mandatory_recompile_guard": "Cargo.toml/Cargo.lock and every crates/configs/web file touched after fresh extraction; required Compiling routertop v0.8.0 observed"
+  },
+  "binary": {
+    "path": "/build/routertop-v07/target/release/routertop",
+    "version": "0.8.0",
+    "sha256_before": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+    "sha256_after": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+    "build": {
+      "argv": [
+        "cargo",
+        "build",
+        "--locked",
+        "--release"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 404.85,
+      "log": "v08-rc2-release.log",
+      "log_sha256": "1d4ca10717d40832ec37b6a56a861b70f59ca888bd93e9261d731d9d82713232"
+    },
+    "version_checks": {
+      "--version": {
+        "argv": [
+          "/build/routertop-v07/target/release/routertop",
+          "--version"
+        ],
+        "cwd": "/build/routertop-v08-rc2",
+        "exit_code": 0,
+        "seconds": 0.02,
+        "log": "v08-rc2-version.log",
+        "log_sha256": "46460c7f835cceab2f3f3af86dd2be8f03edbf0b0bf04636a0cf325057e96e9c"
+      },
+      "--help": {
+        "argv": [
+          "/build/routertop-v07/target/release/routertop",
+          "--help"
+        ],
+        "cwd": "/build/routertop-v08-rc2",
+        "exit_code": 0,
+        "seconds": 0.03,
+        "log": "v08-rc2-help.log",
+        "log_sha256": "770a7525906448ac59c59b6e0877ff79ae95bbbd18aace1219d5e5d5eea2ca4c"
+      }
+    }
+  },
+  "owned_files": {
+    "scripts/network-v08-smoke.py": {
+      "sha256_normalized_lf": "ccf5662635845fbefd6e69e4cf206e1a311f9388fa996bf64f7a3a718ca63ef6"
+    },
+    "scripts/network-v08-vlan-smoke.py": {
+      "sha256_normalized_lf": "99c7c2dd8d30118801e73293f4e3ae4138fbc032e19bdf1f8124551f6939d4aa"
+    },
+    "scripts/provider-status-permissions-smoke.py": {
+      "sha256_normalized_lf": "fbea9607793d9a17ae3e98bf1c6338ad0de0dff59af0946e626d153a654c17a8"
+    },
+    "scripts/fixtures/dual-wan-isp.py": {
+      "sha256_normalized_lf": "9cd06acae6e862730caa2af2499daa1b94da3e7c7ffaf6657d266d892fe10064"
+    }
+  },
+  "postbuild_test_only_addition": {
+    "name": "scripts/provider-status-permissions-smoke.py",
+    "sha256": "fbea9607793d9a17ae3e98bf1c6338ad0de0dff59af0946e626d153a654c17a8",
+    "external_path": "/build/routertop-v08-rc2-test-additions/scripts/provider-status-permissions-smoke.py",
+    "note": "Permission test was added externally after RC2 source freeze; no original81 source file or runtime input changed. Base v08 ccf566/VLAN99c7/fixture9cd06 are already in RC2 archive."
+  },
+  "permission_regression": {
+    "result": "PASS",
+    "report": "provider-permissions-regression-report.json",
+    "report_sha256": "26b6fc8b8a68a6084f55c9ca604da5cd3dfc0c688347060344aa1dd8538839f9",
+    "old_rc1": "Actual bound backup CGI root ready=true/backup while uid1000 ready=false/null; root provider.json0600 unreadable by uid1000. Expected-regression mode exit0; original RC1 binary50d194... preserved root-private.",
+    "fixed_rc2": "Actual authenticated CGI root and uid1000 agree for both providers; eight acquiring/degraded/stale-generation/provider/logical/age/missing-WAN-generation/wrong-active snapshots rejected by both roles; provider remains root0600 denied.",
+    "old_log": "v08-rc1-permissions-repro.jsonl",
+    "fixed_log": "v08-rc2-provider-permissions.jsonl",
+    "raw_credentials_or_private_epoch_values_emitted": false
+  },
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "/build/routertop-v08-rc2-test-additions/scripts/provider-status-permissions-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 50.33,
+      "log": "v08-rc2-provider-permissions.jsonl",
+      "log_sha256": "4f5fcda5ab175e3ebe5353db7bca7facada1241ab5c6873634ca31e1a4ffe2ef",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 10,
+        "expected_old_regression": false,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+        "harness_sha256": "fbea9607793d9a17ae3e98bf1c6338ad0de0dff59af0946e626d153a654c17a8"
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v08-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 556.79,
+      "log": "v08-rc2-network-full.jsonl",
+      "log_sha256": "924f41e0393916913a5fa1c78e6b6cc57921c91edbf3232d3e4a08466dc61586",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 26,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v08-smoke.py",
+        "/build/routertop-v07/target/release/routertop",
+        "--wg-failclosed"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 91.62,
+      "log": "v08-rc2-wg-unavailable.jsonl",
+      "log_sha256": "e69c0b1e83133166b11204689f152c65aa433682a95a0de282c0714ac3642fd4",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 3,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v07-smoke.py",
+        "/build/routertop-v07/target/release/routertop",
+        "--case",
+        "pppoe-dhcp-ipv6"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 100.08,
+      "log": "v08-rc2-primary-only.jsonl",
+      "log_sha256": "6f68170fdbceb75ca16803227b617b3f9a0b2bc669f6a9cd3e778dcf12e59d1d",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 13,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v05-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 111.62,
+      "log": "v08-rc2-legacy-pd-wg.jsonl",
+      "log_sha256": "cc945bdee12534216897fb47887d501fb7dc26563068d9a4d458d856eb5cbb55",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 16
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v06-smoke.py",
+        "/build/routertop-v07/target/release/routertop",
+        "--pd-only"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 46.29,
+      "log": "v08-rc2-legacy-ppp-pd-only.jsonl",
+      "log_sha256": "e622207a81b0f93a93ae6b6987b25ec11b8d82a6e8fe05dd172f0c64663b42c0",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 6
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v08-vlan-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 135.88,
+      "log": "v08-rc2-vlan20.jsonl",
+      "log_sha256": "368f1299f9530dcdf14008127670c61be9c6149da7602fc36cba79a7d50d1d5e",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 15,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+        "harness_sha256": "99c7c2dd8d30118801e73293f4e3ae4138fbc032e19bdf1f8124551f6939d4aa",
+        "base_harness_sha256": "ccf5662635845fbefd6e69e4cf206e1a311f9388fa996bf64f7a3a718ca63ef6"
+      },
+      "status": "PASS",
+      "result": "PASS",
+      "platform": "Alpine Linux3.24.3 / kernel6.18.58 / QEMU TCG; real clients/protocol packets in owned namespaces and actual root/uid1000 authenticated CGI"
+    }
+  ],
+  "total_passed_cases": 89,
+  "artifact_build": {
+    "status": "PASS",
+    "source_archive_sha256": "6a9dd160ec55cdcfa9e4b00365364d03871a6238982beb2b62f02f7c3d9c32b6",
+    "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+    "build": {
+      "argv": [
+        "sh",
+        "scripts/build-image.sh"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 64.67,
+      "log": "v08-rc2-image.log",
+      "log_sha256": "312b72751b84471750a245674bbd6841e7c2ef04f24557735db96f71044a14a3"
+    },
+    "blank_disk": {
+      "argv": [
+        "sh",
+        "scripts/make-data-disk.sh",
+        "/build/artifacts-v08-rc2/routertop-data-blank.img"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 1.37,
+      "log": "v08-rc2-blank-disk.log",
+      "log_sha256": "68d76693235b0d54188731880bcc1613eb03779bebc261337c1bc281a889209c"
+    },
+    "artifacts": [
+      {
+        "name": "SHA256SUMS",
+        "uploaded_name": "rc2-SHA256SUMS",
+        "sha256": "2495c7be5323f957be794c7d772663597ed0d1c3c12d7269f91183c90ad16aa1",
+        "size": 488
+      },
+      {
+        "name": "build-manifest.json",
+        "uploaded_name": "rc2-build-manifest.json",
+        "sha256": "30a636917c196243cf43b6009d29d71a51167194cf0fc4338d8f212be4d2b116",
+        "size": 480
+      },
+      {
+        "name": "cpio.log",
+        "uploaded_name": "rc2-cpio.log",
+        "sha256": "acd06ab836df1e45adde9005b7f7f8d5970901382c77bcff3a0ec054ce358c5a",
+        "size": 14
+      },
+      {
+        "name": "initramfs.gz",
+        "uploaded_name": "rc2-initramfs.gz",
+        "sha256": "301f4404d331bdbb1ffffbfe38f727a39288ac9ee512bcad51d34e87c236c9a5",
+        "size": 41012699
+      },
+      {
+        "name": "packages.txt",
+        "uploaded_name": "rc2-packages.txt",
+        "sha256": "ddc1b86615f05c0f1ddf281b066f708f9df671c8beeff82d1e1784867160d64f",
+        "size": 1322
+      },
+      {
+        "name": "repositories.txt",
+        "uploaded_name": "rc2-repositories.txt",
+        "sha256": "7b8b3e6fe030eeb4ee7619b42c9419aa846bff1c632442d3f00ed9fb97c6fa36",
+        "size": 103
+      },
+      {
+        "name": "routertop",
+        "uploaded_name": "rc2-routertop",
+        "sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+        "size": 1417856
+      },
+      {
+        "name": "routertop-data-blank.img",
+        "uploaded_name": "rc2-routertop-data-blank.img",
+        "sha256": "6d9a1ad6ee034c9e2bc92d61782d18ef149d36fc0fb8f3a5df600526f30badae",
+        "size": 34603008
+      },
+      {
+        "name": "routertop-x86_64.iso",
+        "uploaded_name": "rc2-routertop-x86_64.iso",
+        "sha256": "3f0a642e3b3380b43a76358af89132fdddf4ac4faaf12bb0e5bb71e22add1224",
+        "size": 66775040
+      },
+      {
+        "name": "vmlinuz",
+        "uploaded_name": "rc2-vmlinuz",
+        "sha256": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85",
+        "size": 12641280
+      }
+    ]
+  },
+  "cleanup": {
+    "all_owned_namespaces_removed": true,
+    "binary_unchanged": true,
+    "qemu_pid": 10756,
+    "serial_port": 19401,
+    "http_pid": 476,
+    "http_port": 19402,
+    "builder_and_http_retained_for_root": true,
+    "physical_interfaces_or_disks_used": false
+  },
+  "boundaries": {
+    "AC1": "Root owns full Rust fmt/test/Clippy evidence; this worker contributes actual permission regression.",
+    "AC4": "Actual final ISO browser/save/reload/warm/cold reboot proof belongs to root/Web owner. Authenticated CGI permission test is not full browser/reboot proof.",
+    "AC5": "Image/binary/package measurements in artifact-ready evidence; size roadmap owned by root.",
+    "AC6": "Independent review, commit/push and exact-commit hosted CI are owned by root; NOT_RUN by this worker.",
+    "physical_ISP_modems_hardware": "NOT_RUN. Synthetic virtual ISPs exchange actual DHCP/PPP/DHCPv6/RA/HTTP/DNS packets."
+  },
+  "superseded_candidate": "RC1 packet PASS79 remains historical; actual appliance found a separate uid1000 CGI readiness bug. RC2 minimal wan.rs fix and meaningful old-vs-new permission regression supersede RC1 for final delivery.",
+  "unresolved": [
+    "Root must combine separate actual ISO/browser/reboot and remote CI evidence.",
+    "Physical ISP/hardware acceptance is NOT_RUN.",
+    "Retain builder and HTTP until root requests cleanup."
+  ],
+  "next_action": "Integrate the permission test and sanitized RC2 evidence, include its command in hostedCI, combine root actual ISO proof, then root commits/pushes. Do not infer deployment/remote acceptance from this local handoff.",
+  "external_side_effects": {
+    "authorized": false,
+    "performed": false,
+    "note": "No commit/push/account publication by this worker. Only authorized local QEMU/HTTP/disposable VM namespace work."
+  }
+}

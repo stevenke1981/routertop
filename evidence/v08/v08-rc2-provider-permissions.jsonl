@@ -1,0 +1,13 @@
+{"check": "authenticated CGI public readiness", "provider": "primary", "root": {"active": "primary", "ipv6_active": "primary", "ipv6_ready": true, "ipv6_policy": "active-standby"}, "uid1000": {"active": "primary", "ipv6_active": "primary", "ipv6_ready": true, "ipv6_policy": "active-standby"}, "private_epoch_readable": false, "expected_old_regression": false, "status": "PASS"}
+{"case": "root/uid1000 real primary provider readiness agrees without private epoch access", "status": "PASS"}
+{"check": "authenticated CGI public readiness", "provider": "backup", "root": {"active": "backup", "ipv6_active": "backup", "ipv6_ready": true, "ipv6_policy": "active-standby"}, "uid1000": {"active": "backup", "ipv6_active": "backup", "ipv6_ready": true, "ipv6_policy": "active-standby"}, "private_epoch_readable": false, "expected_old_regression": false, "status": "PASS"}
+{"case": "root/uid1000 real backup provider readiness agrees without private epoch access", "status": "PASS"}
+{"case": "root/uid1000 reject acquiring public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject degraded public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject stale_generation public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject wrong_provider public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject wrong_logical public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject stale_timestamp public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject missing_generation public provider snapshot while epoch remains private", "status": "PASS"}
+{"case": "root/uid1000 reject wrong_active public provider snapshot while epoch remains private", "status": "PASS"}
+{"status": "PASS", "passed_cases": 10, "expected_old_regression": false, "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191", "harness_sha256": "fbea9607793d9a17ae3e98bf1c6338ad0de0dff59af0946e626d153a654c17a8"}

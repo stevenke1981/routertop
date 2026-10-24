@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "candidate": "rc2",
+  "version": "0.8.0",
+  "platform": "Windows x86_64",
+  "rustc": "1.99.0",
+  "checks": [
+    {
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo test --locked",
+      "exit_code": 0,
+      "passed": 103,
+      "failed": 0
+    },
+    {
+      "command": "cargo clippy --all-targets --locked -- -D warnings",
+      "exit_code": 0
+    }
+  ],
+  "inputs": "artifact-verification.json identifies LF-normalized candidate inputs; private raw logs remain in .cache/v08.",
+  "log_sha256": {
+    "windows-fmt-r3.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "windows-tests-r3.log": "98debc247fef5b2d7a12900e4e76fc168b1eb94c1dfafd4f046b452eaf3a51de",
+    "windows-clippy-r3.log": "e1776743a612e69ad629b5ff63ed83ef5e7e6c5a905c11affad40eaf7e61d937"
+  }
+}

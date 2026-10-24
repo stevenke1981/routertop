@@ -1,0 +1,100 @@
+{
+  "task_id": "v08-core",
+  "actor_instance": "/root/v08_core",
+  "receiver_instance": "/root",
+  "kind": "handoff",
+  "base_sha": "fcc8c02b742ffeac4531423f78be82cd098c4966",
+  "head_sha": "fcc8c02b742ffeac4531423f78be82cd098c4966",
+  "result": "PASS",
+  "simulation": false,
+  "observed_at": "2026-10-24T15:33:24.210603+00:00",
+  "candidate": "R2-frozen-after-review-fix",
+  "worktree": "E:\\routertop\\.worktrees\\v08-core",
+  "normalization": "UTF8 original bytes CRLF replaced by LF",
+  "files": {
+    "crates/routertop/src/ipv6.rs": "c2df414ad3e862c90a565e51ade14e55a6a6367c6b2abab03214a58ad444bd4b",
+    "crates/routertop/src/lib.rs": "dc9f0b22f3bc79f9296bb41882a95dc1a9bd969b0325b4cad90cce8117766b7b",
+    "crates/routertop/src/main.rs": "0b231b6a655057da82fd1ed9e38865ab3e1e5ceef1080bb32f2196bb1d145ca9",
+    "crates/routertop/src/pd.rs": "8181c16c340be058fb3bfcf234520afbe78e5948e7ac71979dcf71a66a762d78",
+    "crates/routertop/src/provider.rs": "b356bcdf3150a8e3fdd765ea312de1c2327bb2cdeeb0280610e63c4e2d6d1d98",
+    "crates/routertop/src/wan.rs": "5ccf96c7a0e392f53468d9c2bd6b89f7654a3258ef952a778c202ca3ae13323a",
+    "crates/routertop/tests/ipv6.rs": "96877c202258c15bc938ece11b83a3b738e8f4d4a152cdc88922b6b6ff000c29",
+    "crates/routertop/tests/provider.rs": "1ce966b20fe924b1cb7bf6d8f93862a049b2f9238e53ba942aaff45c5ab2ef46",
+    "image/overlay/usr/sbin/routertop-ppp-ip-up": "6b68cbc0d0e8071b340e968c85bf3cb57c46b725a9ee733062acbff3fbce2f7e",
+    "image/overlay/usr/sbin/routertop-ppp-ip-down": "8acc22606c484137dbe3a09d007e2a2d03fa4ac79388098d15620826a4568797",
+    "image/overlay/usr/sbin/routertop-ppp-ipv6-up": "8fd1d43ef8fcf95ada6ed07863464378ab22a0524e801b901e85b214b04b977b",
+    "image/overlay/usr/sbin/routertop-ppp-ipv6-down": "e6701ddd1e28aa359a44ac801eefcb7efa6c72b7a505d5fcac1abd967de900e4"
+  },
+  "checks": [
+    {
+      "name": "provider production regression",
+      "argv": [
+        "cargo",
+        "test",
+        "--test",
+        "provider"
+      ],
+      "cwd": "E:\\routertop\\.worktrees\\v08-core",
+      "platform": "windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "count": 4,
+      "scope": "Before final error-cleanup condition refinement; final current clippy covers build."
+    },
+    {
+      "name": "clippy all targets current R2",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "E:\\routertop\\.worktrees\\v08-core",
+      "platform": "windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "full existing Rust suite intermediate candidate",
+      "argv": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "cwd": "E:\\routertop\\.worktrees\\v08-core",
+      "platform": "windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "scope": "Before PPP process-origin and final monitor cleanup refinements; root will rerun merged R2."
+    },
+    {
+      "name": "final diff whitespace",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "E:\\routertop\\.worktrees\\v08-core",
+      "platform": "windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "real packet and ISO",
+      "result": "NOT_RUN",
+      "owner": "/root/v08_test"
+    }
+  ],
+  "unresolved": [
+    "Live DHCP/PPPoE combinations and image verification belong to test owner; not claimed passed.",
+    "No commit or push made."
+  ],
+  "next_action": "Root copy exactly these 12 files, preserving root versions/docs and web ownership; run integrated Windows suite and Linux packet/ISO evidence.",
+  "external_side_effects": {
+    "authorized": false,
+    "performed": false
+  }
+}

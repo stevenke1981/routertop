@@ -1,0 +1,161 @@
+{
+  "status": "PASS",
+  "source_archive_sha256": "6a9dd160ec55cdcfa9e4b00365364d03871a6238982beb2b62f02f7c3d9c32b6",
+  "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+  "binary_sha256_after": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+  "source_hashes_unchanged": true,
+  "namespaces_empty": true,
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "/build/routertop-v08-rc2-test-additions/scripts/provider-status-permissions-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 50.33,
+      "log": "v08-rc2-provider-permissions.jsonl",
+      "log_sha256": "4f5fcda5ab175e3ebe5353db7bca7facada1241ab5c6873634ca31e1a4ffe2ef",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 10,
+        "expected_old_regression": false,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+        "harness_sha256": "fbea9607793d9a17ae3e98bf1c6338ad0de0dff59af0946e626d153a654c17a8"
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-provider-permissions.jsonl"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v08-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 556.79,
+      "log": "v08-rc2-network-full.jsonl",
+      "log_sha256": "924f41e0393916913a5fa1c78e6b6cc57921c91edbf3232d3e4a08466dc61586",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 26,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-network-full.jsonl"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v08-smoke.py",
+        "/build/routertop-v07/target/release/routertop",
+        "--wg-failclosed"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 91.62,
+      "log": "v08-rc2-wg-unavailable.jsonl",
+      "log_sha256": "e69c0b1e83133166b11204689f152c65aa433682a95a0de282c0714ac3642fd4",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 3,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-wg-unavailable.jsonl"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v07-smoke.py",
+        "/build/routertop-v07/target/release/routertop",
+        "--case",
+        "pppoe-dhcp-ipv6"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 100.08,
+      "log": "v08-rc2-primary-only.jsonl",
+      "log_sha256": "6f68170fdbceb75ca16803227b617b3f9a0b2bc669f6a9cd3e778dcf12e59d1d",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 13,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-primary-only.jsonl"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v05-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 111.62,
+      "log": "v08-rc2-legacy-pd-wg.jsonl",
+      "log_sha256": "cc945bdee12534216897fb47887d501fb7dc26563068d9a4d458d856eb5cbb55",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 16
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-legacy-pd-wg.jsonl"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v06-smoke.py",
+        "/build/routertop-v07/target/release/routertop",
+        "--pd-only"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 46.29,
+      "log": "v08-rc2-legacy-ppp-pd-only.jsonl",
+      "log_sha256": "e622207a81b0f93a93ae6b6987b25ec11b8d82a6e8fe05dd172f0c64663b42c0",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 6
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-legacy-ppp-pd-only.jsonl"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/network-v08-vlan-smoke.py",
+        "/build/routertop-v07/target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v08-rc2",
+      "exit_code": 0,
+      "seconds": 135.88,
+      "log": "v08-rc2-vlan20.jsonl",
+      "log_sha256": "368f1299f9530dcdf14008127670c61be9c6149da7602fc36cba79a7d50d1d5e",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 15,
+        "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191",
+        "harness_sha256": "99c7c2dd8d30118801e73293f4e3ae4138fbc032e19bdf1f8124551f6939d4aa",
+        "base_harness_sha256": "ccf5662635845fbefd6e69e4cf206e1a311f9388fa996bf64f7a3a718ca63ef6"
+      },
+      "status": "PASS",
+      "raw_log_published": false,
+      "public_case_records": "v08-rc2-vlan20.jsonl"
+    }
+  ],
+  "artifacts_status": "PASS",
+  "simulation": false,
+  "candidate": "rc2",
+  "total_passed_cases": 89,
+  "validation_scope": "Final optimized binary; actual root/UID1000 authenticated CGI and isolated Linux network namespaces/real packets. Actual ISO/browser/persistence are separate."
+}

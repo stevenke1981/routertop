@@ -1,0 +1,502 @@
+{
+  "result": "FAIL",
+  "mode": "real_appliance",
+  "started_utc": "2026-10-24T16:55:19.255820+00:00",
+  "checks": [
+    {
+      "name": "fresh_enrollment_and_config_load",
+      "result": "PASS"
+    },
+    {
+      "name": "static_wan_save_reload_and_conditional_fields",
+      "result": "PASS"
+    },
+    {
+      "name": "backup_dhcp_static_options_and_atomic_disable",
+      "result": "PASS"
+    },
+    {
+      "name": "dual_pppoe_write_only_credentials_blank_preservation_identity_and_bounds",
+      "result": "PASS"
+    },
+    {
+      "name": "dual_wan_ipv6_pd_save_preserves_other_settings_and_credentials",
+      "result": "PASS"
+    },
+    {
+      "name": "saved_modes_credential_flag_and_light_responsive_ui",
+      "result": "PASS"
+    },
+    {
+      "name": "actual_reboot_preserves_config_revision_credentials_certificate_and_expires_session",
+      "result": "PASS"
+    }
+  ],
+  "screenshots": [
+    "static-wan-desktop.png",
+    "dual-wan-desktop.png",
+    "dual-wan-mobile.png",
+    "dual-wan-ipv6-pd-desktop.png",
+    "dual-wan-ipv6-pd-mobile.png"
+  ],
+  "visual_audits": [
+    {
+      "name": "static-wan-desktop",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "dual-wan-desktop",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "dual-wan-mobile",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "dual-wan-ipv6-pd-desktop",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "dual-wan-ipv6-pd-mobile",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    }
+  ],
+  "packet_forwarding": "NOT_RUN by browser harness",
+  "cold_boot_and_duid": "NOT_RUN by browser harness",
+  "last_status": {
+    "wan": {
+      "dual_wan": true,
+      "active": "backup",
+      "ipv6_policy": "active-standby",
+      "ipv6_active": "backup",
+      "ipv6_ready": true,
+      "primary": {
+        "mode": "pppoe",
+        "state": "unavailable",
+        "healthy": false,
+        "logical_interface": "ppp0",
+        "interface": "eth0"
+      },
+      "backup": {
+        "mode": "pppoe",
+        "state": "connected",
+        "healthy": true,
+        "logical_interface": "ppp1",
+        "interface": "eth2"
+      }
+    },
+    "ipv6_dynamic": {
+      "provider": "backup",
+      "phase": "bound",
+      "state": "bound",
+      "generation": 2,
+      "logical_interface": "ppp1",
+      "updated_uptime_seconds": 23
+    },
+    "delegated_count": 2,
+    "uptime_seconds": 24
+  },
+  "failed_stage": "initial backup-only boot with backup IPv6/PD",
+  "error": "Authenticated shell check failed",
+  "elapsed_seconds": 49.63
+}

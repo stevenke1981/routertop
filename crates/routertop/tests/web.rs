@@ -711,3 +711,59 @@ fn dual_wan_secrets_are_slot_bound_and_static_failover_survives_restart() {
         .unwrap()
         .contains("backup-test-secret"));
 }
+
+#[test]
+fn ipv6_provider_policy_persists_and_legacy_edits_keep_opt_in_without_leaking_wan_secrets() {
+    let fixture = Fixture::new();
+    let auth = fixture.setup();
+    let public = || body(&fixture.call(&authenticated(request("GET", "/config"), &auth)));
+    let save = |config: Value, revision| {
+        fixture.call(&authenticated(
+            post("/config", json!({"revision":revision,"config":config})),
+            &auth,
+        ))
+    };
+    let mut config = public()["config"].clone();
+    config["wan"] = json!({"interface":"eth0","mode":"pppoe","pppoe":{"username":"primary","password":"primary-policy-secret","mtu":1492},"static_ipv4":null});
+    config["wan_backup"] = json!({"interface":"eth2","mode":"pppoe","pppoe":{"username":"backup","password":"backup-policy-secret","mtu":1492},"static_ipv4":null});
+    config["failover"] = json!({"primary_target":"203.0.113.9","backup_target":"203.0.113.10","interval_seconds":2,"failure_threshold":2,"recovery_threshold":3});
+    config["ipv6"] = json!({"wan_mode":"auto","provider_policy":"active-standby","dns_auto":true,"pd":{"prefix_length":56,"lan_subnet_id":0,"vlans":[]},"wan_address":null,"wan_gateway":null,"lan_address":"","vlans":[],"dns_upstream":[]});
+    let reply = save(config, 1);
+    assert_eq!(reply.status, 200, "{}", reply.body);
+    let mut legacy = public()["config"].clone();
+    legacy["ipv6"]
+        .as_object_mut()
+        .unwrap()
+        .remove("provider_policy");
+    legacy["hostname"] = json!("policy-legacy-edit");
+    assert_eq!(save(legacy, 2).status, 200);
+    let persisted = public();
+    assert_eq!(
+        persisted["config"]["ipv6"]["provider_policy"],
+        "active-standby"
+    );
+    assert_eq!(persisted["wan_password_set"], true);
+    assert_eq!(persisted["wan_backup_password_set"], true);
+    assert!(!persisted.to_string().contains("policy-secret"));
+    let stored = stored_config(&fixture.paths.data).unwrap();
+    assert!(stored.contains("primary-policy-secret") && stored.contains("backup-policy-secret"));
+    fs::remove_dir_all(&fixture.paths.runtime).unwrap();
+    initialize_store(&fixture.paths.data, SAMPLE).unwrap();
+    let login = fixture.call(&post(
+        "/login",
+        json!({"username":"admin","password":PASSWORD}),
+    ));
+    assert_eq!(login.status, 200);
+    let restarted_auth = credentials(&login);
+    let restarted = body(&fixture.call(&authenticated(request("GET", "/config"), &restarted_auth)));
+    assert_eq!(restarted, persisted);
+    let mut opt_out = restarted["config"].clone();
+    opt_out["ipv6"]["provider_policy"] = json!("primary-only");
+    let reply = fixture.call(&authenticated(
+        post("/config", json!({"revision":3,"config":opt_out})),
+        &restarted_auth,
+    ));
+    assert_eq!(reply.status, 200, "{}", reply.body);
+    let after = body(&fixture.call(&authenticated(request("GET", "/config"), &restarted_auth)));
+    assert_eq!(after["config"]["ipv6"]["provider_policy"], "primary-only");
+}

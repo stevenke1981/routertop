@@ -1,0 +1,4 @@
+{"case": "active-standby + WG unavailable: primary actual PD remains; client/router IPv4/IPv6 and outside DNS plaintext counters all zero", "status": "PASS"}
+{"case": "active-standby + WG unavailable: primary actual PD remains; client/router IPv4/IPv6 and outside DNS plaintext counters all zero", "status": "PASS"}
+{"case": "active-standby + WG unavailable: backup actual PD remains; client/router IPv4/IPv6 and outside DNS plaintext counters all zero", "status": "PASS"}
+{"status": "PASS", "passed_cases": 3, "binary_sha256": "6c3586ddaff4eaf7c5dda4cbc8e6a2d823e512dcf56be64edc90fb21950a2191"}

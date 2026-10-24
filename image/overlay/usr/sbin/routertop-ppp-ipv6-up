@@ -5,4 +5,9 @@ export PATH=/sbin:/usr/sbin:/bin:/usr/bin
 case "$1" in ppp0|ppp1) ;; *) exit 0;; esac
 runtime=${6:?missing PPP runtime}
 config=$(cat "$runtime/config-path")
+# Capture this process incarnation at hook origin. A delayed old down hook
+# cannot borrow a later ppp0/ppp1 session's identity.
+pid=${PPPD_PID:-$PPID}
+start=$(/bin/busybox awk '{ print $22 }' "/proc/$pid/stat")
+export ROUTERTOP_PPP_SESSION="$pid-$start"
 exec routertop pppoe-event "$config" "$runtime" ipv6-up "$1"

@@ -12,9 +12,10 @@ pub mod ipv6;
 pub mod network;
 pub mod pd;
 pub mod pppoe;
+pub mod provider;
 pub mod wan;
 pub mod web;
-pub use ipv6::{DelegatedVlan, Ipv6Config, Ipv6Vlan, PrefixDelegation, WanMode};
+pub use ipv6::{DelegatedVlan, Ipv6Config, Ipv6Vlan, PrefixDelegation, ProviderPolicy, WanMode};
 pub use network::{
     FirewallAction, FirewallChain, FirewallFamily, FirewallProtocol, FirewallRule, Peer, Vlan,
     WireGuard,
@@ -484,7 +485,10 @@ table inet routertop {{\n\
         }
         nftables = expanded;
         nftables=nftables.replacen("table inet routertop {\n", "table inet routertop {\n    set active_wan { type ifname; flags timeout; timeout 20s; }\n    set primary_v6 { type ifname; flags timeout; timeout 20s; }\n",1);
-        let guard=format!("        meta nfproto ipv4 oifname {{ \"{wan_if}\", \"{backup}\" }} oifname != @active_wan drop\n        meta nfproto ipv6 oifname {{ \"{wan_if}\", \"{backup}\" }} oifname != @primary_v6 drop\n        meta nfproto ipv6 iifname {{ \"{wan_if}\", \"{backup}\" }} iifname != @primary_v6 drop\n");
+        let mut guard=format!("        meta nfproto ipv4 oifname {{ \"{wan_if}\", \"{backup}\" }} oifname != @active_wan drop\n        meta nfproto ipv6 oifname {{ \"{wan_if}\", \"{backup}\" }} oifname != @primary_v6 drop\n        meta nfproto ipv6 iifname {{ \"{wan_if}\", \"{backup}\" }} iifname != @primary_v6 drop\n");
+        if provider::enabled(config) {
+            guard=format!("        meta nfproto ipv4 oifname {{ \"{wan_if}\", \"{backup}\" }} oifname != @active_wan drop\n");
+        }
         nftables = nftables.replacen(
             "type filter hook forward priority 0; policy drop;\n",
             &format!("type filter hook forward priority 0; policy drop;\n{guard}"),

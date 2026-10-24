@@ -1,6 +1,6 @@
 # RouterTop
 
-以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.7 加入固定 IP WAN、雙 WAN 主備切換與恢復後自動切回，支援 DHCP／PPPoE，延續 IPv6CP、DHCPv6-PD、WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
+以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.8 加入可選的雙 WAN IPv6／DHCPv6-PD 自動切換，支援 DHCP／PPPoE，延續固定 IP、雙 WAN 主備切換、IPv6CP 與 WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
 
 ## 已實作範圍
 
@@ -17,15 +17,17 @@
 
 預設 WAN 為 `eth0`，LAN 為 `eth1`／`192.168.88.1/24`，DHCP 範圍為 `.100` 至 `.199`。HTTPS 預設僅綁定 LAN 位址的 443 埠；SSH 未安裝或啟用，`ssh_port` 只控制防火牆放行。
 
-實作項目不等於驗收通過。0.7 的實際產物、體積、測試及未執行項目記錄於 [0.7 驗收紀錄](docs/acceptance-v0.7.md)。[0.6](docs/acceptance-v0.6.md)、[0.5](docs/acceptance-v0.5.md)、[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
+實作項目不等於驗收通過。0.8 的實際產物、體積、測試及未執行項目記錄於 [0.8 驗收紀錄](docs/acceptance-v0.8.md)。[0.7](docs/acceptance-v0.7.md)、[0.6](docs/acceptance-v0.6.md)、[0.5](docs/acceptance-v0.5.md)、[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
+
+**0.8 目前為部分驗收的開發版：103 項 Rust 測試與 89 項 Linux 封包／權限檢查通過；實際映像 DNS 檢查仍失敗，完整切換／復原與 UEFI 冷開機尚未完成。**
 
 ## 首次啟動與登入
 
 1. 在 Linux 建立一個全新的資料磁碟檔：`sh scripts/make-data-disk.sh routertop-data.img`。需要 `mkfs.ext4`、`sfdisk` 等工具；輸出為 33 MiB 一般檔案，內含 32 MiB ext4 分割區及 `ROUTERTOP_DATA` 標籤。工具拒絕覆寫既有路徑。
-2. 將資料磁碟與 0.7 映像交給 Windows 啟動器：
+2. 將資料磁碟與 0.8 映像交給 Windows 啟動器：
 
    ```powershell
-   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.7 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.8 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
    ```
 
 3. 首次 console 顯示 `Setup choice [create/token]:`。選 `create` 並輸入、確認 12–128 位元組密碼，即可建立管理員；若想從 Web 註冊，選 `token`，在可信實體終端取得一次性註冊權杖。
@@ -40,7 +42,7 @@
 
 在「網路設定」選擇固定 IP、DHCP 或 PPPoE；固定 IP 需填寫 IPv4／前綴與同網段閘道。啟用雙 WAN 後，設定備線介面、連線方式及兩條線路各自可回應 ping 的 IPv4 檢查目標。主線連續失敗達門檻後切換備線，恢復達門檻後自動切回；兩線皆無法通過檢查時停止對外路由。Web 顯示使用中線路和各線狀態。兩組 PPPoE 密碼分別保存，讀取不回傳密碼。
 
-這版是主備切換；外部 IP 改變後，既有 TCP／VPN 連線可能需要重連。IPv6／DHCPv6-PD 僅使用主線，備線接手時撤回 IPv6，主線恢復後重新取得前綴。雙 WAN 啟用 IPv6 時需使用自動模式；單 WAN 仍支援靜態 IPv6。詳細欄位與限制見 [0.7 WAN 契約](docs/network-v0.7-contract.md)。
+這版是主備切換；外部 IP 改變後，既有 TCP／VPN 連線可能需要重連。IPv6 設定可啟用「IPv6 自動備援」：兩條 WAN 共用 PD 提示長度、LAN／VLAN 子網編號與 DNS 政策；切換時撤除舊前綴與 DNS，向使用中供應線路重新取得配置。需啟用雙 WAN、自動 IPv6 與 PD。預設仍為主線限定，保留舊設定行為；單 WAN 仍支援靜態 IPv6。切換依既有 WAN 健康檢查，不另作 IPv6-only 健康選路。詳細欄位與限制見 [0.8 WAN 契約](docs/network-v0.8-contract.md)。
 
 ## 設定與持久化
 
@@ -91,3 +93,7 @@ RouterTop 自有程式採 MIT；Linux 與 Alpine 套件保留各自授權。此 
 ## PPPoE WAN (0.6)
 
 Web 的 WAN 設定可選 DHCP 或 PPPoE，提供唯寫 ISP 密碼與 MTU。PPPoE 使用邏輯介面 `ppp0`，支援自動重撥、IPv6CP 及 DHCPv6-PD 的 LAN／VLAN 前綴分配；儲存後重新啟動套用，憑證私密保存。介面維持淺色設計，不引入前端框架。[設定契約](docs/network-v0.6-contract.md) 與 [驗收紀錄](docs/acceptance-v0.6.md) 列明實際結果與限制。
+
+## 後續體積優化順序
+
+第一優先為 **SquashFS（zstd／xz）搭配 overlay 或獨立設定分割區**；其後才依序處理核心裁剪、Alpine 套件清理、qcow2／sparse 儲存縮減、進階 initramfs 精簡。規劃、量測指標與未執行項目見 [體積優化路線](docs/image-size-roadmap.md)；本版功能與實際成品大小仍以驗收紀錄為準。

@@ -10,6 +10,8 @@ pub const FULL_TUNNEL_TABLE: u32 = 51820;
 #[serde(deny_unknown_fields)]
 pub struct Ipv6Config {
     #[serde(default)]
+    pub provider_policy: ProviderPolicy,
+    #[serde(default)]
     pub wan_mode: WanMode,
     #[serde(default = "yes")]
     pub dns_auto: bool,
@@ -21,6 +23,13 @@ pub struct Ipv6Config {
     pub lan_address: String,
     pub vlans: Vec<Ipv6Vlan>,
     pub dns_upstream: Vec<String>,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum ProviderPolicy {
+    #[default]
+    PrimaryOnly,
+    ActiveStandby,
 }
 fn yes() -> bool {
     true
@@ -440,6 +449,53 @@ pub(crate) fn render(config: &Config) -> Result<Extra, String> {
     out.sysctl=format!("net.ipv6.conf.all.forwarding={forwarding}\nnet.ipv6.conf.default.forwarding={forwarding}\nnet.ipv6.conf.all.accept_ra=0\nnet.ipv6.conf.default.accept_ra=0\nnet.ipv6.conf.all.accept_redirects=0\nnet.ipv6.conf.default.accept_redirects=0\n");
     if full.is_some() {
         out.sysctl.push_str("net.ipv4.conf.all.src_valid_mark=1\n");
+    }
+    if crate::provider::enabled(config) {
+        let backup = crate::wan::device(config.wan_backup.as_ref().unwrap(), 1);
+        // Generated policy expands to both links. User rules are rendered later
+        // and never rewritten by this expansion.
+        for field in [
+            &mut out.input,
+            &mut out.forward,
+            &mut out.nat,
+            &mut out.guard,
+            &mut out.output,
+        ] {
+            let mut expanded = String::new();
+            for line in field.lines() {
+                expanded.push_str(line);
+                expanded.push('\n');
+                if line.contains(&format!("\"{wan}\"")) {
+                    expanded
+                        .push_str(&line.replace(&format!("\"{wan}\""), &format!("\"{backup}\"")));
+                    expanded.push('\n');
+                }
+            }
+            *field = expanded;
+        }
+        out.sets.push_str(
+            "    set auto_sources { type ipv6_addr; flags interval,timeout; timeout 5s; }\n",
+        );
+        let gate=format!("        oifname {{ \"{wan}\", \"{backup}\" }} meta nfproto ipv6 ip6 saddr fe80::/10 udp sport 546 udp dport 547 accept\n        oifname {{ \"{wan}\", \"{backup}\" }} meta nfproto ipv6 ip6 hoplimit 255 meta l4proto ipv6-icmp icmpv6 type {{ nd-neighbor-solicit, nd-neighbor-advert, nd-router-solicit }} accept\n        oifname {{ \"{wan}\", \"{backup}\" }} meta nfproto ipv6 oifname != @auto_wan drop\n        oifname {{ \"{wan}\", \"{backup}\" }} meta nfproto ipv6 ip6 saddr != @auto_sources drop\n");
+        if out.output.is_empty() {
+            out.output=format!("    chain output {{\n        type filter hook output priority 0; policy accept;\n{gate}    }}\n");
+        } else {
+            out.output = out.output.replacen(
+                "type filter hook output priority 0; policy accept;\n",
+                &format!("type filter hook output priority 0; policy accept;\n{gate}"),
+                1,
+            );
+        }
+        out.sysctl
+            .push_str("net.ipv6.conf.all.autoconf=0\nnet.ipv6.conf.default.autoconf=0\n");
+        for uplink in crate::wan::uplinks(config) {
+            writeln!(
+                out.sysctl,
+                "net.ipv6.conf.{}.accept_ra=0\nnet.ipv6.conf.{}.autoconf=0",
+                uplink.interface, uplink.interface
+            )
+            .unwrap();
+        }
     }
     Ok(out)
 }
