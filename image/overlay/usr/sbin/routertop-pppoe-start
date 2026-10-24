@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+config=/etc/routertop/routertop.toml
+[ "$(routertop wan-mode "$config")" = pppoe ] || exit 0
+[ -f /run/routertop/persistent ] || { echo 'PPPoE requires persistent credentials.' >&2; exit 1; }
+modprobe ppp_generic
+modprobe ppp_async
+mkdir -p /dev
+[ -c /dev/ppp ] || mknod /dev/ppp c 108 0
+routertop pppoe-init "$config" /run/routertop/pppoe
+routertop pppoe-run "$config" /run/routertop/pppoe >/dev/null 2>&1 &
+echo "$!" >/run/routertop/pppoe/supervisor.pid

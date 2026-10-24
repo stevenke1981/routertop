@@ -1,0 +1,59 @@
+{
+  "task_id": "routertop-v06",
+  "base_sha": "3991768b388257cef792a5cb1d8fdbaf609d6957",
+  "head_identity": "published commit is recorded in final delivery; runtime source hashes in artifact-verification.json",
+  "actor_instance": "root",
+  "receiver_instance": "user",
+  "kind": "handoff",
+  "result": "PASS",
+  "simulation": false,
+  "observed_at": "2026-10-24T07:59:03.001662+00:00",
+  "owners": {
+    "pppoe_core": "Rust, private credentials, PPP lifecycle, kernel MSS and boot integration",
+    "pppoe_web": "light Web form, browser and ISO lifecycle harness",
+    "pppoe_test": "real authentication/PPP/IPv6/PD fixtures and packet acceptance",
+    "pppoe_review": "one independent scoped pass and focused two-fix closure",
+    "root": "integration, final image/Chrome lifecycle/BIOS/UEFI, evidence and publishing"
+  },
+  "checks": {
+    "windows_final_tests": 84,
+    "linux_r1_unit_tests": 82,
+    "r2_focused_unix_permission_checks": 2,
+    "r4_standard_packets": 17,
+    "r4_pd_only_packets": 6,
+    "r4_browser_groups": 10,
+    "r4_iso_lifecycle_groups": 6,
+    "visual_audits": 5,
+    "ui_fixture_groups": 6
+  },
+  "artifact": {
+    "path": "artifact-verification.json",
+    "sha256": "1df7dc23d2bd9ef0a9f56a5ac11f4bf494ea09ff92f1af7f4b0dbd17b8f1aca6",
+    "encoding": "normalized LF JSON"
+  },
+  "review": "../../docs/review-v0.6.md",
+  "odin": {
+    "project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8",
+    "structure_trace": "9e8de038-c5c2-404b-8095-1acfeb8b070b",
+    "symbols_trace": "89f411cc-b596-4807-94e8-26a4063a6530",
+    "scope": "read-only live project structure and real Rust LSP symbols; not test evidence"
+  },
+  "unresolved": [
+    "ARM and physical ISP/hardware interoperability NOT_RUN",
+    "single PPP session and one PD association; limits documented"
+  ],
+  "external_side_effects": {
+    "authorized": true,
+    "scope": "commit and push public source; exact outcome/CI in final delivery"
+  },
+  "result_scope": "PASS for local acceptance",
+  "head_sha": null,
+  "acceptance_ids": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4",
+    "AC5",
+    "AC6-local"
+  ]
+}

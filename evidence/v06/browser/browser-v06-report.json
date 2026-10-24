@@ -1,0 +1,545 @@
+{
+  "result": "PASS",
+  "mode": "real_appliance",
+  "started_utc": "2026-10-24T07:53:57.498348+00:00",
+  "checks": [
+    {
+      "name": "fresh_enrollment_and_config_load",
+      "result": "PASS"
+    },
+    {
+      "name": "pppoe_mode_mtu_bounds_write_only_password_blank_preservation_and_account_change_validation",
+      "result": "PASS"
+    },
+    {
+      "name": "pppoe_ipv6_pd_save_preserves_other_settings_and_credential",
+      "result": "PASS"
+    },
+    {
+      "name": "saved_modes_credential_flag_and_light_responsive_ui",
+      "result": "PASS"
+    },
+    {
+      "name": "actual_reboot_preserves_config_revision_credentials_certificate_and_expires_session",
+      "result": "PASS"
+    },
+    {
+      "name": "actual_pppoe_ipv4_ipv6_and_distinct_delegated_lan_vlan_subnets",
+      "result": "PASS"
+    },
+    {
+      "name": "upstream_lifecycle_hook",
+      "result": "PASS"
+    },
+    {
+      "name": "uefi_cold_boot_preserves_settings_admin_certificate_pppoe_credential_and_dhcpv6_identity",
+      "result": "PASS"
+    },
+    {
+      "name": "final_authenticated_poweroff_and_https_down",
+      "result": "PASS"
+    },
+    {
+      "name": "no_browser_runtime_errors_or_returned_credentials",
+      "result": "PASS"
+    }
+  ],
+  "screenshots": [
+    "pppoe-desktop.png",
+    "pppoe-mobile.png",
+    "pppoe-ipv6-pd-desktop.png",
+    "pppoe-after-reboot.png",
+    "pppoe-after-uefi-cold-boot.png"
+  ],
+  "visual_audits": [
+    {
+      "name": "pppoe-desktop",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "pppoe-mobile",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "pppoe-ipv6-pd-desktop",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "pppoe-after-reboot",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    },
+    {
+      "name": "pppoe-after-uefi-cold-boot",
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false
+    }
+  ],
+  "packet_forwarding": "NOT_RUN by browser harness",
+  "cold_boot_and_duid": {
+    "result": "PASS",
+    "firmware": "UEFI",
+    "identity_preserved": true,
+    "pppoe_credential_preserved": true,
+    "private_credential_permissions": "0600"
+  },
+  "lease_observation": {
+    "state": "bound",
+    "pppoe_state": "connected",
+    "ipv4_present": true,
+    "ipv6_ready": true,
+    "wan_address_count": 1,
+    "delegated_interfaces": [
+      "eth1",
+      "vlan20"
+    ],
+    "unique_prefix_length": 64
+  },
+  "lifecycle_checks": {
+    "result": "PASS",
+    "checks": [
+      {
+        "name": "actual_iso_pppoe_authenticated_ipv4_ipv6_pd_and_routed_http",
+        "result": "PASS"
+      },
+      {
+        "name": "actual_iso_server_disconnect_withdraws_ppp_and_delegated_policy",
+        "result": "PASS"
+      },
+      {
+        "name": "actual_iso_automatic_redial_restores_ipv4_ipv6_pd_and_preserves_private_identity",
+        "result": "PASS"
+      },
+      {
+        "name": "actual_iso_ppp_pd_renewal_retires_kernel_and_firewall_prefix_a",
+        "result": "PASS"
+      },
+      {
+        "name": "actual_iso_pd_expiry_withdraws_addresses_and_policy_with_live_ppp",
+        "result": "PASS"
+      },
+      {
+        "name": "actual_iso_pd_recovery_keeps_private_material_and_no_underlay_dhcp_fallback",
+        "result": "PASS"
+      }
+    ],
+    "memory_kib": {
+      "MemTotal": 220724,
+      "MemAvailable": 114844
+    },
+    "private_material_preserved": true,
+    "underlay_dhcpv4_delta": 0,
+    "session_count_increased": true,
+    "final_prefixes": [
+      "2001:db8:200::/64",
+      "2001:db8:200:1::/64"
+    ],
+    "transport": "isolated QEMU socket Ethernet; actual PPPoE/PPP/IPv6CP and DHCPv6 packets"
+  },
+  "cold_boot_lease_observation": {
+    "state": "bound",
+    "pppoe_state": "connected",
+    "ipv4_present": true,
+    "ipv6_ready": true,
+    "wan_address_count": 1,
+    "delegated_interfaces": [
+      "eth1",
+      "vlan20"
+    ],
+    "unique_prefix_length": 64
+  },
+  "elapsed_seconds": 134.13
+}

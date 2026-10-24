@@ -31,10 +31,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build inside Alpine
         run: |
-          docker run --rm -e ROUTERTOP_ARTIFACT_OWNER="$(id -u):$(id -g)" -v "$PWD:/src" -w /src alpine:3.24.3 sh -ec '
-            apk add cargo rust gcc musl-dev cpio gzip findutils coreutils kmod grub grub-bios grub-efi xorriso mtools e2fsprogs sfdisk
+          sudo modprobe ppp_generic
+          sudo modprobe ppp_async
+          sudo modprobe 8021q
+          if [ ! -c /dev/ppp ]; then sudo mknod /dev/ppp c 108 0; fi
+          docker run --rm --privileged -e ROUTERTOP_ARTIFACT_OWNER="$(id -u):$(id -g)" -v "$PWD:/src" -w /src alpine:3.24.3 sh -ec '
+            apk add cargo rust gcc musl-dev cpio gzip findutils coreutils kmod grub grub-bios grub-efi xorriso mtools e2fsprogs sfdisk python3 iproute2 nftables dnsmasq curl ppp-daemon rp-pppoe dhcpcd util-linux
             cargo test --locked
             cargo build --locked --release
+            python3 scripts/network-v06-smoke.py ./target/release/routertop
+            python3 scripts/network-v06-smoke.py ./target/release/routertop --pd-only
             ROUTERTOP_BINARY=/src/target/release/routertop ROUTERTOP_BINARY_TARGET="$(rustc -vV | sed -n "s/^host: //p")" sh scripts/build-image.sh
             sh scripts/make-data-disk.sh dist/x86_64/routertop-data-blank.img
             # Keep mode 0600; let the runner upload this newly created blank disk.

@@ -1,6 +1,7 @@
 use routertop::{parse_config, render};
 use std::{
     env, fs,
+    io::Write,
     path::Path,
     process::{self, Command},
 };
@@ -51,10 +52,13 @@ fn check_live_wan(config: &routertop::Config) -> Result<(), String> {
         return Err("network-check requires Linux".into());
     }
     let output = Command::new("ip")
-        .args(["-j", "-4", "address", "show", "dev", &config.wan.interface])
+        .args(["-j", "-4", "address", "show", "dev", config.wan.device()])
         .output()
         .map_err(|error| format!("WAN address query: {error}"))?;
     if !output.status.success() {
+        if config.wan.mode == routertop::WanProtocol::Pppoe {
+            return Ok(());
+        }
         return Err("cannot inspect WAN addresses".into());
     }
     let devices: Vec<serde_json::Value> =
@@ -73,6 +77,42 @@ fn check_live_wan(config: &routertop::Config) -> Result<(), String> {
         }
     }
     routertop::network::validate_wan_subnets(config, &addresses)
+}
+
+/// Replace the active configuration without exposing its PPP credentials,
+/// including when the previous file came from a legacy 0644 image.
+fn write_active_config(path: &Path, source: &str, owner: Option<(u32, u32)>) -> Result<(), String> {
+    let temporary = path.with_extension(format!("private-{}", process::id()));
+    let result = (|| {
+        let mut options = fs::OpenOptions::new();
+        options.write(true).create_new(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let mut file = options
+            .open(&temporary)
+            .map_err(|_| "cannot create private active configuration")?;
+        #[cfg(unix)]
+        if let Some((uid, gid)) = owner {
+            std::os::unix::fs::chown(&temporary, Some(uid), Some(gid))
+                .map_err(|_| "cannot set private configuration owner")?;
+        }
+        #[cfg(not(unix))]
+        let _ = owner;
+        file.write_all(source.as_bytes())
+            .map_err(|_| "cannot write active configuration")?;
+        file.sync_all()
+            .map_err(|_| "cannot sync active configuration")?;
+        drop(file);
+        fs::rename(&temporary, path).map_err(|_| "cannot commit active configuration")?;
+        Ok(())
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&temporary);
+    }
+    result
 }
 
 fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
@@ -147,9 +187,16 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
         run("sysctl", &["-p", "/etc/sysctl.conf"])?;
         run("dnsmasq", &["--conf-file=/etc/dnsmasq.conf"])?;
         fs::create_dir_all("/etc/routertop").map_err(|e| e.to_string())?;
-        fs::write("/etc/routertop/routertop.toml", source).map_err(|e| e.to_string())?;
+        write_active_config(
+            Path::new("/etc/routertop/routertop.toml"),
+            source,
+            Some((1000, 1000)),
+        )?;
         if auto {
             run("/usr/sbin/routertop-ipv6-start", &[])?;
+        }
+        if config.wan.mode == routertop::WanProtocol::Pppoe {
+            run("/usr/sbin/routertop-pppoe-start", &[])?;
         }
         fs::write("/run/routertop/applied", "boot provisioned\n").map_err(|e| e.to_string())?;
         Ok(())
@@ -163,6 +210,35 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
 
 fn execute(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, file, dir] if cmd == "pppoe-init" || cmd == "pppoe-run" => {
+            require_local_root()?;
+            let config =
+                parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
+            if cmd == "pppoe-init" {
+                routertop::pppoe::initialize(&config, Path::new(file), Path::new(dir))
+            } else {
+                routertop::pppoe::supervise(&config, Path::new(dir))
+            }
+        }
+        [cmd, file, dir, event, interface] if cmd == "pppoe-event" => {
+            require_local_root()?;
+            let config =
+                parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
+            routertop::pppoe::event(&config, Path::new(file), Path::new(dir), event, interface)
+        }
+        [cmd, file] if cmd == "wan-mode" => {
+            let config =
+                parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
+            println!(
+                "{}",
+                if config.wan.mode == routertop::WanProtocol::Pppoe {
+                    "pppoe"
+                } else {
+                    "dhcp"
+                }
+            );
+            Ok(())
+        }
         [cmd, file, dir, identity] if cmd == "ipv6-init" => {
             require_local_root()?;
             let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
@@ -247,6 +323,7 @@ fn execute(args: &[String]) -> Result<(), String> {
             } else if cmd == "hostname" {
                 println!("{}", config.hostname);
             } else {
+                require_local_root()?;
                 print!(
                     "{}",
                     toml::to_string_pretty(&config).map_err(|e| e.to_string())?
@@ -281,5 +358,40 @@ fn main() {
     if let Err(error) = result {
         eprintln!("routertop: {error}");
         process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn active_credentials_are_private_on_create_and_replace() {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = env::temp_dir().join(format!("routertop-active-{}-{nonce}", process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("routertop.toml");
+        for source in ["first-private-value", "replacement-private-value"] {
+            if path.exists() {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+                    fs::set_permissions(&path, fs::Permissions::from_mode(0o644)).unwrap();
+                }
+            }
+            write_active_config(&path, source, None).unwrap();
+            assert_eq!(fs::read_to_string(&path).unwrap(), source);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                assert_eq!(
+                    fs::metadata(&path).unwrap().permissions().mode() & 0o777,
+                    0o600
+                );
+            }
+        }
+        fs::remove_dir_all(dir).unwrap();
     }
 }

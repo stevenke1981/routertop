@@ -3,7 +3,7 @@
 (() => {
   const API = '/cgi-bin/routertop.cgi';
   const $ = (id) => document.getElementById(id);
-  const state = { csrf: null, config: null, revision: null, authenticated: false, dirty: false, busy: false, publicKeys: {}, ipv6Vlans: [], pdVlans: [] };
+  const state = { csrf: null, config: null, revision: null, authenticated: false, dirty: false, busy: false, publicKeys: {}, ipv6Vlans: [], pdVlans: [], wanPasswordSet: false };
   const panelNames = { overview: '系統總覽', network: '網路設定', ipv6: 'IPv6', vlans: 'VLAN 網路', wireguard: 'WireGuard VPN', firewall: '防火牆規則', security: '帳號安全' };
 
   function text(id, value) { $(id).textContent = String(value); }
@@ -23,6 +23,8 @@
     state.publicKeys = {};
     state.ipv6Vlans = [];
     state.pdVlans = [];
+    state.wanPasswordSet = false;
+    ['mode', 'state', 'ipv4', 'ipv6'].forEach((name) => text('wan-runtime-' + name, '尚未取得'));
     $('editor-dialog').close();
     ['vlans-list', 'wireguard-list', 'firewall-list', 'ipv6-vlans-list', 'editor-fields'].forEach((id) => $(id).replaceChildren());
     $('network-form').reset();
@@ -149,6 +151,12 @@
     text('persistence-detail', data.persistent ? '已連接設定儲存空間' : '無法確認設定儲存空間');
     text('console-auth-status', data.console_auth_required === true ? '已啟用（必要）' : '無法確認驗證狀態');
     text('console-password-status', data.console_password_shared === true ? '與 Web admin 密碼相同' : '無法確認共用密碼狀態');
+    const wan = data.wan;
+    const wanStates = { dialing: '正在撥號', connected: '已連線', reconnecting: '連線中斷，正在重撥', disabled: '由 DHCP 取得位址' };
+    text('wan-runtime-mode', wan?.mode === 'pppoe' ? 'PPPoE 撥號' : wan?.mode === 'dhcp' ? '自動取得（DHCP）' : '尚未取得');
+    text('wan-runtime-state', wanStates[wan?.state] || '無法確認連線狀態');
+    text('wan-runtime-ipv4', typeof wan?.ipv4_address === 'string' && wan.ipv4_address ? wan.ipv4_address : '尚未取得');
+    text('wan-runtime-ipv6', wan?.ipv6_ready === true ? '已就緒' : wan?.mode === 'pppoe' ? '尚未就緒' : '請查看 IPv6 頁面');
     const dynamic = data.ipv6_dynamic;
     const leases = Array.isArray(dynamic?.delegated) ? dynamic.delegated : [];
     const labels = { waiting: '等待上游提供 IPv6', bound: '已取得動態 IPv6', degraded: '連線資訊不完整' };
@@ -167,6 +175,13 @@
       throw new Error('設定資料不完整，無法安全編輯。請重新讀取。');
     }
     state.config = structuredClone(config);
+    if (state.config.wan.pppoe) state.config.wan.pppoe.password = '';
+    state.wanPasswordSet = data.wan_password_set === true;
+    $('wan-mode').value = config.wan.mode || 'dhcp';
+    $('pppoe-username').value = config.wan.pppoe?.username || '';
+    $('pppoe-password').value = '';
+    $('pppoe-mtu').value = config.wan.pppoe?.mtu ?? 1492;
+    syncWanFields();
     state.config.vlans ??= [];
     state.config.wireguard ??= [];
     state.config.firewall.rules ??= [];
@@ -198,6 +213,15 @@
     $('save-config').disabled = false;
     setPending(Boolean(data.pending_reboot));
     renderAdvanced();
+  }
+  function syncWanFields() {
+    const pppoe = $('wan-mode').value === 'pppoe';
+    $('pppoe-fields').hidden = !pppoe;
+    $('pppoe-fields').disabled = !pppoe;
+    const preserved = state.wanPasswordSet && $('pppoe-username').value === state.config?.wan.pppoe?.username;
+    $('pppoe-password').required = pppoe && !preserved;
+    text('pppoe-password-help', preserved ? '已儲存撥號密碼。留空保留原密碼；輸入新密碼即可更新。' : '請輸入網路業者提供的撥號密碼；變更帳號時需要重新輸入。');
+    if (!pppoe) $('pppoe-password').value = '';
   }
   async function loadConfig() {
     const data = await request('/config');
@@ -395,7 +419,7 @@
     $('editor-fields').append(wrapper);
     return input;
   }
-  const interfaceChoices = () => ['', $('wan-interface').value.trim(), $('lan-interface').value.trim(), ...state.config.vlans.map((v) => v.interface), ...state.config.wireguard.map((w) => w.interface)].map((name) => [name, name || '任何介面']);
+  const interfaceChoices = () => ['', ...($('wan-mode').value === 'pppoe' ? ['ppp0'] : []), $('wan-interface').value.trim(), $('lan-interface').value.trim(), ...state.config.vlans.map((v) => v.interface), ...state.config.wireguard.map((w) => w.interface)].map((name) => [name, name || '任何介面']);
   function optionalField(name) { return $('edit-' + name).value.trim() || null; }
   function numberField(name) { const value = Number($('edit-' + name).value); if (!Number.isSafeInteger(value)) throw new Error('數值欄位必須填入整數。'); return value; }
   function openEditor(kind, index = -1, peerIndex = -1) {
@@ -562,13 +586,15 @@
     catch (error) { message(state.authenticated ? 'global-error' : 'auth-error', errorText(error)); }
     finally { button.disabled = false; }
   });
-  ['refresh-button', 'ipv6-refresh'].forEach((id) => $(id).addEventListener('click', async () => {
+  ['refresh-button', 'ipv6-refresh', 'wan-refresh'].forEach((id) => $(id).addEventListener('click', async () => {
     const button = $(id); button.disabled = true; clearMessages();
     try { await loadStatus(); }
     catch (error) { message(state.authenticated ? 'global-error' : 'auth-error', errorText(error)); }
     finally { button.disabled = false; }
   }));
   $('network-form').addEventListener('input', markDirty);
+  $('wan-mode').addEventListener('change', () => { syncWanFields(); markDirty(); });
+  $('pppoe-username').addEventListener('input', syncWanFields);
   $('reload-config').addEventListener('click', async () => {
     if (state.busy) return;
     if (state.dirty && !window.confirm('重新讀取會捨棄尚未儲存的修改，確定繼續嗎？')) return;
@@ -586,6 +612,8 @@
     const config = structuredClone(state.config);
     config.hostname = $('hostname').value.trim();
     config.wan.interface = $('wan-interface').value.trim();
+    config.wan.mode = $('wan-mode').value;
+    config.wan.pppoe = config.wan.mode === 'pppoe' ? { username: $('pppoe-username').value, password: $('pppoe-password').value, mtu: Number($('pppoe-mtu').value) } : null;
     config.lan.interface = $('lan-interface').value.trim();
     config.lan.address = $('lan-address').value.trim();
     config.dhcp.start = $('dhcp-start').value.trim();
@@ -606,7 +634,10 @@
     try {
       const result = await request('/config', { method: 'POST', body: { config, revision: state.revision } });
       if (!state.authenticated) return;
-      state.config = config; state.dirty = false; setRevision(result.revision); setPending(Boolean(result.pending_reboot));
+      state.wanPasswordSet = config.wan.mode === 'pppoe';
+      if (config.wan.pppoe) config.wan.pppoe.password = '';
+      $('pppoe-password').value = '';
+      state.config = config; syncWanFields(); state.dirty = false; setRevision(result.revision); setPending(Boolean(result.pending_reboot));
       renderAdvanced(); draftMessage('全部變更已儲存到裝置');
       message('global-message', '設定已儲存。重新啟動後生效；目前的連線設定尚未變更。');
       await loadPublicKeys();
@@ -614,6 +645,9 @@
       const detail = error.status === 409 ? errorText(error) + ' 請按「重新讀取」，確認最新設定後再編輯。' : errorText(error);
       message(state.authenticated ? 'global-error' : 'auth-error', detail);
     } finally {
+      $('pppoe-password').value = '';
+      if (config.wan.pppoe) config.wan.pppoe.password = '';
+      syncWanFields();
       state.busy = false; $('network-fields').disabled = !state.authenticated; $('save-config').disabled = !state.authenticated;
       $('reload-config').disabled = false; $('network-form').setAttribute('aria-busy', 'false'); text('save-config', '儲存設定');
       advancedBusy();

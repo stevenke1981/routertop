@@ -727,12 +727,37 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
                 json!({"public_keys":keys.map_err(|_| (500,"WireGuard 金鑰無效"))?}),
             )
         }
-        ("GET", "/config") => response(
-            200,
-            json!({"config":crate::parse_config(&data.config).map_err(|_|(500,"設定資料無效"))?,"revision":data.revision,"pending_reboot":pending(paths,&data.config)}),
-        ),
+        ("GET", "/config") => {
+            let mut config =
+                crate::parse_config(&data.config).map_err(|_| (500, "設定資料無效"))?;
+            let password_set = config
+                .wan
+                .pppoe
+                .as_ref()
+                .is_some_and(|p| !p.password.is_empty());
+            if let Some(ppp) = &mut config.wan.pppoe {
+                ppp.password.clear();
+            }
+            response(
+                200,
+                json!({"config":config,"wan_password_set":password_set,"revision":data.revision,"pending_reboot":pending(paths,&data.config)}),
+            )
+        }
         ("POST", "/config") => {
-            let change: SaveConfig = parse(request)?;
+            let mut change: SaveConfig = parse(request)?;
+            let previous = crate::parse_config(&data.config).map_err(|_| (500, "設定資料無效"))?;
+            if change.config.wan.mode == crate::WanProtocol::Dhcp {
+                change.config.wan.pppoe = None;
+            } else if let Some(ppp) = &mut change.config.wan.pppoe {
+                if ppp.password.is_empty() {
+                    if let Some(old) = previous.wan.pppoe.as_ref().filter(|old| {
+                        previous.wan.mode == crate::WanProtocol::Pppoe
+                            && old.username == ppp.username
+                    }) {
+                        ppp.password.clone_from(&old.password);
+                    }
+                }
+            }
             if let Err(error) = crate::validate(&change.config) {
                 return Ok(response(400, json!({"error":error})));
             }
@@ -775,7 +800,7 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
                 .map_err(|_| (500, "無法讀取系統主機名稱"))?;
             response(
                 200,
-                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true,"ipv6_dynamic":crate::pd::read_status()}),
+                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true,"ipv6_dynamic":crate::pd::read_status(),"wan":crate::pppoe::read_status(&crate::parse_config(&data.config).map_err(|_|(500,"設定資料無效"))?)}),
             )
         }
         ("POST", "/logout") => {

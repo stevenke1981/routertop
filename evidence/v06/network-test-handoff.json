@@ -1,0 +1,111 @@
+{
+  "task_id": "routertop-v06-network-tests",
+  "actor_instance": "/root/pppoe_test",
+  "receiver_instance": "/root",
+  "base_sha": "3991768b388257cef792a5cb1d8fdbaf609d6957",
+  "head_sha": null,
+  "kind": "handoff",
+  "simulation": false,
+  "result": "PASS",
+  "write_scopes": [
+    "scripts/network-v06-smoke.py",
+    "scripts/fixtures/pppoe-isp.py",
+    "scripts/fixtures/dhcpv6-server.py"
+  ],
+  "artifacts": {
+    "scripts/network-v06-smoke.py": "7c6cd101559372cf4d69fa82433d72c48f12a1acc34a4bd99449112b38ad2372",
+    "scripts/fixtures/pppoe-isp.py": "c0edd79c9e758d3f99069fda8edd9b086e36b26dd8bf4cc92754ef6930ead369",
+    "scripts/fixtures/dhcpv6-server.py": "cb7892d7626e8836df4b429fd491deacf229277e46d561ac2fb1b44524c84102"
+  },
+  "runtime_artifact_sha256": "9b088b194e417c1c8bcda0607321932e7f5a9f7d270a3eaa2e5b8cf9c11103b2",
+  "checks": [
+    {
+      "name": "Linux initial full Rust suite",
+      "command": "cargo test --locked",
+      "cwd": "/build/routertop",
+      "environment": "Disposable Alpine v3.24 x86_64 QEMU TCG; Linux 6.18.58-0-virt",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_tests": 82,
+      "scope": "r1 before root permission fixes and MSS kernel-clamp fix",
+      "log": "/build/v06-unit.log"
+    },
+    {
+      "name": "Private active config permissions",
+      "command": "umask 077; CARGO_HOME=/build/cargo cargo test --locked active_credentials_are_private_on_create_and_replace",
+      "cwd": "/build/routertop",
+      "environment": "same Alpine builder",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_tests": 1,
+      "scope": "r2 root permission fix",
+      "log": "/build/v06-focused-active.log"
+    },
+    {
+      "name": "Public status/private peer modes",
+      "command": "umask 077; CARGO_HOME=/build/cargo cargo test --locked runtime_public_status_and_private_credentials_have_explicit_modes",
+      "cwd": "/build/routertop",
+      "environment": "same Alpine builder",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_tests": 1,
+      "scope": "r2 root permission fix",
+      "log": "/build/v06-focused-status.log"
+    },
+    {
+      "name": "Final release network suite",
+      "command": "python3 scripts/network-v06-smoke.py target/release/routertop",
+      "cwd": "/build/routertop",
+      "environment": "same Alpine builder; real rp-pppoe4.0/pppd2.5.3 in owned namespaces",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_groups": 17,
+      "scope": "r4 final runtime byte hash above, harness791ce5fdd6c04d6be48d5c3d8caa9fc6a9f1452bc952d0984cd04548bb59668e before PD-only optional extension",
+      "report": "dist/v0.6/network-v06-release-report.json",
+      "log": "dist/v0.6/network-v06-results-r4.jsonl"
+    },
+    {
+      "name": "Python source syntax and diff whitespace",
+      "command": "python -m py_compile scripts/network-v06-smoke.py scripts/fixtures/pppoe-isp.py scripts/fixtures/dhcpv6-server.py; git diff --check",
+      "cwd": "E:\\routertop\\.worktrees\\pppoe-test",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "name": "NoAddrsAvail fixture protocol check",
+      "command": "Direct ia_value option parsing: default IA_NA address, assign_address:false IA_NA status2, IA_PD prefix retained",
+      "cwd": "E:\\routertop\\.worktrees\\pppoe-test",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "name": "Final release PD-only PPP/IPv6CP",
+      "command": "python3 scripts/network-v06-smoke.py target/release/routertop --pd-only",
+      "cwd": "/build/routertop",
+      "environment": "Root-owned actual Alpine builder run; same final R4 release binary",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_groups": 6,
+      "scope": "IA_NA NoAddrsAvail + IA_PD success; no WAN GUA; IPv6CP default; LAN/VLAN IPv6 HTTP; changed prefix/reconnect and persistent identity",
+      "report": "dist/v0.6/pd-only-r4-complete.json",
+      "log": "dist/v0.6/network-v06-pd-only-r4.jsonl"
+    }
+  ],
+  "resolved_findings": [
+    "Confirmed linux-virt CONFIG_PPPOE disabled from actual kernel config; userspace rp-pppoe + ppp_async chosen instead of larger kernel.",
+    "pppd rejects executable hook ancestors writable by group/other; test workspace moved from /tmp to private /var/lib without bypassing security check.",
+    "Actual hook execve showed sanitized PATH lacked /sbin and /usr/sbin; production hook PATH fix verified through real PPP events.",
+    "Actual ISP IPv4 VLAN SYN checksum differed by8 with userspace -m; removing only that option restored traffic, then final kernel MSS clamp passed strict wire checksums/MSS and 120KiB transfers."
+  ],
+  "non_final_diagnostics": "The pre-fix 15-case run with a privately edited peer omitting -m is diagnostic only, not final acceptance; R4 17-case unmodified production release supersedes it.",
+  "unresolved": [
+    "ISO/GUI/reboot/coldboot/CI/push owned by root; not claimed by test agent"
+  ],
+  "next_action": "Root observes its PD-only report and integrates final ISO/browser/exact remote evidence; serial19401 lease returned.",
+  "external_side_effects": {
+    "authorized": false,
+    "performed": false,
+    "scope": "No commits/push/deployment performed by test agent"
+  },
+  "result_scope": "PASS for final r4 17 packet groups and 6 PD-only groups"
+}

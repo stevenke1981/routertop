@@ -7,9 +7,12 @@ use serde_json::{json, Value};
 use std::{
     fs,
     path::PathBuf,
+    sync::atomic::{AtomicU64, Ordering},
     time::{SystemTime, UNIX_EPOCH},
 };
 use x25519_dalek::{PublicKey, StaticSecret};
+
+static LAB_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 const SAMPLE: &str = include_str!("../../../configs/routertop.toml");
 const PASSWORD: &str = "test-only strong administrator password";
@@ -22,12 +25,13 @@ struct Lab {
 impl Lab {
     fn new() -> Self {
         let root = std::env::temp_dir().join(format!(
-            "rt-network-web-{}-{}",
+            "rt-network-web-{}-{}-{}",
             std::process::id(),
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_nanos()
+                .as_nanos(),
+            LAB_SEQUENCE.fetch_add(1, Ordering::Relaxed)
         ));
         fs::create_dir_all(&root).unwrap();
         let paths = Paths {

@@ -1,10 +1,10 @@
 # RouterTop
 
-以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.5 加入 IPv6 自動 WAN 與 DHCPv6-PD，延續 WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
+以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.6 加入 PPPoE WAN、IPv6CP 與 PPP 連線上的 DHCPv6-PD，延續 WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
 
 ## 已實作範圍
 
-- IPv4 DHCP WAN、固定 LAN、DHCP 伺服器、DNS 轉送、NAT、狀態防火牆與 LAN gateway 靜態路由。
+- IPv4 DHCP／PPPoE WAN、固定 LAN、DHCP 伺服器、DNS 轉送、NAT、狀態防火牆與 LAN gateway 靜態路由。
 - 實體 WAN／LAN 上的 802.1Q VLAN、選配 DHCP 與對外 NAT，預設跨網段隔離。
 - 靜態或自動 IPv6 WAN、DHCPv6-PD `/48`–`/64` 申請、LAN／VLAN 獨立 `/64`、RA／SLAAC、IPv6 DNS 轉送及必要的 ND／PMTU 規則。
 - IPv4／IPv6 split-tunnel WireGuard，或一個明確啟用的全通道介面；全通道 IPv4 NAT、可選 NAT66 與防止直接 WAN 回退的規則。
@@ -17,15 +17,15 @@
 
 預設 WAN 為 `eth0`，LAN 為 `eth1`／`192.168.88.1/24`，DHCP 範圍為 `.100` 至 `.199`。HTTPS 預設僅綁定 LAN 位址的 443 埠；SSH 未安裝或啟用，`ssh_port` 只控制防火牆放行。
 
-實作項目不等於驗收通過。0.5 的實際產物、體積、測試及未執行項目記錄於 [0.5 驗收紀錄](docs/acceptance-v0.5.md)。[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
+實作項目不等於驗收通過。0.6 的實際產物、體積、測試及未執行項目記錄於 [0.6 驗收紀錄](docs/acceptance-v0.6.md)。[0.5](docs/acceptance-v0.5.md)、[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
 
 ## 首次啟動與登入
 
 1. 在 Linux 建立一個全新的資料磁碟檔：`sh scripts/make-data-disk.sh routertop-data.img`。需要 `mkfs.ext4`、`sfdisk` 等工具；輸出為 33 MiB 一般檔案，內含 32 MiB ext4 分割區及 `ROUTERTOP_DATA` 標籤。工具拒絕覆寫既有路徑。
-2. 將資料磁碟與 0.5 映像交給 Windows 啟動器：
+2. 將資料磁碟與 0.6 映像交給 Windows 啟動器：
 
    ```powershell
-   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.5 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.6 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
    ```
 
 3. 首次 console 顯示 `Setup choice [create/token]:`。選 `create` 並輸入、確認 12–128 位元組密碼，即可建立管理員；若想從 Web 註冊，選 `token`，在可信實體終端取得一次性註冊權杖。
@@ -68,7 +68,7 @@ cargo run -- export configs/routertop.toml
 
 `status` 讀取 Linux 網卡、路由與 nft table。`apply CONFIG --boot` 僅供 appliance 初次開機配置，已配置的系統拒絕再次套用。`storage-init`、`stored-config`、`wg-configs DATA OUTPUT` 與 `bootstrap-token` 是 Linux root console 管理指令。`wg-configs` 產生含私鑰的 0600 檔案，僅供開機服務使用。
 
-完整步驟見 [映像建置說明](image/README.md)。0.5 apk recipe 只打包 Rust CLI、預設設定與授權；Web 靜態資源、TLS 服務、儲存掛載及 console／開機整合由 OS 映像建置加入，不能把安裝 CLI apk 當成完整 OS 安裝。
+完整步驟見 [映像建置說明](image/README.md)。0.6 apk recipe 只打包 Rust CLI、預設設定與授權；Web 靜態資源、TLS 服務、儲存掛載及 console／開機整合由 OS 映像建置加入，不能把安裝 CLI apk 當成完整 OS 安裝。
 
 壓縮 kernel + root 的初始目標為 64 MiB；ISO、資料磁碟與 RAM 需求分開計量。實際值見驗收紀錄。ARM 只預留 profile，建置入口會拒絕尚未驗證的 ARM 映像。
 
@@ -81,3 +81,7 @@ cargo run -- export configs/routertop.toml
 RouterTop 自有程式採 MIT；Linux 與 Alpine 套件保留各自授權。此 repository 公開自有來源碼與建置流程；正式散布 OS 映像前仍需準備對應套件授權及來源交付。
 
 參考：[Alpine](https://alpinelinux.org/releases/)、[RouterOS 功能](https://manual.mikrotik.com/docs/getting-started/software-specifications/)、[nft 原子更新](https://wiki.nftables.org/wiki-nftables/index.php/Atomic_rule_replacement)、[dnsmasq](https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html)。
+
+## PPPoE WAN (0.6)
+
+Web 的 WAN 設定可選 DHCP 或 PPPoE，提供唯寫 ISP 密碼與 MTU。PPPoE 使用邏輯介面 `ppp0`，支援自動重撥、IPv6CP 及 DHCPv6-PD 的 LAN／VLAN 前綴分配；儲存後重新啟動套用，憑證私密保存。介面維持淺色設計，不引入前端框架。[設定契約](docs/network-v0.6-contract.md) 與 [驗收紀錄](docs/acceptance-v0.6.md) 列明實際結果與限制。

@@ -25,7 +25,8 @@ mkdir -p /data/routertop /run/routertop/web
 chmod 0700 /data/routertop /run/routertop/web
 routertop storage-init /data/routertop /etc/routertop/routertop.toml
 routertop stored-config /data/routertop > /etc/routertop/routertop.toml.new
-chmod 0644 /etc/routertop/routertop.toml.new
+chmod 0600 /etc/routertop/routertop.toml.new
+chown 1000:1000 /etc/routertop/routertop.toml.new
 mv /etc/routertop/routertop.toml.new /etc/routertop/routertop.toml
 chown -R 1000:1000 /data/routertop /run/routertop/web
 touch /run/routertop/persistent

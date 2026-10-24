@@ -1,8 +1,8 @@
-# RouterTop 0.5 development image
+# RouterTop 0.6 development image
 
 The x86_64 image uses an Alpine Linux RAM root plus an optional writable ext4 data volume. It is not an installer and never formats an attached disk at boot. A provisioned data volume enables persistent settings, administrator enrollment and LAN-only HTTPS management. Local serial/VGA consoles require the same persistent administrator password as Web. Missing or corrupt state never grants an unauthenticated shell.
 
-Actual 0.5 artifact sizes and test outcomes belong in [acceptance-v0.5.md](../docs/acceptance-v0.5.md). Keep [0.1 acceptance](../docs/acceptance.md) and its artifacts separate; old results do not certify the updated management image.
+Actual 0.6 artifact sizes and test outcomes belong in [acceptance-v0.6.md](../docs/acceptance-v0.6.md). Keep [0.1 acceptance](../docs/acceptance.md) and its artifacts separate; old results do not certify the updated management image.
 
 ## Build in a disposable Alpine x86_64 VM
 
@@ -45,8 +45,8 @@ Without a data volume, basic routing can boot but HTTPS management stays disable
 ## Boot on Windows and enroll
 
 ```powershell
-./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.5 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
-./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.5 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe' -Iso
+./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.6 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.6 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe' -Iso
 ```
 
 The launcher defaults to 512 MiB RAM, QEMU user-mode WAN and a restricted virtual LAN. It forwards only `127.0.0.1:19443` to the guest LAN `192.168.88.1:443`; `-ManagementPort` changes the host-side port. This is not a physical LAN bridge. `-DataDisk` attaches an existing raw image, and the label selects its partition. Omitting it runs without writable management persistence.
@@ -67,13 +67,13 @@ HTTPS binds the configured LAN IP only and is permitted by the LAN firewall rule
 
 ## Legacy read-only configuration input
 
-The 0.1 `routertop.configdev=/dev/vdb1` option remains an explicit secondary ext4 input mounted `ro,noload,nosuid,nodev,noexec`. Its `/routertop.toml` supplies initial settings, but it is not a writable management store. When a durable 0.5 bundle already exists, that bundle supplies saved configuration. Prefer the dedicated writable data disk for the 0.5 management flow.
+The 0.1 `routertop.configdev=/dev/vdb1` option remains an explicit secondary ext4 input mounted `ro,noload,nosuid,nodev,noexec`. Its `/routertop.toml` supplies initial settings, but it is not a writable management store. When a durable 0.6 bundle already exists, that bundle supplies saved configuration. Prefer the dedicated writable data disk for the 0.6 management flow.
 
 ## apk packaging and platform limits
 
-`sh packaging/make-source.sh` prepares `packaging/alpine/routertop-0.5.0.tar.gz` from the exact local source and Cargo lockfile. Run `abuild checksum` and `abuild -r` as an Alpine abuild user with signing configured. Crates are fetched during prepare; build/tests use `--frozen`.
+`sh packaging/make-source.sh` prepares `packaging/alpine/routertop-0.6.0.tar.gz` from the exact local source and Cargo lockfile. Run `abuild checksum` and `abuild -r` as an Alpine abuild user with signing configured. Crates are fetched during prepare; build/tests use `--frozen`.
 
-The **0.5 apk contains the CLI, default config and license only**. It does not install the full OS boot stack, Web files, lighttpd configuration or data-volume management. Trust the signing key before installing; never substitute `--allow-untrusted` for a signing workflow. Package build/signing needs its own evidence.
+The **0.6 apk contains the CLI, default config and license only**. It does not install the full OS boot stack, Web files, lighttpd configuration or data-volume management. Trust the signing key before installing; never substitute `--allow-untrusted` for a signing workflow. Package build/signing needs its own evidence.
 
 The `linux-virt` kernel targets QEMU/VMs. Physical NIC firmware, board drivers, installation/upgrades and secure boot remain separate work. `profiles/aarch64.env` and APKBUILD's aarch64 declaration reserve portability; the image builder rejects unimplemented ARM boot paths.
 
@@ -83,3 +83,5 @@ The `linux-virt` kernel targets QEMU/VMs. Physical NIC firmware, board drivers, 
 - [Official rootfs builder](https://github.com/alpinelinux/alpine-make-rootfs)
 - [Alpine image scripts](https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/scripts)
 - [APKBUILD reference](https://wiki.alpinelinux.org/wiki/APKBUILD_Reference)
+
+PPPoE uses `ppp-daemon` and `rp-pppoe`, with `ppp_generic`/`ppp_async` loaded at runtime. Credentials are configured through authenticated Web settings and persisted privately; the factory image contains no ISP credentials. Actual dialing/reconnect/reboot acceptance is recorded in [0.6 acceptance](../docs/acceptance-v0.6.md).

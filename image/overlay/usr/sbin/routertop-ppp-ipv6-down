@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+# pppd sanitizes PATH; lifecycle tools live in sbin on Alpine.
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin
+[ "$1" = ppp0 ] || exit 0
+runtime=${6:?missing PPP runtime}
+config=$(cat "$runtime/config-path")
+exec routertop pppoe-event "$config" "$runtime" ipv6-down "$1"

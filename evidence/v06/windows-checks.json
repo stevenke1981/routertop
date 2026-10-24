@@ -1,0 +1,39 @@
+{
+  "result": "PASS",
+  "platform": "Windows x86_64",
+  "observed_utc": "2026-10-24T07:47:23.119129+00:00",
+  "checks": [
+    {
+      "name": "cargo fmt --all -- --check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "cargo clippy --all-targets --locked -- -D warnings",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "cargo test --locked",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests": 84
+    },
+    {
+      "name": "node --check web/app.js",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "source_sha256": {
+    "crates/routertop/src/pppoe.rs": "1e08f1d3d51bb2040ccc147a52bef1b9037ca90ab894c1ffba011e8fd28d9d16",
+    "crates/routertop/src/lib.rs": "b36b9cdc6ca44e5c75d4c6e5a0d5c53c753f8a34c011e31bf4c0818bdb9fd68d",
+    "crates/routertop/src/main.rs": "dc99571af0e182fe8f37f3913622afce3a24e4df375d40c29631673dfe2368f8",
+    "crates/routertop/tests/pppoe.rs": "62219281ccef14da236969883163cd5cdcd3e77d13981baf42f3417f3da64fcf",
+    "crates/routertop/tests/web_network.rs": "30a5b632883c70bd8d196e454ed8873bfba514dec953e0e041d59b3b4ad1af3b",
+    "web/app.js": "29e6ec8f77da20c28b021ece8675bee7ea190a8596603beff832ff682d6a405b"
+  },
+  "linux_mode_assertions": "NOT_RUN on Windows; executed separately on Linux",
+  "candidate": "r4",
+  "resolved_test_fixture_issue": "Parallel temporary-directory names collided on Windows clock ticks; per-process atomic sequence makes each test directory unique."
+}

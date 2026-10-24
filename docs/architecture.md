@@ -1,4 +1,4 @@
-# 架構決策：RouterTop 0.5
+# 架構決策：RouterTop 0.6
 
 ## 基礎系統與資料平面
 
@@ -76,4 +76,8 @@ DHCPv6 identity 位於 root-only `/data/routertop-dhcpcd/duid`，以持久資料
 
 Cargo.lock 固定 Rust dependency resolution；apk 驗證 Alpine 簽章。產物附套件版本、repository、binary hash、kernel/root bytes 與 artifact hashes。精確重建仍需保存 APK snapshot 及工具鏈。
 
-開發依 agent-team workflow 分工與獨立 worktree，Odin 作為程式導航及分析輔助；實際編譯、服務、VM、瀏覽器、console 與封包證據分開記錄。0.5 的實測與體積記錄於 [驗收紀錄](acceptance-v0.5.md)，目前不得推定尚未完成的項目通過；[0.3](acceptance-v0.3.md)、[0.2](acceptance-v0.2.md) 與 [0.1](acceptance.md) 紀錄保留。
+開發依 agent-team workflow 分工與獨立 worktree，Odin 作為程式導航及分析輔助；實際編譯、服務、VM、瀏覽器、console 與封包證據分開記錄。0.6 的實測與體積記錄於 [驗收紀錄](acceptance-v0.6.md)，目前不得推定尚未完成的項目通過；[0.3](acceptance-v0.3.md)、[0.2](acceptance-v0.2.md) 與 [0.1](acceptance.md) 紀錄保留。
+
+## PPPoE lifecycle (0.6)
+
+The validated WAN model distinguishes physical underlay from logical `ppp0`. ppp-daemon and rp-pppoe carry PPPoE over generic/async PPP; the lean linux-virt kernel has no native PPPoE module. Private peer options and hooks provide persistent redial, IPv6CP-triggered DHCPv6, and immediate withdrawal on disconnect. Shared PD monitoring and DNS supervision start once, even while dialing. Web GET excludes the stored ISP password; revision-controlled saves preserve a blank credential only for the same account. See [the 0.6 contract](network-v0.6-contract.md).

@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "exit_code": 0,
+  "candidate": "r4",
+  "binary_sha256": "9b088b194e417c1c8bcda0607321932e7f5a9f7d270a3eaa2e5b8cf9c11103b2",
+  "harness_sha256": "791ce5fdd6c04d6be48d5c3d8caa9fc6a9f1452bc952d0984cd04548bb59668e",
+  "fixture_sha256": "c0edd79c9e758d3f99069fda8edd9b086e36b26dd8bf4cc92754ef6930ead369",
+  "packet_summary": {
+    "status": "PASS",
+    "passed_cases": 17
+  }
+}

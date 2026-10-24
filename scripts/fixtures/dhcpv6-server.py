@@ -48,6 +48,8 @@ def control(path):
     state["address"] = ipaddress.IPv6Address(state.get("address", "2001:db8:1::2"))
     state["upstream_prefix"] = ipaddress.IPv6Network(state.get("upstream_prefix", "2001:db8:1::/64"))
     state["dns_server"] = ipaddress.IPv6Address(state.get("dns_server", "2001:db8:1::1"))
+    if not isinstance(state.get("assign_address", True), bool):
+        raise ValueError("invalid address assignment switch")
     for key, default in (("t1", 8), ("t2", 16), ("preferred_lifetime", 24),
                          ("valid_lifetime", 32), ("ra_lifetime", 30)):
         value = state.get(key, default)
@@ -68,6 +70,11 @@ def ia_value(code, value, state):
         raise ValueError("short IA")
     answer = value[:4] + struct.pack("!II", state["t1"], state["t2"])
     if code == 3:
+        if not state.get("assign_address", True):
+            # RFC 8415 IA_NA-scoped NoAddrsAvail; the sibling IA_PD still
+            # succeeds. Common PPP ISPs assign only a delegated prefix.
+            return option(code, value[:4] + struct.pack("!II", 0, 0)
+                          + option(13, struct.pack("!H", 2)))
         answer += option(5, state["address"].packed + struct.pack("!II", state["preferred_lifetime"], state["valid_lifetime"]))
         for subcode, subvalue in options(value[12:]):
             if subcode == 5 and len(subvalue) >= 24 and subvalue[:16] != state["address"].packed:
@@ -176,6 +183,8 @@ class Fixture:
         else:
             for code, value in parsed:
                 if code in (3, 25):
+                    if code == 3 and not state.get("assign_address", True):
+                        self.counts["ia_na_noaddrsavail"] += 1
                     reply += ia_value(code, value, state)
             reply += option(23, state["dns_server"].packed)
         self.udp.sendto(reply, (sender[0], 546, 0, self.index))

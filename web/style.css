@@ -197,3 +197,6 @@ dialog::backdrop { background: #16161f55; }
 #ipv6-runtime dd { white-space: pre-line; }
 #ipv6-runtime-error { margin-top: 16px; margin-bottom: 0; }
 #panel-ipv6 .card-header > .button { flex-shrink: 0; }
+
+#panel-network .card-header > .button { flex-shrink: 0; }
+#wan-runtime dd { overflow-wrap: anywhere; }

@@ -562,3 +562,68 @@ fn real_runtime_rename_failure_cannot_keep_old_password_sessions_alive() {
         200
     );
 }
+
+#[test]
+fn pppoe_password_is_write_only_preserved_and_removed_atomically() {
+    let fixture = Fixture::new();
+    let auth = fixture.setup();
+    let mut config =
+        body(&fixture.call(&authenticated(request("GET", "/config"), &auth)))["config"].clone();
+    config["wan"]["mode"] = json!("pppoe");
+    config["wan"]["pppoe"] =
+        json!({"username":"fixture-user","password":"fixture-dial-password","mtu":1492});
+    let saved = fixture.call(&authenticated(
+        post("/config", json!({"revision":1,"config":config})),
+        &auth,
+    ));
+    assert_eq!(saved.status, 200, "{}", saved.body);
+    let get = fixture.call(&authenticated(request("GET", "/config"), &auth));
+    assert!(!get.body.contains("fixture-dial-password"));
+    let public = body(&get);
+    assert_eq!(public["wan_password_set"], true);
+    assert_eq!(public["config"]["wan"]["pppoe"]["password"], "");
+    let mut preserved = public["config"].clone();
+    preserved["hostname"] = json!("renamed-router");
+    let saved = fixture.call(&authenticated(
+        post("/config", json!({"revision":2,"config":preserved})),
+        &auth,
+    ));
+    assert_eq!(saved.status, 200, "{}", saved.body);
+    assert!(stored_config(&fixture.paths.data)
+        .unwrap()
+        .contains("fixture-dial-password"));
+    let before = fs::read(fixture.paths.data.join("state.json")).unwrap();
+    let mut changed = public["config"].clone();
+    changed["wan"]["pppoe"]["username"] = json!("different-account");
+    assert_eq!(
+        fixture
+            .call(&authenticated(
+                post("/config", json!({"revision":3,"config":changed})),
+                &auth
+            ))
+            .status,
+        400
+    );
+    assert_eq!(
+        before,
+        fs::read(fixture.paths.data.join("state.json")).unwrap()
+    );
+    let mut disabled = public["config"].clone();
+    disabled["wan"]["mode"] = json!("dhcp");
+    assert_eq!(
+        fixture
+            .call(&authenticated(
+                post("/config", json!({"revision":3,"config":disabled})),
+                &auth
+            ))
+            .status,
+        200
+    );
+    assert!(!stored_config(&fixture.paths.data)
+        .unwrap()
+        .contains("fixture-dial-password"));
+    assert_eq!(
+        body(&fixture.call(&authenticated(request("GET", "/config"), &auth)))["wan_password_set"],
+        false
+    );
+}

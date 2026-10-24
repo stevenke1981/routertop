@@ -193,7 +193,7 @@ pub(crate) fn validate(config: &Config) -> Result<(), String> {
                 let wan=host(value,1,128)?;
                 let gateway=u128::from(address(gateway)?);
                 if gateway==wan.ip||(!link_local(gateway)&&(!global_or_ula(gateway)||!wan.contains(gateway))) {return Err("IPv6 WAN gateway must be on-link global/ULA or link-local and not the router".into());}
-                local.push((&config.wan.interface,wan,false));
+                local.push((config.wan.device(),wan,false));
             }
             (None,None) if full.is_some_and(full_v6)||v6.wan_mode==WanMode::Auto=>{}
             _=>return Err("IPv6 WAN address/gateway must be a pair; omission requires a dual-stack full tunnel".into()),
@@ -313,8 +313,8 @@ pub(crate) fn render(config: &Config) -> Result<Extra, String> {
     let full = full_tunnel(config);
     let ipv6_enabled = enabled(config);
     let v6_egress_allowed = full.is_none_or(full_v6);
-    let wan = &config.wan.interface;
-    let destination = full.map_or(wan.as_str(), |wg| wg.interface.as_str());
+    let wan = config.wan.device();
+    let destination = full.map_or(wan, |wg| wg.interface.as_str());
     if ipv6_enabled {
         out.established = "        meta nfproto ipv6 ct state established,related accept\n".into();
         out.input.push_str("        meta nfproto ipv6 meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept\n        meta nfproto ipv6 ip6 hoplimit 255 meta l4proto ipv6-icmp icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } accept\n");

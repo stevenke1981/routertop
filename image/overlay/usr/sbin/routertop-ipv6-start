@@ -8,7 +8,9 @@ runtime=/run/routertop/pd
 routertop ipv6-init "$config" "$runtime" /data/routertop-dhcpcd/duid
 mkdir -p /var/lib/dhcpcd /run/dhcpcd
 # Managed kernel lifetimes and the nft timeout sets remain finite on failures.
-dhcpcd -6 -b -f "$runtime/dhcpcd.conf"
+if [ "$(routertop wan-mode "$config")" = dhcp ]; then
+    dhcpcd -6 -b -f "$runtime/dhcpcd.conf"
+fi
 routertop ipv6-monitor "$config" "$runtime" >>/var/log/routertop-ipv6.log 2>&1 &
 echo "$!" > "$runtime/monitor.pid"
 /usr/sbin/routertop-dns-supervisor >>/var/log/routertop-dns.log 2>&1 &

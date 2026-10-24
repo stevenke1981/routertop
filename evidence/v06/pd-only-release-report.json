@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "exit_code": 0,
+  "candidate": "r4",
+  "binary_sha256": "9b088b194e417c1c8bcda0607321932e7f5a9f7d270a3eaa2e5b8cf9c11103b2",
+  "harness_sha256": "7c6cd101559372cf4d69fa82433d72c48f12a1acc34a4bd99449112b38ad2372",
+  "dhcp_fixture_sha256": "7f72083ea72975e689456908b0a3f82c6dcbd5074a638116a7f3b715f24e74e2",
+  "packet_summary": {
+    "status": "PASS",
+    "passed_cases": 6
+  },
+  "scope": "IA_PD only; IA_NA NoAddrsAvail, no WAN GUA, actual IPv6CP default, LAN/VLAN routed IPv6, prefix change after real PPP reconnect, stable DUID"
+}
