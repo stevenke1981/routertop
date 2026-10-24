@@ -1,0 +1,171 @@
+{
+  "product": "RouterTop",
+  "version": "0.4.0",
+  "candidate": "r2",
+  "source_base": "7af518d6f2138b0a0dd27c64066dbd7e3f954306",
+  "verification": "PASS",
+  "artifacts": {
+    "vmlinuz": {
+      "bytes": 12641280,
+      "sha256": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85"
+    },
+    "initramfs.gz": {
+      "bytes": 40333148,
+      "sha256": "bfc244bed474bddf37764714edbef42b50c63bc14e5cf420a39cc76de251caa9"
+    },
+    "packages.txt": {
+      "bytes": 1225,
+      "sha256": "b5e16d9c2c89a343ea81500f7aff8b34cb8a5305fd0625c90376aa1f0a4cb218"
+    },
+    "repositories.txt": {
+      "bytes": 103,
+      "sha256": "7b8b3e6fe030eeb4ee7619b42c9419aa846bff1c632442d3f00ed9fb97c6fa36"
+    },
+    "build-manifest.json": {
+      "bytes": 480,
+      "sha256": "2524525a21603a96c9e4c9a58fe79ebf67042b93b82ad1019fc61aab2d6827a4"
+    },
+    "routertop-x86_64.iso": {
+      "bytes": 66095104,
+      "sha256": "b8b1c544fcca8150fc77c167feb35d6b79a3bd46d2d1216c64b4515fb7231744"
+    },
+    "routertop-linux-x86_64": {
+      "bytes": 1110656,
+      "sha256": "74a21e682feea6021a251f637e488cb2edacb96d83d119f055018e0c2e54c3ce"
+    },
+    "routertop-data-blank.img": {
+      "bytes": 34603008,
+      "sha256": "51372078bd39dba7b5b7c2f4a3179d53205e2af9a78be4980ede920654a6b8f5"
+    }
+  },
+  "build_manifest": {
+    "product": "RouterTop",
+    "architecture": "x86_64",
+    "alpine_branch": "v3.24",
+    "rust_target": "x86_64-alpine-linux-musl",
+    "kernel_bytes": 12641280,
+    "initramfs_bytes": 40333148,
+    "compressed_boot_bytes": 52974428,
+    "routertop_sha256": "74a21e682feea6021a251f637e488cb2edacb96d83d119f055018e0c2e54c3ce",
+    "source_date_epoch": 1792713600,
+    "package_lock": "packages.txt",
+    "boot_test": "NOT_RUN",
+    "signed": false,
+    "configuration_persistence": "ext4-data-volume-required",
+    "management": "LAN-HTTPS",
+    "version": "0.4.0"
+  },
+  "compiled_source_files": [
+    {
+      "path": "Cargo.toml",
+      "sha256_lf": "2117e9a866c09cfe267dc2d4d2dfb79e0ac3494ce1edf2537648bbf32d778e30"
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256_lf": "861142df571021d0754e592ffb45f67c091ee98bddd48e8b253539065d5ba0be"
+    },
+    {
+      "path": "crates/routertop/Cargo.toml",
+      "sha256_lf": "1316be2c641ae24cbcb82c11754ea40adac5cbb463555be6176ee9d1789f2ca3"
+    },
+    {
+      "path": "crates/routertop/src/console.rs",
+      "sha256_lf": "6791db9f3591a8b22d3606bf8b00b855ce278dcfc8f786cb3f95911ea3f72866"
+    },
+    {
+      "path": "crates/routertop/src/ipv6.rs",
+      "sha256_lf": "eb4548a1a9b02d5a09576816b9cf0e5877498fa368c1e18ccee7effa405d9cf4"
+    },
+    {
+      "path": "crates/routertop/src/lib.rs",
+      "sha256_lf": "cd131638c5198e5957508bf0596a5c72dd0a128774a74a7f19047a53d39b7f93"
+    },
+    {
+      "path": "crates/routertop/src/main.rs",
+      "sha256_lf": "7185728d64ed96a4139d2a15a33c43f2fed93db0bf5944af65fc586ee30ea7cb"
+    },
+    {
+      "path": "crates/routertop/src/network.rs",
+      "sha256_lf": "56e931dad92b1dd2729cf83f06ec3ce031422bc1b6a73ceec87830725b56082f"
+    },
+    {
+      "path": "crates/routertop/src/web.rs",
+      "sha256_lf": "52fdd8a5ddf0532f689c6d3cc459bcfd2ac011e81abf39ca7ca70272fbef5a1a"
+    },
+    {
+      "path": "configs/routertop.toml",
+      "sha256_lf": "702298cfe9f1c551b579d0214df49afe924d1377f07d06d8a6f8880cae38aa63"
+    },
+    {
+      "path": "image/overlay/etc/inittab",
+      "sha256_lf": "15ec397bc9ef7d1bdd7a08f319c1893a444b8140bebb1189ce72bb67d6611eac"
+    },
+    {
+      "path": "image/overlay/etc/routertop-release",
+      "sha256_lf": "c6aefe40f08a709d62c20125563fb04f4599c946ed9bcc39d1754ee25005383f"
+    },
+    {
+      "path": "image/overlay/init",
+      "sha256_lf": "23a883d1b13022b479d4502d95dc5503ec9e80625c1c661d76586b87aa2262aa"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-boot",
+      "sha256_lf": "fed777f75885c28111d1e8f10904f27d0087c3c2e323a468b6b894f0c2bd32c7"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-console",
+      "sha256_lf": "2be22802536840a2872fb765f26116ea4df4ad50a8471b1a1cc38836d4d890ed"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-management",
+      "sha256_lf": "de9151078bc1b19034a918226257c1de5b203d0be8d919cbff15b8ac84a2c8ac"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-storage",
+      "sha256_lf": "3913602c7e2c551dff0060488d8962ffbf31d4d78a8f827841dd808a14f1ec39"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-wan-check",
+      "sha256_lf": "0aeb5cccf2fe684151fdd8c18011b1eb0b65b40b74e2d02aa57f9a10258db816"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-web-supervisor",
+      "sha256_lf": "a19903ed54f1daf3dadbaad7f83417bb3bf26fe07e5470541cb9901d1223e00e"
+    },
+    {
+      "path": "image/packages.txt",
+      "sha256_lf": "53c71b7c3aeeb196264e03ced2413a682e0cb29c23b06f9e25eb92d2dc793a5c"
+    },
+    {
+      "path": "image/profiles/aarch64.env",
+      "sha256_lf": "9d262645b05e154d71f1eefd1b5674a99a8fc51f2de94243f3b175949f0a4e31"
+    },
+    {
+      "path": "image/profiles/x86_64.env",
+      "sha256_lf": "4673ea46bb03c9a9365902b858567cb29dee94c680a498efbc807d2c9ca599fa"
+    },
+    {
+      "path": "image/grub.cfg",
+      "sha256_lf": "5108c1f2cf6a9f748cfa97728c92ccc2a3fa626081b3de755ea5a1ecf17acff2"
+    },
+    {
+      "path": "scripts/build-image.sh",
+      "sha256_lf": "af955e0f6d94b9b2cb93ccf2ca99e0423ae293d3412f2f600d3b363778bafcd1"
+    },
+    {
+      "path": "web/app.js",
+      "sha256_lf": "b6c30c6b97597b747c1e37dcfd68defd7a0d03efa6024f27ee67134bb87c615c"
+    },
+    {
+      "path": "web/index.html",
+      "sha256_lf": "ebd31c07c1368f021ed4c75325e4aef31411bcfb8c4f8eeb453dc6e62b9f0929"
+    },
+    {
+      "path": "web/style.css",
+      "sha256_lf": "35fcd600ff45b44ba9b809ed80dcd4445e1557a128f4bb4727e1aadb7f42234f"
+    }
+  ],
+  "web_bytes": 85610,
+  "package_count": 60,
+  "iso_delta_from_0_3_bytes": 32768
+}

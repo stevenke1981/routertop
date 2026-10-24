@@ -224,7 +224,12 @@ fn strict_content_length_content_type_and_password_boundaries() {
     req.content_type = Some("text/plain".into());
     assert_eq!(fixture.call(&req).status, 400);
     let token = bootstrap_token(&fixture.paths.data).unwrap();
-    for password in ["a".repeat(11), "a".repeat(129)] {
+    for password in [
+        "a".repeat(11),
+        "a".repeat(129),
+        "abcdefghijkl\t".into(),
+        "abcdefghijkl\u{7f}".into(),
+    ] {
         assert_eq!(
             fixture
                 .call(&post("/setup", json!({"token":token,"password":password})))

@@ -1,0 +1,10 @@
+#!/bin/sh
+# BusyBox init respawns this gate, never a bare shell. Keep terminal restoration
+# outside Rust too so a terminated login process cannot leave password echo off.
+trap 'stty sane 2>/dev/null || :; exit 0' INT TERM HUP
+while :; do
+    stty sane 2>/dev/null || :
+    /usr/sbin/routertop console /data/routertop /run/routertop/console
+    stty sane 2>/dev/null || :
+    sleep 2
+done

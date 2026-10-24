@@ -1,6 +1,6 @@
 ::sysinit:/usr/sbin/routertop-boot
 ::respawn:/usr/sbin/routertop-web-supervisor
-ttyS0::askfirst:-/bin/sh
-tty1::askfirst:-/bin/sh
+ttyS0::respawn:/usr/sbin/routertop-console
+tty1::respawn:/usr/sbin/routertop-console
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/bin/umount -a -r

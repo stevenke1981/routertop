@@ -1,27 +1,29 @@
-# RouterOS 功能目標與 RouterTop 0.3 範圍
+# RouterOS 功能目標與 RouterTop 0.4 範圍
 
-這份表區分程式實作與後續工程；安裝某個 Linux 套件不等於完成同名 RouterOS 功能。**0.3 是開發映像，沒有完整 RouterOS 功能相當性或正式生產部署宣稱。**
+這份表區分程式實作與後續工程；安裝某個 Linux 套件不等於完成同名 RouterOS 功能。**0.4 是開發映像，沒有完整 RouterOS 功能相當性或正式生產部署宣稱。**本表不替代各層的 0.4 驗收證據。
 
-| 範圍 | 0.3 已實作內容 | 尚未完成／後續驗收範圍 |
+| 範圍 | 0.4 已實作內容 | 尚未完成／後續驗收範圍 |
 |---|---|---|
 | x86_64 系統 | Alpine、linux-virt、自訂 initramfs、BIOS/UEFI ISO 建置 | 實體機驅動、最低 RAM、硬體相容與安裝器 |
 | IPv4 地址／路由 | DHCP WAN、固定 LAN、LAN gateway 靜態路由 | WAN 固定地址、PPPoE、多 WAN、策略路由、故障切換 |
-| NAT／防火牆 | 狀態防火牆、LAN／選配 VLAN、VPN masquerade；input／forward 規則 CRUD、排序與啟停 | DNAT、連接埠範圍、連線檢視、即時交易與 rollback |
+| NAT／防火牆 | IPv4／IPv6 狀態防火牆、family 明確的 input／forward CRUD、排序與啟停；IPv4 masquerade、全通道選配 NAT66 | DNAT、連接埠範圍、連線檢視、任意政策路由、即時交易與 rollback |
 | DHCP／DNS | LAN DHCP 與 DNS 轉送 | 靜態租約、relay、DNSSEC／DoH 選配 |
-| IPv6 | forwarding 明確關閉 | DHCPv6-PD、RA、完整 IPv6 firewall |
-| Web／API | 繁體中文靜態 UI、LAN HTTPS、狀態及設定 API | 多管理員／角色、遠端管理策略、API 外部整合 |
+| IPv6 | 靜態 WAN／gateway、LAN／VLAN `/64`、RA／SLAAC、IPv6 DNS、ND／PMTU 與 IPv6 規則 | DHCPv6-PD、ISP 前綴自動配置、stateful DHCPv6；不把靜態方案宣稱為完整 IPv6 產品相容 |
+| Web／API | macOS 系統設定風格的淺色繁中 UI、分組設定、IPv4 LAN HTTPS、IPv6／全通道控制 | 多管理員／角色、遠端管理策略；完整螢幕閱讀器等可及性驗收另列 |
 | 管理員認證 | 一次性 console token、admin、Argon2id、session、CSRF、Origin、全域節流 | MFA、集中認證、審計及帳號復原產品流程 |
 | 設定持久化 | 可寫 ext4 資料卷、原子 bundle、revision、儲存後重啟套用 | 完整備份還原 UI、斷電故障注入、儲存遷移與冗餘 |
 | TLS | 每資料卷產生並保存自簽憑證；LAN IP 綁定 | 公開 CA、憑證匯入／輪替介面、變更 LAN IP 後憑證管理 |
-| Console／CLI | 本機 CLI、TOML、真實 status；physical console 保持免密碼 root | 正式 console 驗證與開機信任鏈 |
-| apk／系統更新 | apk 保留；0.3 CLI-only APKBUILD；完整 OS 由 image builder 組裝 | 簽章發行通道、A/B 升級、系統 rollback；安裝 CLI apk 不會安裝整個管理 OS |
-| Bridge／VLAN | 實體 WAN／LAN 上 802.1Q 子介面、IPv4、選配 DHCP／NAT、預設隔離及 Web CRUD | Linux bridge 管理、RSTP、access port／PVID、硬體 offload |
-| VPN | 核心 WireGuard、IPv4 split tunnel、peer／endpoint／keepalive／MTU、私鑰持久化與公鑰 UI | 全通道策略路由、IPv6、DNS endpoint、鑰匙輪替 UI、IPsec／OpenVPN |
+| Console／CLI | 序列／螢幕必要登入、共用 Web admin 密碼、首次 create／token、登出及跨 TTY 節流；無資料不開放 shell | Secure Boot、磁碟加密、離線復原產品流程；已登入 shell 不隨 Web 改密碼終止 |
+| apk／系統更新 | apk 保留；0.4 CLI-only APKBUILD；完整 OS 由 image builder 組裝 | 簽章發行通道、A/B 升級、系統 rollback；安裝 CLI apk 不會安裝整個管理 OS |
+| Bridge／VLAN | 實體 WAN／LAN 上 802.1Q、IPv4、選配 DHCP／NAT、IPv6 `/64`／SLAAC、預設隔離及 Web CRUD | Linux bridge 管理、RSTP、access port／PVID、硬體 offload |
+| VPN | 核心 WG、IPv4／IPv6 分流、單一全通道介面、fwmark／獨立路由表、WAN 防洩漏 gate、可選 NAT66、私鑰持久化 | IPv6／DNS 外層 endpoint、雙全通道或故障切換、鑰匙輪替 UI、IPsec／OpenVPN |
 | BGP／OSPF | 未實作 | FRR 模組、設定生命週期及封包驗收 |
 | QoS | 未實作 | tc、CAKE／fq_codel、限速及負載測試 |
 | 無線 AP | 未實作 | hostapd、板型驅動／韌體；不宣稱 CAPsMAN 相容 |
 | ARM | aarch64 profile／套件架構預留；OS 建置仍拒絕 | QEMU virt 開機、交叉編譯、指定 SoC 與板型驗收 |
 
-沒有資料卷時，HTTPS 管理與可寫設定持久化不啟用；基本路由仍可使用映像內設定。整體壓縮體積目標為 kernel + root ≤64 MiB，實測需分開列出 ISO、資料卷及 RAM。
+沒有資料卷時，HTTPS 管理與可寫設定持久化不啟用，console 也不提供免驗證 shell；基本路由仍可使用映像內設定。全通道必須有 IPv4 default，IPv6 default 可選；未提供後者時阻擋 IPv6 轉送。外層 WG endpoint 暫限 IPv4，沒有 NAT66 時需配置遠端 IPv6 回程路由。管理 HTTPS 仍在 IPv4 LAN。
 
-實際 PASS／FAIL／NOT_RUN、產物 hash 與版本體積比較見 [0.3 驗收紀錄](acceptance-v0.3.md)；[0.2 驗收紀錄](acceptance-v0.2.md) 保留舊版結果。瀏覽器、VM 重啟、持久化、負向 HTTP、封包、ARM、實體硬體、CI 與發布證據不能相互替代。
+整體壓縮體積目標仍為 kernel + root ≤64 MiB；0.4 實測為 50.52 MiB，ISO 63.03 MiB，ISO、資料卷及 RAM 分開計量。x86_64 是本次建置／測試目標，aarch64 仍只預留，不宣稱 ARM 或實體 RouterBOARD 可用。
+
+實際 PASS／FAIL／NOT_RUN、產物 hash 與版本體積比較記錄於 [0.4 驗收紀錄](acceptance-v0.4.md)；[0.3](acceptance-v0.3.md)、[0.2](acceptance-v0.2.md)、[0.1](acceptance.md) 保留舊版結果。瀏覽器、console、VM 重啟、持久化、負向 HTTP、封包、ARM、實體硬體、CI 與發布證據不能相互替代。

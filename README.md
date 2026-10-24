@@ -1,50 +1,58 @@
 # RouterTop
 
-以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.3 加入 VLAN、WireGuard 與有序防火牆規則管理，沿用持久設定與 LAN HTTPS 管理；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
+以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.4 加入 IPv6、WireGuard 全通道、必要的本機 console 登入，並改用受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
 
 ## 已實作範圍
 
 - IPv4 DHCP WAN、固定 LAN、DHCP 伺服器、DNS 轉送、NAT、狀態防火牆與 LAN gateway 靜態路由。
 - 實體 WAN／LAN 上的 802.1Q VLAN、選配 DHCP 與對外 NAT，預設跨網段隔離。
-- IPv4 split-tunnel WireGuard、對等端與公開金鑰管理；私鑰由系統產生並與設定一起原子保存。
-- input／forward 規則新增、編輯、刪除、排序及啟停，可比對介面、網段、協定與目的埠。
-- Rust 嚴格設定驗證、CLI、設定產生器及 CGI 管理 API；繁體中文 Web UI 不依賴外部 CDN 或前端框架。
+- 靜態 IPv6 WAN、LAN／VLAN `/64`、RA／SLAAC、IPv6 DNS 轉送及必要的 ND／PMTU 規則；此版不含 DHCPv6-PD。
+- IPv4／IPv6 split-tunnel WireGuard，或一個明確啟用的全通道介面；全通道 IPv4 NAT、可選 NAT66 與防止直接 WAN 回退的規則。
+- IPv4／IPv6 input／forward 規則新增、編輯、刪除、排序及啟停，可比對介面、網段、協定與目的埠。
+- Rust 嚴格設定驗證、CLI、設定產生器及 CGI 管理 API；繁體中文 Web UI 使用淺灰側欄、白色分組面板與藍色重點，不依賴外部 CDN 或前端框架。
 - 可寫 ext4 資料卷保存設定、管理員密碼雜湊與 TLS 憑證；session 留在 RAM，重新開機後重新登入。
 - 管理頁面提供首次註冊、登入、系統狀態、設定儲存、修改密碼、登出與重新啟動。設定儲存後於下次開機套用。
+- 本機序列／螢幕 console 與 Web 共用 `admin` 密碼；登入成功才提供 root shell，沒有免驗證開關。
 - Alpine 簽章套件組成 kernel、initramfs 與 BIOS/UEFI ISO；保留 apk、套件清單與建置 manifest。
 
 預設 WAN 為 `eth0`，LAN 為 `eth1`／`192.168.88.1/24`，DHCP 範圍為 `.100` 至 `.199`。HTTPS 預設僅綁定 LAN 位址的 443 埠；SSH 未安裝或啟用，`ssh_port` 只控制防火牆放行。
 
-實作項目不等於驗收通過。0.3 的實際產物、體積、測試及未執行項目以 [0.3 驗收紀錄](docs/acceptance-v0.3.md) 為準；[0.2 驗收紀錄](docs/acceptance-v0.2.md) 保留舊版本證據。
+實作項目不等於驗收通過。0.4 的實際產物、體積、測試及未執行項目記錄於 [0.4 驗收紀錄](docs/acceptance-v0.4.md)。本機實測：65／66 項 Windows／Linux 測試、17 項 IPv6／全通道封包、console、Chrome、BIOS／UEFI 256 MiB 通過；ISO 63.03 MiB，kernel + root 50.52 MiB。[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 紀錄保留為各版本證據。
 
 ## 首次啟動與登入
 
 1. 在 Linux 建立一個全新的資料磁碟檔：`sh scripts/make-data-disk.sh routertop-data.img`。需要 `mkfs.ext4`、`sfdisk` 等工具；輸出為 33 MiB 一般檔案，內含 32 MiB ext4 分割區及 `ROUTERTOP_DATA` 標籤。工具拒絕覆寫既有路徑。
-2. 將資料磁碟與 0.3 映像交給 Windows 啟動器：
+2. 將資料磁碟與 0.4 映像交給 Windows 啟動器：
 
    ```powershell
-   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.3 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.4 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
    ```
 
-3. 在 VM 本機 console 執行 `routertop bootstrap-token`，取得一次性註冊權杖。
+3. 首次 console 顯示 `Setup choice [create/token]:`。選 `create` 並輸入、確認 12–128 位元組密碼，即可建立管理員；若想從 Web 註冊，選 `token`，在可信實體終端取得一次性註冊權杖。
 4. 開啟 `https://127.0.0.1:19443`。這是啟動器轉送至客體 LAN 的 localhost 連線；直接 LAN 用戶端使用 `https://192.168.88.1`。
-5. 檢查本機產生的自簽憑證，輸入權杖與 12–128 位元組密碼，建立唯一管理員 `admin`。成功後權杖失效，後續使用密碼登入。
+5. 檢查本機產生的自簽憑證。若已使用 `create`，以 `admin` 與同一密碼登入；若選擇 `token`，在 Web 輸入權杖與新密碼完成註冊。兩種方式建立的是同一個帳號，註冊成功後權杖失效。
 
-自簽憑證會觸發瀏覽器信任警告；localhost 轉送也不符合憑證的 LAN IP 名稱。可在可信 console 執行 `openssl x509 -in /data/tls/server.pem -noout -sha256 -fingerprint` 核對指紋。它提供加密，並非公開 CA 簽發身分。
+自簽憑證會觸發瀏覽器信任警告；localhost 轉送也不符合憑證的 LAN IP 名稱。可在可信 console 以已建立的管理員密碼登入，再執行 `openssl x509 -in /data/tls/server.pem -noout -sha256 -fingerprint` 核對指紋。它提供加密，並非公開 CA 簽發身分。
 
-本機序列／螢幕 console **仍是免密碼 root**，Web 管理員密碼不會改變此設定。此版的實體 console 信任邊界沒有改成正式產品的登入機制。
+序列與螢幕 console 都會要求管理員密碼，成功後才進入 root shell，輸入 `exit` 返回登入。密碼輸入不回顯；Web 修改密碼會影響下一次 console 登入，但不會終止已登入的 shell。資料卷缺失、管理員資料損壞或驗證失敗時，不會退回無保護 shell；必要時使用可信離線維護環境與備份復原。這不代表已提供 Secure Boot、磁碟加密或防止實體離線改寫。
 
 ## 設定與持久化
 
 系統 root 仍從 RAM 執行。開機只掛載明確指定的 `routertop.datadev=/dev/vda1`，或唯一具有 `ROUTERTOP_DATA` 標籤的 ext4 分割區；不會在開機時格式化磁碟。啟動器預設透過標籤尋找附加資料檔。
 
-沒有資料卷時仍可啟動基本路由，但不啟用 HTTPS 管理，也沒有可寫設定持久化。已有資料損壞或遺失時不會自動清空管理員重新註冊，應使用本機 console 復原。
+沒有資料卷時仍可啟動基本路由，但不啟用 HTTPS 管理、可寫設定持久化或無驗證 console shell。已有資料損壞或遺失時不會自動清空管理員重新註冊。
 
 Web 儲存會寫入資料卷並顯示是否待重啟；不會立即改動運作中的網路。確認重新啟動後才載入新設定。若修改 LAN 位址或 HTTPS 埠，下次需使用新網址；Windows 啟動器內建轉送仍指向預設 `192.168.88.1:443`，需要相應調整測試連線。資料卷不會讓 RAM root 裡手動執行的所有 `apk add` 或檔案修改自動持久化。
 
-VLAN 與 VPN 的網際網路存取需要明確啟用；跨 VLAN、VPN 到 LAN／VLAN 的連線需要 forward 放行規則。系統保留 LAN 管理、DHCP／DNS、VPN UDP listener 及 established／related 規則，既有連線不會因新增 drop 規則立即中斷。自訂規則依畫面順序匹配。WireGuard 目前限 IPv4 分流路由，endpoint 使用 IPv4 位址與埠，不支援 `0.0.0.0/0`。啟用 VPN 時須先取得 WAN IPv4 租約；開機與 DHCP 更新會檢查網段衝突，衝突時停止轉送，需修正後重開。
+VLAN 與 split-tunnel VPN 的網際網路存取需要明確啟用；跨 VLAN、VPN 到 LAN／VLAN 的連線需要 forward 放行規則。一般自訂規則在 established／related 之後依畫面順序匹配；input 系統保留 LAN 管理、DHCP／DNS、VPN listener 與必要 IPv6 控制訊息。全通道的直接 WAN 阻擋則放在 established／related 之前，不讓既有直接連線繞過。啟用 VPN 時須先取得 WAN IPv4 租約；開機與 DHCP 更新檢查網段衝突，衝突時停止轉送。
 
-WireGuard 私鑰不會出現在 Web、公開設定或一般 export；備份完整資料卷才會保存 VPN 身分。刪除介面會移除其私鑰，改名或重新建立介面會產生新身分。0.2 資料卷載入時補上新增欄位的空值，保留原有帳號及 revision；損壞或缺少既有 VPN 私鑰時拒絕啟動管理，不會默默換鑰。
+IPv6 啟用後，WAN 使用靜態位址與 gateway，gateway 可為綁定 WAN 介面的 link-local 位址；LAN／VLAN 使用不重疊的 `/64`，由 dnsmasq 提供 RA／SLAAC。此版沒有 DHCPv6-PD 或自動向 ISP 申請前綴，需先備妥可用的 IPv6 網段與上游路由。雙協定全通道可省略 WAN IPv6 位址及 gateway，透過 IPv4 外層 WireGuard 承載 IPv6。管理 HTTPS 仍限 LAN IPv4。
+
+全通道最多一個介面，使用單一 peer、必填 `0.0.0.0/0`，可加 `::/0`；endpoint 暫限 IPv4 位址與埠。與原有 `internet`（讓遠端 peer 對外）模式互斥。IPv4 LAN 流量經 VPN NAT；IPv6 可選 NAT66，不選時 VPN 端必須具備回到 LAN／VLAN 前綴的路由。其他分流 WG 可共存。隧道失效時應維持 WAN 阻擋，DNS 也須使用可經隧道到達的伺服器；實際防洩漏證據見 0.4 驗收紀錄。只設定 IPv4 全通道時，IPv6 轉送會停用於防火牆，LAN 的 ND／RA 仍保留但不宣告可用的 IPv6 預設出口。
+
+WireGuard 私鑰不會出現在 Web、公開設定或一般 export；備份完整資料卷才會保存 VPN 身分。刪除介面會移除其私鑰，改名或重新建立介面會產生新身分。舊資料卷載入時正規化新增欄位的預設值，保留原有帳號及 revision；損壞或缺少既有 VPN 私鑰時拒絕啟動管理，不會默默換鑰。
+
+0.4 的 Web 與 console 建立／修改密碼共用驗證，排除 ASCII 控制字元。若 0.3 帳號曾使用包含控制字元的密碼，升級後仍可從 Web 登入，但須先在 Web 改為可輸入的密碼才能使用 console；既有雜湊無法判斷原密碼內容。一般密碼不受影響。
 
 ## 開發與建置
 
@@ -58,11 +66,13 @@ cargo run -- export configs/routertop.toml
 
 `status` 讀取 Linux 網卡、路由與 nft table。`apply CONFIG --boot` 僅供 appliance 初次開機配置，已配置的系統拒絕再次套用。`storage-init`、`stored-config`、`wg-configs DATA OUTPUT` 與 `bootstrap-token` 是 Linux root console 管理指令。`wg-configs` 產生含私鑰的 0600 檔案，僅供開機服務使用。
 
-完整步驟見 [映像建置說明](image/README.md)。0.3 apk recipe 只打包 Rust CLI、預設設定與授權；Web 靜態資源、TLS 服務、儲存掛載及開機整合由 OS 映像建置加入，不能把安裝 CLI apk 當成完整 OS 安裝。
+完整步驟見 [映像建置說明](image/README.md)。0.4 apk recipe 只打包 Rust CLI、預設設定與授權；Web 靜態資源、TLS 服務、儲存掛載及 console／開機整合由 OS 映像建置加入，不能把安裝 CLI apk 當成完整 OS 安裝。
 
 壓縮 kernel + root 的初始目標為 64 MiB；ISO、資料磁碟與 RAM 需求分開計量。實際值見驗收紀錄。ARM 只預留 profile，建置入口會拒絕尚未驗證的 ARM 映像。
 
 後續範圍見 [功能對照表](docs/feature-matrix.md) 與 [架構](docs/architecture.md)。本機測試、VM、瀏覽器、封包、實體硬體、ARM、CI 與發布各自提供證據，不互相替代。
+
+介面設計見 [0.4 設計記錄](docs/design-v0.4.md)：使用系統字型、分組設定、鍵盤焦點與響應式布局，保留 RouterTop 品牌，沒有使用 Apple 素材，也不宣稱 Apple 官方產品或完整符合 macOS 原生規範。
 
 ## 上游與授權
 

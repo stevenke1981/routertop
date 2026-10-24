@@ -4,6 +4,7 @@ set -eu
 [ -f /run/routertop/applied ] || exit 0
 if ! routertop network-check /etc/routertop/routertop.toml; then
     sysctl -w net.ipv4.ip_forward=0
+    sysctl -w net.ipv6.conf.all.forwarding=0
     touch /run/routertop/network-conflict
     echo 'ROUTERTOP_WAN_CONFLICT: forwarding disabled; fix saved subnets and reboot.' >/dev/console
 fi

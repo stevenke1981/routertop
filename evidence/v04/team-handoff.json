@@ -1,0 +1,38 @@
+{
+  "base_commit": "7af518d6f2138b0a0dd27c64066dbd7e3f954306",
+  "owners": {
+    "network": "/root/core",
+    "console_and_packet_acceptance": "/root/network_test",
+    "web_design": "/root/image",
+    "independent_review": "/root/review",
+    "integration_vm_publication": "/root"
+  },
+  "handoff": "PASS",
+  "artifact_binary_sha256": "74a21e682feea6021a251f637e488cb2edacb96d83d119f055018e0c2e54c3ce",
+  "iso_sha256": "b8b1c544fcca8150fc77c167feb35d6b79a3bd46d2d1216c64b4515fb7231744",
+  "evidence": [
+    "artifact-verification.json",
+    "console-report.json",
+    "console-pty-results.jsonl",
+    "network-v03-results.jsonl",
+    "network-v04-results.jsonl",
+    "browser/browser-v04-report.json"
+  ],
+  "windows_tests": 65,
+  "alpine_tests": 66,
+  "post_fix_network_tests": 31,
+  "real_network_v04_cases": 17,
+  "console_cases": 6,
+  "browser_and_cold_boot_groups": 12,
+  "browser_visual_audits": 18,
+  "not_run": [
+    "ARM boot",
+    "physical hardware",
+    "throughput/load",
+    "power-loss injection",
+    "screen reader",
+    "signed apk distribution",
+    "production deployment"
+  ],
+  "hosted_ci": "Check the published commit Actions result separately."
+}

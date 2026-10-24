@@ -143,6 +143,20 @@ fn atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
     let temp = parent.join(format!(".write-{}", token()?));
     let result = (|| {
         let mut file = private_file(&temp, true)?;
+        // The root console and the unprivileged CGI share durable credentials.
+        // A root-created replacement must not make the next CGI write fail.
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let owner = fs::metadata(path)
+                .or_else(|_| fs::metadata(parent))
+                .map_err(io_error)?;
+            let current = file.metadata().map_err(io_error)?;
+            if current.uid() != owner.uid() || current.gid() != owner.gid() {
+                std::os::unix::fs::chown(&temp, Some(owner.uid()), Some(owner.gid()))
+                    .map_err(io_error)?;
+            }
+        }
         file.write_all(bytes).map_err(io_error)?;
         file.sync_all().map_err(io_error)?;
         drop(file);
@@ -363,7 +377,7 @@ fn cookie(response: &mut Response, token: &str) {
     ));
 }
 fn password_ok(password: &str) -> bool {
-    (12..=128).contains(&password.len())
+    (12..=128).contains(&password.len()) && !password.bytes().any(|byte| byte.is_ascii_control())
 }
 fn password_hash(password: &str) -> Result<String, String> {
     let mut bytes = [0u8; 16];
@@ -385,6 +399,86 @@ fn verify(password: &str, hash: &str) -> bool {
                 .is_ok()
         })
         .unwrap_or(false)
+}
+
+/// Physical-console enrollment shares the exact durable Web administrator.
+/// The caller must already have physical console access; no HTTP route exposes
+/// this enrollment method. Existing accounts can never be reset through it.
+pub fn console_setup_required(data: &Path) -> Result<bool, String> {
+    let _guard = lock(data)?;
+    Ok(durable(data)?.admin_hash.is_none())
+}
+
+pub fn console_setup(data: &Path, password: &str, confirmation: &str) -> Result<(), String> {
+    if !password_ok(password) || password != confirmation {
+        return Err(
+            "Passwords must match, contain 12 to 128 bytes, and exclude control characters.".into(),
+        );
+    }
+    let _guard = lock(data)?;
+    let mut state = durable(data)?;
+    if state.admin_hash.is_some() {
+        return Err("Administrator already enrolled; log in with the existing password.".into());
+    }
+    state.admin_hash = Some(password_hash(password)?);
+    state.enrollment_token = None;
+    state.auth_epoch = state
+        .auth_epoch
+        .checked_add(1)
+        .ok_or("Credential epoch exhausted")?;
+    save_json(&data.join("state.json"), &state)
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ConsoleAuth {
+    Accepted,
+    Rejected,
+    Throttled,
+}
+
+/// A separate root-owned runtime directory isolates console throttling from
+/// CGI sessions. Holding both locks serializes attempts across all local TTYs
+/// and checks the current persisted hash on every attempt.
+pub fn console_authenticate(
+    data: &Path,
+    runtime: &Path,
+    password: &str,
+    now: u64,
+) -> Result<ConsoleAuth, String> {
+    private_directory(runtime)?;
+    let _console_guard = lock(runtime)?;
+    let _data_guard = lock(data)?;
+    let state = durable(data)?;
+    let hash = state
+        .admin_hash
+        .as_deref()
+        .ok_or("Administrator setup is required")?;
+    let attempts = runtime.join("attempts.json");
+    let mut rate: Volatile = if attempts.exists() {
+        read_json(&attempts)?
+    } else {
+        Volatile::default()
+    };
+    if rate.failures > 5 || !rate.sessions.is_empty() {
+        return Err("Console throttle state is invalid".into());
+    }
+    if throttle(&mut rate, now).is_err() {
+        return Ok(ConsoleAuth::Throttled);
+    }
+    let accepted = verify(password, hash);
+    if accepted {
+        rate.failures = 0;
+        rate.window_start = now;
+    } else {
+        rate.failures += 1;
+    }
+    // A failed write never authorizes a shell, even for a correct password.
+    save_json(&attempts, &rate)?;
+    Ok(if accepted {
+        ConsoleAuth::Accepted
+    } else {
+        ConsoleAuth::Rejected
+    })
 }
 fn request_length(request: &Request) -> ApiResult<()> {
     let declared = match &request.content_length {
@@ -567,7 +661,7 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
             }
             let setup: Setup = parse(request)?;
             if !password_ok(&setup.password) {
-                return Err((400, "密碼長度必須是 12 到 128 位元組"));
+                return Err((400, "密碼長度必須是 12 到 128 位元組，且不可包含控制字元"));
             }
             let valid = data
                 .enrollment_token
@@ -681,7 +775,7 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
                 .map_err(|_| (500, "無法讀取系統主機名稱"))?;
             response(
                 200,
-                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION")}),
+                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true}),
             )
         }
         ("POST", "/logout") => {
@@ -693,7 +787,7 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
         ("POST", "/password") => {
             let change: ChangePassword = parse(request)?;
             if !password_ok(&change.new_password) {
-                return Err((400, "密碼長度必須是 12 到 128 位元組"));
+                return Err((400, "密碼長度必須是 12 到 128 位元組，且不可包含控制字元"));
             }
             throttle(&mut runtime, now)?;
             if !data

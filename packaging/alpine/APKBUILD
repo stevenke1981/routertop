@@ -1,7 +1,7 @@
 # Local source package. Run packaging/make-source.sh, then abuild checksum.
 # The generated checksum binds the exact source archive, including Cargo.lock.
 pkgname=routertop
-pkgver=0.3.0
+pkgver=0.4.0
 pkgrel=0
 pkgdesc="Compact Rust control plane for the RouterTop Linux router"
 url="https://github.com/stevenke1981/routertop"

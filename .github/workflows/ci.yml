@@ -22,6 +22,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y iproute2 nftables wireguard-tools dnsmasq-base busybox curl kmod
           sudo python3 scripts/network-v03-smoke.py ./target/debug/routertop
+          sudo python3 scripts/network-v04-smoke.py ./target/debug/routertop
+          sudo python3 scripts/console-pty-smoke.py ./target/debug/routertop
   alpine-image:
     runs-on: ubuntu-latest
     steps:

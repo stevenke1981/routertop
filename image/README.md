@@ -1,15 +1,15 @@
-# RouterTop 0.3 development image
+# RouterTop 0.4 development image
 
-The x86_64 image uses an Alpine Linux RAM root plus an optional writable ext4 data volume. It is not an installer and never formats an attached disk at boot. A provisioned data volume enables persistent settings, administrator enrollment and LAN-only HTTPS management. Local serial/VGA consoles remain passwordless root: this development image requires a physically trusted, isolated environment.
+The x86_64 image uses an Alpine Linux RAM root plus an optional writable ext4 data volume. It is not an installer and never formats an attached disk at boot. A provisioned data volume enables persistent settings, administrator enrollment and LAN-only HTTPS management. Local serial/VGA consoles require the same persistent administrator password as Web. Missing or corrupt state never grants an unauthenticated shell.
 
-Actual 0.3 artifact sizes and test outcomes belong in [acceptance-v0.3.md](../docs/acceptance-v0.3.md). Keep [0.1 acceptance](../docs/acceptance.md) and its artifacts separate; old results do not certify the updated management image.
+Actual 0.4 artifact sizes and test outcomes belong in [acceptance-v0.4.md](../docs/acceptance-v0.4.md). Keep [0.1 acceptance](../docs/acceptance.md) and its artifacts separate; old results do not certify the updated management image.
 
 ## Build in a disposable Alpine x86_64 VM
 
 ```sh
 apk add cargo cpio gzip findutils coreutils kmod grub grub-bios grub-efi xorriso mtools
 cargo build --locked --release
-OUT=/tmp/routertop-build-003 \
+OUT=/tmp/routertop-build-004 \
 ROUTERTOP_BINARY="$PWD/target/release/routertop" \
 ROUTERTOP_BINARY_TARGET="$(rustc -vV | sed -n 's/^host: //p')" \
 sh scripts/build-image.sh
@@ -44,34 +44,35 @@ Without a data volume, basic routing can boot but HTTPS management stays disable
 ## Boot on Windows and enroll
 
 ```powershell
-./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.3 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
-./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.3 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe' -Iso
+./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.4 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.4 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe' -Iso
 ```
 
 The launcher defaults to 512 MiB RAM, QEMU user-mode WAN and a restricted virtual LAN. It forwards only `127.0.0.1:19443` to the guest LAN `192.168.88.1:443`; `-ManagementPort` changes the host-side port. This is not a physical LAN bridge. `-DataDisk` attaches an existing raw image, and the label selects its partition. Omitting it runs without writable management persistence.
 
-At the trusted guest console:
+At first boot, the console offers `Setup choice [create/token]`. Choose `create` to create and confirm the administrator password locally, then log in. Inside the authenticated shell, inspect the persisted HTTPS certificate fingerprint:
 
 ```sh
-routertop bootstrap-token
 openssl x509 -in /data/tls/server.pem -noout -sha256 -fingerprint
 ```
 
-Open `https://127.0.0.1:19443`, check the certificate identity using the console fingerprint, and enroll `admin` with the one-time token and a 12–128-byte password. Direct LAN clients use `https://192.168.88.1`. A self-signed certificate is expected; localhost forwarding also differs from the certificate's LAN IP subject alternative name. TLS material persists with the disk. The enrollment token is unavailable after successful setup and is never returned by the public API.
+Open `https://127.0.0.1:19443`, verify the certificate identity, then log in as `admin` with the same password. Alternatively choose `token` at the initial console prompt to obtain the one-time Web enrollment token. Passwords contain 12–128 bytes and exclude ASCII control characters. Web asks for at least 12 characters. An old password containing control characters still works through Web; change it there before using console login.
 
-HTTPS binds the configured LAN IP only and is permitted by the LAN firewall rule. There is no HTTP listener or enabled SSH daemon. Saved settings apply on the next boot; the UI distinguishes saved/pending from active and asks before rebooting. Changing the LAN IP/HTTPS port requires a new URL and corresponding adjustments to the launcher's fixed guest forwarding destination. Logout, password change and reboot invalidate sessions. Web credentials do not secure the passwordless physical recovery consoles.
+Direct LAN clients use `https://192.168.88.1`. The self-signed certificate persists with the disk; localhost forwarding differs from its LAN IP subject alternative name. The enrollment token is unavailable after successful setup and is never returned by the public API. `exit` logs out of the console; every new shell requires authentication.
+
+HTTPS binds the configured LAN IP only and is permitted by the LAN firewall rule. There is no HTTP listener or enabled SSH daemon. Saved settings apply on the next boot; the UI distinguishes saved/pending from active and asks before rebooting. Changing the LAN IP/HTTPS port requires a new URL and corresponding adjustments to the launcher's fixed guest forwarding destination. Logout, password change and reboot invalidate sessions. Web password changes also change subsequent console logins; existing authenticated shells are not terminated. Without a valid data volume, consoles remain locked.
 
 `ROUTERTOP_READY` proves the boot path reached its ready marker, not end-to-end routing. The launcher itself does not place a DHCP client behind the router. Use a separate client VM or `scripts/netns-smoke.sh` for DHCP/DNS/NAT evidence. Runtime, browser, persistence and negative-access results must be recorded independently.
 
 ## Legacy read-only configuration input
 
-The 0.1 `routertop.configdev=/dev/vdb1` option remains an explicit secondary ext4 input mounted `ro,noload,nosuid,nodev,noexec`. Its `/routertop.toml` supplies initial settings, but it is not a writable management store. When a durable 0.3 bundle already exists, that bundle supplies saved configuration. Prefer the dedicated writable data disk for the 0.3 management flow.
+The 0.1 `routertop.configdev=/dev/vdb1` option remains an explicit secondary ext4 input mounted `ro,noload,nosuid,nodev,noexec`. Its `/routertop.toml` supplies initial settings, but it is not a writable management store. When a durable 0.4 bundle already exists, that bundle supplies saved configuration. Prefer the dedicated writable data disk for the 0.4 management flow.
 
 ## apk packaging and platform limits
 
-`sh packaging/make-source.sh` prepares `packaging/alpine/routertop-0.3.0.tar.gz` from the exact local source and Cargo lockfile. Run `abuild checksum` and `abuild -r` as an Alpine abuild user with signing configured. Crates are fetched during prepare; build/tests use `--frozen`.
+`sh packaging/make-source.sh` prepares `packaging/alpine/routertop-0.4.0.tar.gz` from the exact local source and Cargo lockfile. Run `abuild checksum` and `abuild -r` as an Alpine abuild user with signing configured. Crates are fetched during prepare; build/tests use `--frozen`.
 
-The **0.3 apk contains the CLI, default config and license only**. It does not install the full OS boot stack, Web files, lighttpd configuration or data-volume management. Trust the signing key before installing; never substitute `--allow-untrusted` for a signing workflow. Package build/signing needs its own evidence.
+The **0.4 apk contains the CLI, default config and license only**. It does not install the full OS boot stack, Web files, lighttpd configuration or data-volume management. Trust the signing key before installing; never substitute `--allow-untrusted` for a signing workflow. Package build/signing needs its own evidence.
 
 The `linux-virt` kernel targets QEMU/VMs. Physical NIC firmware, board drivers, installation/upgrades and secure boot remain separate work. `profiles/aarch64.env` and APKBUILD's aarch64 declaration reserve portability; the image builder rejects unimplemented ARM boot paths.
 

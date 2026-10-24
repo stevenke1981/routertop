@@ -2,10 +2,10 @@
 set -eu
 export PATH=/sbin:/usr/sbin:/bin:/usr/bin
 fail() {
-    echo "ROUTERTOP_BOOT_FAILED: $*; use the local recovery console."
+    echo "ROUTERTOP_BOOT_FAILED: $*; authenticated local console required."
     exit 1
 }
-trap 'sysctl -w net.ipv4.ip_forward=0 >/dev/null 2>&1 || true; echo "ROUTERTOP_BOOT_FAILED: forwarding disabled; local recovery available."' EXIT
+trap 'sysctl -w net.ipv4.ip_forward=0 >/dev/null 2>&1 || true; sysctl -w net.ipv6.conf.all.forwarding=0 >/dev/null 2>&1 || true; echo "ROUTERTOP_BOOT_FAILED: forwarding disabled; console authentication required."' EXIT
 mkdir -p /run/routertop /var/lib/misc /var/log
 # These drivers cover QEMU virtio and emulated Intel Ethernet. Hardware images
 # must add their drivers/firmware explicitly; missing optional drivers are OK.
@@ -14,7 +14,7 @@ modprobe virtio_net || true
 modprobe virtio_blk || true
 modprobe e1000 || true
 ip link set lo up
-echo "RouterTop development image: local consoles are passwordless root."
+echo "RouterTop: local consoles require the persistent administrator password."
 echo "System root runs in RAM; an explicitly provisioned data volume stores settings."
 # Optional explicit configuration partition, mounted read-only. Never discover
 # and mount arbitrary host disks; never format or write the supplied partition.

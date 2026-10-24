@@ -25,6 +25,12 @@ pub struct WireGuard {
     pub mtu: u16,
     pub internet: bool,
     pub peers: Vec<Peer>,
+    #[serde(default)]
+    pub address_v6: Option<String>,
+    #[serde(default)]
+    pub full_tunnel: bool,
+    #[serde(default)]
+    pub nat66: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -58,11 +64,22 @@ pub enum FirewallProtocol {
     Tcp,
     Udp,
     Icmp,
+    Icmpv6,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum FirewallFamily {
+    #[default]
+    Ipv4,
+    Ipv6,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct FirewallRule {
+    #[serde(default)]
+    pub family: FirewallFamily,
     pub id: String,
     pub enabled: bool,
     pub chain: FirewallChain,
@@ -128,7 +145,9 @@ pub fn validate_wan_subnets(config: &Config, addresses: &[String]) -> Result<(),
         configured.push(cidr(&wg.address, "WireGuard address")?);
         for peer in &wg.peers {
             for allowed in &peer.allowed_ips {
-                configured.push(cidr(allowed, "WireGuard allowed IP")?);
+                if !allowed.contains(':') && allowed != "0.0.0.0/0" {
+                    configured.push(cidr(allowed, "WireGuard allowed IP")?);
+                }
             }
         }
     }
@@ -297,7 +316,13 @@ pub(crate) fn validate_network(config: &Config) -> Result<(), String> {
                 endpoints.push(ip);
             }
             for allowed in &peer.allowed_ips {
-                let network = canonical_network(allowed, false)?;
+                if allowed.contains(':') {
+                    continue;
+                } // IPv6 validates its own address family.
+                let network = canonical_network(allowed, wg.full_tunnel)?;
+                if network.prefix == 0 {
+                    continue;
+                } // Full defaults use a separate policy table.
                 if !unicast(network.network()) || !unicast(network.broadcast()) {
                     return Err(
                         "WireGuard allowed IPs must contain only usable unicast IPv4 ranges".into(),
@@ -372,7 +397,21 @@ pub(crate) fn validate_network(config: &Config) -> Result<(), String> {
             return Err("input firewall rules cannot specify an output interface".into());
         }
         for network in [&rule.source, &rule.destination].into_iter().flatten() {
-            canonical_network(network, true)?;
+            match rule.family {
+                FirewallFamily::Ipv4 => {
+                    canonical_network(network, true)?;
+                }
+                FirewallFamily::Ipv6 => {
+                    crate::ipv6::network(network)?;
+                }
+            }
+        }
+        if matches!(
+            (rule.family, rule.protocol),
+            (FirewallFamily::Ipv4, FirewallProtocol::Icmpv6)
+                | (FirewallFamily::Ipv6, FirewallProtocol::Icmp)
+        ) {
+            return Err("firewall ICMP protocol must match its IP family".into());
         }
         if let Some(port) = rule.destination_port {
             if port == 0 || !matches!(rule.protocol, FirewallProtocol::Tcp | FirewallProtocol::Udp)
@@ -383,7 +422,7 @@ pub(crate) fn validate_network(config: &Config) -> Result<(), String> {
             }
         }
     }
-    Ok(())
+    crate::ipv6::validate(config)
 }
 
 pub(crate) fn render_rules(config: &Config, chain: FirewallChain) -> String {
@@ -394,7 +433,15 @@ pub(crate) fn render_rules(config: &Config, chain: FirewallChain) -> String {
         .iter()
         .filter(|rule| rule.enabled && rule.chain == chain)
     {
-        output.push_str("        meta nfproto ipv4");
+        let family = match rule.family {
+            FirewallFamily::Ipv4 => "ipv4",
+            FirewallFamily::Ipv6 => "ipv6",
+        };
+        let address_family = match rule.family {
+            FirewallFamily::Ipv4 => "ip",
+            FirewallFamily::Ipv6 => "ip6",
+        };
+        write!(output, "        meta nfproto {family}").expect("String write");
         if let Some(name) = &rule.in_interface {
             write!(output, " iifname \"{name}\"").expect("String write");
         }
@@ -402,19 +449,24 @@ pub(crate) fn render_rules(config: &Config, chain: FirewallChain) -> String {
             write!(output, " oifname \"{name}\"").expect("String write");
         }
         if let Some(source) = &rule.source {
-            write!(output, " ip saddr {source}").expect("String write");
+            write!(output, " {address_family} saddr {source}").expect("String write");
         }
         if let Some(destination) = &rule.destination {
-            write!(output, " ip daddr {destination}").expect("String write");
+            write!(output, " {address_family} daddr {destination}").expect("String write");
         }
         let protocol = match rule.protocol {
             FirewallProtocol::Any => None,
             FirewallProtocol::Tcp => Some("tcp"),
             FirewallProtocol::Udp => Some("udp"),
             FirewallProtocol::Icmp => Some("icmp"),
+            FirewallProtocol::Icmpv6 => Some("ipv6-icmp"),
         };
         if let Some(protocol) = protocol {
-            write!(output, " ip protocol {protocol}").expect("String write");
+            if rule.family == FirewallFamily::Ipv4 {
+                write!(output, " ip protocol {protocol}").expect("String write");
+            } else {
+                write!(output, " meta l4proto {protocol}").expect("String write");
+            }
             if let Some(port) = rule.destination_port {
                 write!(output, " {protocol} dport {port}").expect("String write");
             }
@@ -444,6 +496,8 @@ pub(crate) struct NetworkRendered {
 }
 
 pub(crate) fn render_network(config: &Config) -> Result<NetworkRendered, String> {
+    let full = crate::ipv6::full_tunnel(config);
+    let internet_interface = full.map_or(config.wan.interface.as_str(), |wg| wg.interface.as_str());
     let mut rendered = NetworkRendered {
         setup: "#!/bin/sh\n# Generated by RouterTop; boot-time setup only.\nset -eu\n".into(),
         input: String::new(),
@@ -497,11 +551,18 @@ pub(crate) fn render_network(config: &Config) -> Result<NetworkRendered, String>
             )
             .expect("String write");
             writeln!(rendered.dnsmasq,"dhcp-option=tag:rt-{name},option:router,{ip}\ndhcp-option=tag:rt-{name},option:dns-server,{ip}").expect("String write");
-        } else {
+        } else if !config
+            .ipv6
+            .as_ref()
+            .is_some_and(|v6| v6.vlans.iter().any(|vlan| vlan.interface == *name))
+        {
+            // dnsmasq 2.92 also suppresses constructor RA contexts with
+            // no-dhcpv4-interface. SLAAC-only VLANs instead omit the IPv4 pool
+            // and the DHCPv4 input allowance above.
             writeln!(rendered.dnsmasq, "no-dhcp-interface={name}").expect("String write");
         }
         if vlan.internet {
-            internet_rules(&mut rendered, name, &network, &config.wan.interface);
+            internet_rules(&mut rendered, name, &network, internet_interface);
         }
     }
     for wg in &config.wireguard {
@@ -514,11 +575,23 @@ pub(crate) fn render_network(config: &Config) -> Result<NetworkRendered, String>
         )
         .expect("String write");
         writeln!(rendered.setup, "ip link set dev '{name}' mtu {}", wg.mtu).expect("String write");
+        if let Some(address) = &wg.address_v6 {
+            writeln!(rendered.setup, "ip -6 address add '{address}' dev '{name}'")
+                .expect("String write");
+        }
         writeln!(
             rendered.setup,
             "wg setconf '{name}' '/run/routertop/wireguard/{name}.conf'"
         )
         .expect("String write");
+        if full.is_some() {
+            writeln!(
+                rendered.setup,
+                "wg set '{name}' fwmark {}",
+                crate::ipv6::FULL_TUNNEL_MARK
+            )
+            .expect("String write");
+        }
         writeln!(rendered.setup, "ip link set dev '{name}' up").expect("String write");
         writeln!(
             rendered.input,
@@ -528,10 +601,17 @@ pub(crate) fn render_network(config: &Config) -> Result<NetworkRendered, String>
         .expect("String write");
         for peer in &wg.peers {
             for network in &peer.allowed_ips {
-                writeln!(rendered.setup, "ip route replace '{network}' dev '{name}'")
-                    .expect("String write");
-                if wg.internet {
-                    internet_rules(&mut rendered, name, network, &config.wan.interface);
+                if network == "0.0.0.0/0" || network == "::/0" {
+                    continue;
+                }
+                let family = if network.contains(':') { " -6" } else { "" };
+                writeln!(
+                    rendered.setup,
+                    "ip{family} route replace '{network}' dev '{name}'"
+                )
+                .expect("String write");
+                if wg.internet && !network.contains(':') {
+                    internet_rules(&mut rendered, name, network, internet_interface);
                 }
             }
         }

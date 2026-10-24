@@ -182,7 +182,11 @@ fn wireguard_secret_is_atomic_persistent_private_and_never_in_public_config() {
     );
     lab.authenticate(reply);
     assert_eq!(lab.get("/wireguard/keys")["public_keys"]["wg0"], public);
-    assert_eq!(lab.get("/config")["config"], config);
+    assert_eq!(
+        lab.get("/config")["config"],
+        serde_json::to_value(serde_json::from_value::<routertop::Config>(config.clone()).unwrap())
+            .unwrap()
+    );
     config["hostname"] = json!("after-restart");
     assert_eq!(lab.save(config.clone(), 2).status, 200);
     assert_eq!(lab.get("/wireguard/keys")["public_keys"]["wg0"], public);

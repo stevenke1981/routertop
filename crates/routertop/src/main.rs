@@ -136,12 +136,16 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
     })();
     if result.is_err() {
         let _ = run("sysctl", &["-w", "net.ipv4.ip_forward=0"]);
+        let _ = run("sysctl", &["-w", "net.ipv6.conf.all.forwarding=0"]);
     }
     result
 }
 
 fn execute(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, data, runtime] if cmd == "console" => {
+            routertop::console::run(Path::new(data), Path::new(runtime))
+        }
         [cmd, file] if cmd == "network-check" => {
             let config = parse_config(&fs::read_to_string(file).map_err(|e| e.to_string())?)?;
             check_live_wan(&config)
@@ -186,7 +190,7 @@ fn execute(args: &[String]) -> Result<(), String> {
         }
         [] => Err("use routertop --help".into()),
         [cmd] if cmd == "--help" || cmd == "help" => {
-            println!("RouterTop {}\ncheck CONFIG\nrender CONFIG --output DIRECTORY\nexport CONFIG\napply CONFIG --boot\nstatus\nstorage-init DATA CONFIG\nstored-config DATA\nwg-configs DATA OUTPUT\nnetwork-check CONFIG\nbootstrap-token [DATA]\n\nWeb management stores validated configuration on the data volume; reboot to activate changes.", env!("CARGO_PKG_VERSION"));
+            println!("RouterTop {}\ncheck CONFIG\nrender CONFIG --output DIRECTORY\nexport CONFIG\napply CONFIG --boot\nstatus\nstorage-init DATA CONFIG\nstored-config DATA\nwg-configs DATA OUTPUT\nnetwork-check CONFIG\nconsole DATA RUNTIME\nbootstrap-token [DATA]\n\nWeb management stores validated configuration on the data volume; reboot to activate changes.", env!("CARGO_PKG_VERSION"));
             Ok(())
         }
         [cmd] if cmd == "--version" => {

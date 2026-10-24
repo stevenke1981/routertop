@@ -33,6 +33,9 @@ fn peer() -> Peer {
 }
 fn wg() -> WireGuard {
     WireGuard {
+        address_v6: None,
+        full_tunnel: false,
+        nat66: false,
         interface: "wg0".into(),
         address: "10.7.0.1/24".into(),
         listen_port: 51820,
@@ -43,6 +46,7 @@ fn wg() -> WireGuard {
 }
 fn rule(id: &str) -> FirewallRule {
     FirewallRule {
+        family: routertop::FirewallFamily::Ipv4,
         id: id.into(),
         enabled: true,
         chain: FirewallChain::Forward,

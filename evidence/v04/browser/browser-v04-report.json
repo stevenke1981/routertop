@@ -1,0 +1,1549 @@
+{
+  "result": "PASS",
+  "url": "https://127.0.0.1:19443",
+  "started_utc": "2026-10-24T04:49:34.495648+00:00",
+  "checks": [
+    {
+      "name": "new_console_token_gate_and_web_enrollment",
+      "result": "PASS"
+    },
+    {
+      "name": "keyboard_skip_link_and_visible_focus",
+      "result": "PASS"
+    },
+    {
+      "name": "native_dialog_keyboard_containment_escape_and_return",
+      "result": "PASS"
+    },
+    {
+      "name": "ipv6_static_wan_lan_vlan_and_dualstack_full_tunnel_save",
+      "result": "PASS"
+    },
+    {
+      "name": "invalid_ipv6_rejected_without_state_change_and_ipv6_firewall_saved",
+      "result": "PASS"
+    },
+    {
+      "name": "all_panels_light_contrast_targets_and_mobile_layout",
+      "result": "PASS"
+    },
+    {
+      "name": "reboot_preserves_ipv6_full_tunnel_firewall_public_key_certificate_and_admin",
+      "result": "PASS"
+    },
+    {
+      "name": "no_browser_runtime_errors_or_private_key_response_fields",
+      "result": "PASS"
+    },
+    {
+      "name": "authenticated_console_poweroff_before_uefi",
+      "result": "PASS"
+    },
+    {
+      "name": "uefi_cold_boot_preserves_admin_config_revision_public_key_and_certificate",
+      "result": "PASS"
+    },
+    {
+      "name": "uefi_firmware_interfaces_ipv6_policy_routes_console_binary_and_memory",
+      "result": "PASS"
+    },
+    {
+      "name": "uefi_final_authenticated_poweroff_and_https_down",
+      "result": "PASS"
+    }
+  ],
+  "screenshots": [
+    "setup-light.png",
+    "overview-light.png",
+    "wireguard-editor-light.png",
+    "ipv6-desktop-light.png",
+    "firewall-desktop-light.png",
+    "network-desktop-light.png",
+    "vlans-desktop-light.png",
+    "wireguard-desktop-light.png",
+    "security-desktop-light.png",
+    "overview-mobile-light.png",
+    "ipv6-mobile-light.png",
+    "wireguard-mobile-light.png",
+    "firewall-mobile-light.png",
+    "security-mobile-light.png",
+    "login-light.png",
+    "ipv6-after-reboot-light.png",
+    "ipv6-after-uefi-cold-boot-light.png"
+  ],
+  "visual_audits": [
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "setup-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "overview-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(247, 247, 249)",
+          "ratio": 15.73
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(247, 247, 249)",
+          "ratio": 5.131
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(247, 247, 249)",
+          "ratio": 5.851
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "wireguard-editor-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 85, 186)",
+          "ratio": 6.98
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "ipv6-desktop-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(159, 36, 45)",
+          "background": "rgb(255, 240, 240)",
+          "ratio": 6.864
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 87, 191)",
+          "ratio": 6.74
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "ipv6-validation-error"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 9.532
+        },
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 85, 186)",
+          "ratio": 6.98
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "firewall-desktop-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(85, 85, 91)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 6.509
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "network-desktop-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 9.532
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "vlans-desktop-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 9.532
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "wireguard-desktop-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "security-desktop-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "overview-mobile-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "ipv6-mobile-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 9.532
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "wireguard-mobile-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(80, 80, 85)",
+          "background": "rgb(240, 240, 243)",
+          "ratio": 7.048
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 9.532
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "firewall-mobile-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 244, 214)",
+          "ratio": 7.577
+        },
+        {
+          "foreground": "rgb(113, 68, 0)",
+          "background": "rgb(255, 250, 240)",
+          "ratio": 7.981
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "security-mobile-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "login-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "ipv6-after-reboot-light"
+    },
+    {
+      "color_scheme": "light",
+      "font_family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Microsoft JhengHei\", sans-serif",
+      "contrast_pairs": [
+        {
+          "foreground": "rgb(255, 255, 255)",
+          "background": "rgb(0, 100, 217)",
+          "ratio": 5.49
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 14.404
+        },
+        {
+          "foreground": "rgb(69, 69, 74)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 9.059
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.95
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(237, 237, 240)",
+          "ratio": 5.358
+        },
+        {
+          "foreground": "rgb(114, 114, 120)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 4.543
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 15.995
+        },
+        {
+          "foreground": "rgb(0, 100, 217)",
+          "background": "rgb(249, 249, 250)",
+          "ratio": 5.218
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 15.457
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(245, 245, 247)",
+          "ratio": 5.749
+        },
+        {
+          "foreground": "rgb(23, 77, 143)",
+          "background": "rgb(237, 244, 255)",
+          "ratio": 7.61
+        },
+        {
+          "foreground": "rgb(29, 29, 31)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 16.83
+        },
+        {
+          "foreground": "rgb(96, 96, 100)",
+          "background": "rgb(255, 255, 255)",
+          "ratio": 6.26
+        }
+      ],
+      "contrast_failures": [],
+      "target_failures": [],
+      "horizontal_overflow": false,
+      "name": "ipv6-after-uefi-cold-boot-light"
+    }
+  ],
+  "packet_handshake_tests": "NOT_RUN by UI harness",
+  "screen_reader_test": "NOT_RUN",
+  "uefi_observations": {
+    "firmware": "UEFI",
+    "interfaces": {
+      "eth1": {
+        "present": true,
+        "ipv6_addresses": [
+          "fd20:88::1/64",
+          "fe80::5054:ff:fe88:2/64"
+        ]
+      },
+      "vlan20": {
+        "present": true,
+        "ipv6_addresses": [
+          "fd20:20::1/64",
+          "fe80::5054:ff:fe88:2/64"
+        ]
+      },
+      "wg0": {
+        "present": true,
+        "ipv6_addresses": [
+          "fd44::1/64"
+        ]
+      }
+    },
+    "policy_table": 51820,
+    "default_routes": {
+      "ipv4": "wg0",
+      "ipv6": "wg0"
+    },
+    "console_binary_sha256": "2be22802536840a2872fb765f26116ea4df4ad50a8471b1a1cc38836d4d890ed",
+    "routertop_binary_sha256": "74a21e682feea6021a251f637e488cb2edacb96d83d119f055018e0c2e54c3ce",
+    "MemTotal_kib": 214612,
+    "MemAvailable_kib": 116332
+  },
+  "elapsed_seconds": 72.06,
+  "finished_utc": "2026-10-24T04:50:46.557303+00:00"
+}

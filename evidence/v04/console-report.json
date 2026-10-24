@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "first_console_enrollment_without_password_echo",
+      "result": "PASS"
+    },
+    {
+      "name": "ctrl_c_eof_and_command_as_password_do_not_grant_shell",
+      "result": "PASS"
+    },
+    {
+      "name": "authenticated_shell_logout_and_private_cgi_ownership",
+      "result": "PASS"
+    },
+    {
+      "name": "web_password_change_rejects_old_console_password_and_accepts_new",
+      "result": "PASS"
+    },
+    {
+      "name": "production_ttys_use_authentication_gate",
+      "result": "PASS"
+    },
+    {
+      "name": "reboot_retains_shared_administrator_and_console_password",
+      "result": "PASS"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$ImageDirectory = (Join-Path $PSScriptRoot '../dist/v0.3'),
+    [string]$ImageDirectory = (Join-Path $PSScriptRoot '../dist/v0.4'),
     [string]$Qemu = 'qemu-system-x86_64',
     [int]$MemoryMiB = 512,
     [string]$DataDisk,
@@ -36,7 +36,7 @@ if ($Iso) {
 }
 if ($ShowWindow) { $qemuArgs += @('-serial', 'stdio') }
 else { $qemuArgs += @('-display', 'none', '-serial', 'mon:stdio') }
-Write-Host 'Starting RouterTop. Local recovery consoles require physical access and remain passwordless.'
+Write-Host 'Starting RouterTop. Local consoles require the persistent Web administrator password; first boot offers create/token.'
 Write-Host "HTTPS management with a provisioned data disk: https://127.0.0.1:$ManagementPort"
 Write-Host 'WAN uses QEMU user networking; LAN management is forwarded only on localhost.'
 Write-Host 'This launcher checks boot; use the two-VM topology for DHCP/DNS/NAT acceptance.'

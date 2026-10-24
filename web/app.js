@@ -3,8 +3,8 @@
 (() => {
   const API = '/cgi-bin/routertop.cgi';
   const $ = (id) => document.getElementById(id);
-  const state = { csrf: null, config: null, revision: null, authenticated: false, dirty: false, busy: false, publicKeys: {} };
-  const panelNames = { overview: '系統總覽', network: '網路設定', vlans: 'VLAN 網路', wireguard: 'WireGuard VPN', firewall: '防火牆規則', security: '帳號安全' };
+  const state = { csrf: null, config: null, revision: null, authenticated: false, dirty: false, busy: false, publicKeys: {}, ipv6Vlans: [] };
+  const panelNames = { overview: '系統總覽', network: '網路設定', ipv6: 'IPv6', vlans: 'VLAN 網路', wireguard: 'WireGuard VPN', firewall: '防火牆規則', security: '帳號安全' };
 
   function text(id, value) { $(id).textContent = String(value); }
   function message(id, value) { text(id, value || ''); $(id).hidden = !value; }
@@ -21,9 +21,13 @@
     state.revision = null;
     state.dirty = false;
     state.publicKeys = {};
+    state.ipv6Vlans = [];
     $('editor-dialog').close();
-    ['vlans-list', 'wireguard-list', 'firewall-list', 'editor-fields'].forEach((id) => $(id).replaceChildren());
+    ['vlans-list', 'wireguard-list', 'firewall-list', 'ipv6-vlans-list', 'editor-fields'].forEach((id) => $(id).replaceChildren());
     $('network-form').reset();
+    $('ipv6-form').reset();
+    $('ipv6-fields').disabled = true;
+    $('ipv6-enabled').disabled = true;
     $('network-fields').disabled = true;
     $('save-config').disabled = true;
     $('pending-banner').hidden = true;
@@ -84,7 +88,7 @@
   }
   function validatePassword(password, confirmation) {
     const bytes = new TextEncoder().encode(password).length;
-    if (password.length < 12 || bytes < 12 || bytes > 128) throw new Error('密碼至少需要 12 個字元，且不得超過 128 位元組。');
+    if (password.length < 12 || bytes < 12 || bytes > 128 || /[\x00-\x1f\x7f]/.test(password)) throw new Error('密碼至少需要 12 個字元，不得超過 128 位元組，且不可包含控制字元。');
     if (password !== confirmation) throw new Error('兩次輸入的密碼不一致，請重新確認。');
   }
   function showPanel(name, focus = false) {
@@ -96,6 +100,7 @@
       if (active) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
     });
     text('breadcrumb', panelNames[name]);
+    document.title = `${panelNames[name]} · RouterTop 設定`;
     if (focus) $(name + '-title').focus();
   }
   function setPending(pending) {
@@ -139,6 +144,8 @@
     }
     text('persistence-value', data.persistent ? '持久儲存' : '尚未就緒');
     text('persistence-detail', data.persistent ? '已連接設定儲存空間' : '無法確認設定儲存空間');
+    text('console-auth-status', data.console_auth_required === true ? '已啟用（必要）' : '無法確認驗證狀態');
+    text('console-password-status', data.console_password_shared === true ? '與 Web admin 密碼相同' : '無法確認共用密碼狀態');
     setPending(Boolean(data.pending_reboot));
     text('status-updated', '最近更新：' + new Date().toLocaleTimeString('zh-TW', { hour12: false }));
   }
@@ -151,6 +158,13 @@
     state.config.vlans ??= [];
     state.config.wireguard ??= [];
     state.config.firewall.rules ??= [];
+    state.config.ipv6 ??= null;
+    state.ipv6Vlans = structuredClone(config.ipv6?.vlans || []);
+    $('ipv6-enabled').checked = Boolean(config.ipv6);
+    $('ipv6-wan-address').value = config.ipv6?.wan_address || '';
+    $('ipv6-wan-gateway').value = config.ipv6?.wan_gateway || '';
+    $('ipv6-lan-address').value = config.ipv6?.lan_address || '';
+    $('ipv6-dns').value = (config.ipv6?.dns_upstream || []).join('\n');
     setRevision(data.revision);
     $('hostname').value = config.hostname;
     $('wan-interface').value = config.wan.interface;
@@ -211,6 +225,7 @@
     document.querySelectorAll('.advanced-control').forEach((item) => {
       item.disabled = state.busy || !state.config || !state.authenticated || item.dataset.locked === 'true';
     });
+    $('ipv6-fields').disabled = state.busy || !state.config || !state.authenticated || !$('ipv6-enabled').checked;
   }
   function element(tag, content, className = '') {
     const item = document.createElement(tag);
@@ -251,7 +266,14 @@
   function renderAdvanced() {
     if (!state.config) return;
     const config = state.config;
-    ['vlans-list', 'wireguard-list', 'firewall-list'].forEach((id) => $(id).replaceChildren());
+    ['vlans-list', 'wireguard-list', 'firewall-list', 'ipv6-vlans-list'].forEach((id) => $(id).replaceChildren());
+    if (!state.ipv6Vlans.length) emptyList($('ipv6-vlans-list'), '尚未設定 VLAN IPv6 位址。請先建立 VLAN，再指定 /64 網段。');
+    state.ipv6Vlans.forEach((vlan, index) => {
+      const { card, controls } = itemCard('ipv6-vlan', vlan.interface, vlan.address);
+      card.dataset.interface = vlan.interface;
+      controls.append(actionButton('編輯', () => openEditor('ipv6-vlan', index), `編輯 IPv6 VLAN ${vlan.interface}`), actionButton('刪除', () => removeItem(state.ipv6Vlans, index, `${vlan.interface} IPv6 位址`), `刪除 IPv6 VLAN ${vlan.interface}`));
+      $('ipv6-vlans-list').append(card);
+    });
     if (!config.vlans.length) emptyList($('vlans-list'), '尚未建立 VLAN。新增網路後，可設定標籤、位址與獨立 DHCP 範圍。');
     config.vlans.forEach((vlan, index) => {
       const { card, controls } = itemCard('vlan', vlan.interface, `VLAN ${vlan.id} · ${vlan.parent} · ${vlan.address}`);
@@ -266,7 +288,9 @@
       const { card, controls } = itemCard('wireguard', wg.interface, `${wg.address} · UDP ${wg.listen_port} · MTU ${wg.mtu}`);
       card.dataset.interface = wg.interface;
       controls.append(actionButton('編輯', () => openEditor('wireguard', index), `編輯 VPN ${wg.interface}`), actionButton('刪除', () => removeItem(config.wireguard, index, wg.interface), `刪除 VPN ${wg.interface}`));
-      card.append(element('span', wg.internet ? '允許連往 WAN' : '不開放 WAN 轉送', 'badge'));
+      card.append(element('span', wg.full_tunnel ? '全通道 VPN' : wg.internet ? '分流 · 允許連往 WAN' : '分流 · 不開放 WAN 轉送', 'badge'));
+      if (wg.address_v6) card.append(element('p', `IPv6 ${wg.address_v6}${wg.nat66 ? ' · NAT66 已啟用' : ' · 未啟用 NAT66'}`, 'item-detail'));
+      if (wg.full_tunnel) card.append(element('p', '預設流量經由此 VPN，斷線時由核心的保護規則阻止流量改走 WAN。', 'field-help'));
       const key = Object.hasOwn(state.publicKeys, wg.interface) ? state.publicKeys[wg.interface] : null;
       const keyRow = element('div', undefined, 'public-key-row');
       keyRow.append(element('span', '本機公鑰', 'field-help'));
@@ -296,7 +320,7 @@
     if (!rules.length) emptyList($('firewall-list'), '尚無自訂規則。系統的預設安全規則仍會生效。');
     const actions = { accept: '允許', drop: '丟棄', reject: '拒絕' };
     rules.forEach((rule, index) => {
-      const { card, controls } = itemCard('rule', `${index + 1}. ${rule.id}`, `${rule.chain} · ${actions[rule.action]} · ${rule.protocol}${rule.destination_port ? ` : ${rule.destination_port}` : ''}`);
+      const { card, controls } = itemCard('rule', `${index + 1}. ${rule.id}`, `${rule.family === 'ipv6' ? 'IPv6' : 'IPv4'} · ${rule.chain} · ${actions[rule.action]} · ${rule.protocol}${rule.destination_port ? ` : ${rule.destination_port}` : ''}`);
       card.dataset.ruleId = rule.id; card.classList.toggle('rule-disabled', !rule.enabled);
       controls.append(
         actionButton('上移', () => { [rules[index - 1], rules[index]] = [rules[index], rules[index - 1]]; markDirty(); renderAdvanced(); }, `上移規則 ${rule.id}`, index === 0),
@@ -339,11 +363,16 @@
   function openEditor(kind, index = -1, peerIndex = -1) {
     if (!state.config || state.busy) return;
     editor = { kind, index, peerIndex }; $('editor-fields').replaceChildren(); message('editor-error', '');
-    const names = { vlan: 'VLAN', wireguard: 'WireGuard 介面', peer: '對等端', rule: '防火牆規則' };
+    const names = { vlan: 'VLAN', 'ipv6-vlan': 'VLAN IPv6 位址', wireguard: 'WireGuard 介面', peer: '對等端', rule: '防火牆規則' };
     const isNew = kind === 'peer' ? peerIndex < 0 : index < 0;
     text('editor-title', `${isNew ? '新增' : '編輯'}${names[kind]}`);
     text('editor-help', '加入變更只會更新草稿。請在分頁按「儲存全部變更」，重新啟動後生效。');
-    if (kind === 'vlan') {
+    if (kind === 'ipv6-vlan') {
+      if (!state.config.vlans.length) { message('global-error', '請先在 VLAN 網路分頁新增 VLAN，再設定其 IPv6 位址。'); return; }
+      const value = state.ipv6Vlans[index] || { interface: state.config.vlans[0].interface, address: '' };
+      addField('interface', 'VLAN 介面', value.interface, { required: true, choices: state.config.vlans.map((vlan) => [vlan.interface, vlan.interface]) });
+      addField('address', 'IPv6 位址 /64', value.address, { required: true, placeholder: '例如 fd20:20::1/64' });
+    } else if (kind === 'vlan') {
       const value = state.config.vlans[index] || { interface: '', parent: $('lan-interface').value, id: '', address: '', dhcp: null, internet: false };
       addField('interface', 'VLAN 介面名稱', value.interface, { required: true, placeholder: '例如 vlan20' });
       addField('parent', '上層實體介面', value.parent, { required: true, choices: [$('wan-interface').value.trim(), $('lan-interface').value.trim()].map((name) => [name, name]) });
@@ -357,33 +386,42 @@
       const sync = () => [start, end, lease].forEach((input) => { input.disabled = !enabled.checked; input.required = enabled.checked; });
       enabled.addEventListener('change', sync); sync();
     } else if (kind === 'wireguard') {
-      const value = state.config.wireguard[index] || { interface: '', address: '', listen_port: 51820, mtu: 1420, internet: false };
+      const value = state.config.wireguard[index] || { interface: '', address: '', address_v6: null, listen_port: 51820, mtu: 1420, internet: false, full_tunnel: false, nat66: false };
       addField('interface', 'VPN 介面名稱', value.interface, { required: true, placeholder: '例如 wg0' });
       addField('address', 'IPv4 位址 / 前綴', value.address, { required: true, placeholder: '例如 10.44.0.1/24' });
+      addField('address-v6', 'IPv6 位址 / 前綴（選填）', value.address_v6, { wide: true, placeholder: '例如 fd44::1/64', help: '允許 /64 至 /128；啟用 IPv6 時 MTU 至少為 1280。' });
       addField('listen-port', 'UDP 接聽埠', value.listen_port, { type: 'number', min: 1, max: 65535, required: true });
       addField('mtu', 'MTU', value.mtu, { type: 'number', min: 576, max: 9000, required: true });
-      addField('internet', '允許對等端連往 WAN', value.internet, { type: 'checkbox', wide: true });
+      const full = addField('full-tunnel', '將預設流量送入全通道 VPN', value.full_tunnel, { type: 'checkbox', wide: true, help: '全系統限一個全通道介面，且只能有一個對等端。允許網段須為 0.0.0.0/0，可再加 ::/0；遠端端點必填。' });
+      const internet = addField('internet', '允許分流對等端連往 WAN', value.internet, { type: 'checkbox', wide: true });
+      const nat66 = addField('nat66', '啟用 NAT66', value.nat66, { type: 'checkbox', wide: true, help: '僅適用含 ::/0 的全通道 VPN。未啟用時，遠端必須具備回到本機 IPv6 網段的路由。' });
+      const sync = () => { internet.disabled = full.checked; if (full.checked) internet.checked = false; nat66.disabled = !full.checked; if (!full.checked) nat66.checked = false; };
+      full.addEventListener('change', sync); sync();
     } else if (kind === 'peer') {
       const value = state.config.wireguard[index].peers[peerIndex] || { public_key: '', allowed_ips: [], endpoint: null, persistent_keepalive: 0 };
       addField('public-key', '對等端公鑰', value.public_key, { required: true, wide: true, help: '填入對方的 WireGuard 公鑰，不要提供私鑰。' });
-      addField('allowed-ips', '對等端允許的 IPv4 網段', value.allowed_ips.join('\n'), { required: true, wide: true, multiline: true, placeholder: '例如 10.44.0.2/32', help: '每行一個網段；不允許 0.0.0.0/0，且不可與本機 LAN/VLAN 或其他對等端路由重疊。' });
-      addField('endpoint', '遠端端點（選填）', value.endpoint, { placeholder: '例如 198.51.100.10:51820', help: '僅接受 IPv4:埠；留空表示等待對方連入。' });
+      const full = state.config.wireguard[index].full_tunnel;
+      addField('allowed-ips', '對等端允許的 IPv4／IPv6 網段', value.allowed_ips.join('\n'), { required: true, wide: true, multiline: true, placeholder: full ? '0.0.0.0/0\n::/0' : '例如 10.44.0.2/32、fd44::2/128', help: full ? '全通道必須包含 0.0.0.0/0，可再加入 ::/0；不可混入其他網段。' : '每行一個網段。分流模式不可使用預設路由，也不可與本機 LAN/VLAN 或其他對等端路由重疊。' });
+      addField('endpoint', full ? '遠端端點' : '遠端端點（選填）', value.endpoint, { required: Boolean(full), placeholder: '例如 198.51.100.10:51820', help: full ? '全通道必填 IPv4:埠；遠端必須具備轉送能力。' : '僅接受 IPv4:埠；留空表示等待對方連入。' });
       addField('keepalive', 'Keepalive 秒數', value.persistent_keepalive, { type: 'number', min: 0, max: 65535, required: true, help: '0 表示停用。' });
     } else {
-      const value = state.config.firewall.rules[index] || { id: '', enabled: true, chain: 'forward', action: 'drop', protocol: 'any', in_interface: null, out_interface: null, source: null, destination: null, destination_port: null, comment: '' };
+      const value = state.config.firewall.rules[index] || { id: '', enabled: true, family: 'ipv4', chain: 'forward', action: 'drop', protocol: 'any', in_interface: null, out_interface: null, source: null, destination: null, destination_port: null, comment: '' };
       addField('id', '規則 ID', value.id, { required: true, placeholder: '例如 allow-vlan-dns' });
       addField('enabled', '啟用規則', value.enabled, { type: 'checkbox' });
+      const family = addField('family', '位址協定', value.family || 'ipv4', { choices: [['ipv4', 'IPv4'], ['ipv6', 'IPv6']] });
       const chain = addField('chain', '規則鏈', value.chain, { choices: [['forward', 'forward · 穿越路由器'], ['input', 'input · 送至路由器']] });
       addField('action', '處理方式', value.action, { choices: [['accept', 'accept · 允許'], ['drop', 'drop · 丟棄'], ['reject', 'reject · 拒絕']] });
-      const protocol = addField('protocol', '協定', value.protocol, { choices: [['any', 'any · 任意'], ['tcp', 'TCP'], ['udp', 'UDP'], ['icmp', 'ICMP']] });
+      const protocols = (version) => [['any', 'any · 任意'], ['tcp', 'TCP'], ['udp', 'UDP'], version === 'ipv6' ? ['icmpv6', 'ICMPv6'] : ['icmp', 'ICMP']];
+      const protocol = addField('protocol', '協定', value.protocol, { choices: protocols(family.value) });
       const port = addField('destination-port', '目的埠（選填）', value.destination_port, { type: 'number', min: 1, max: 65535 });
       addField('in-interface', '來源介面', value.in_interface, { choices: interfaceChoices() });
       const out = addField('out-interface', '目的介面', value.out_interface, { choices: interfaceChoices() });
-      addField('source', '來源 IPv4 網段（選填）', value.source, { placeholder: '例如 192.168.20.0/24' });
-      addField('destination', '目的 IPv4 網段（選填）', value.destination, { placeholder: '例如 10.44.0.2/32' });
+      addField('source', '來源網段（選填）', value.source, { help: '須與選取的 IPv4／IPv6 協定一致。' });
+      addField('destination', '目的網段（選填）', value.destination, { help: '須與選取的 IPv4／IPv6 協定一致。' });
       addField('comment', '備註（選填）', value.comment, { wide: true, help: '最多 80 個 ASCII 可列印字元。' });
       const sync = () => { out.disabled = chain.value === 'input'; port.disabled = !['tcp', 'udp'].includes(protocol.value); };
       chain.addEventListener('change', sync); protocol.addEventListener('change', sync); sync();
+      family.addEventListener('change', () => { const previous = protocol.value; protocol.replaceChildren(); protocols(family.value).forEach(([key, label]) => { const option = element('option', label); option.value = key; protocol.append(option); }); protocol.value = previous === 'icmp' || previous === 'icmpv6' ? (family.value === 'ipv6' ? 'icmpv6' : 'icmp') : previous; sync(); });
     }
     $('editor-dialog').showModal();
   }
@@ -396,16 +434,21 @@
         if (!input.value.trim()) throw new Error('必填欄位不可只填入空白。');
       }
       let value, items, target = index;
-      if (kind === 'vlan') {
+      if (kind === 'ipv6-vlan') {
+        items = state.ipv6Vlans;
+        value = { interface: optionalField('interface'), address: optionalField('address') };
+        if (items.some((vlan, row) => row !== index && vlan.interface === value.interface)) throw new Error('每個 VLAN 只能指定一個 IPv6 網段。');
+      } else if (kind === 'vlan') {
         items = state.config.vlans;
         value = { interface: optionalField('interface'), parent: optionalField('parent'), id: numberField('id'), address: optionalField('address'), dhcp: $('edit-dhcp-enabled').checked ? { start: optionalField('dhcp-start'), end: optionalField('dhcp-end'), lease_hours: numberField('lease-hours') } : null, internet: $('edit-internet').checked };
         if (index < 0 && items.length >= 16) throw new Error('最多可建立 16 個 VLAN。');
       } else if (kind === 'wireguard') {
         items = state.config.wireguard;
-        value = { interface: optionalField('interface'), address: optionalField('address'), listen_port: numberField('listen-port'), mtu: numberField('mtu'), internet: $('edit-internet').checked, peers: index >= 0 ? structuredClone(items[index].peers) : [] };
+        value = { interface: optionalField('interface'), address: optionalField('address'), address_v6: optionalField('address-v6'), listen_port: numberField('listen-port'), mtu: numberField('mtu'), internet: $('edit-internet').checked, full_tunnel: $('edit-full-tunnel').checked, nat66: $('edit-nat66').checked, peers: index >= 0 ? structuredClone(items[index].peers) : [] };
         if (index < 0 && items.length >= 4) throw new Error('最多可建立 4 個 WireGuard 介面。');
       } else if (kind === 'peer') {
         items = state.config.wireguard[index].peers; target = peerIndex;
+        if (target < 0 && state.config.wireguard[index].full_tunnel && items.length >= 1) throw new Error('全通道介面只能設定一個對等端。請編輯既有對等端，或先刪除再新增。');
         const publicKey = optionalField('public-key');
         let decoded;
         try { decoded = atob(publicKey); } catch { throw new Error('對等端公鑰必須是有效的 Base64。'); }
@@ -416,7 +459,7 @@
         items = state.config.firewall.rules;
         const comment = $('edit-comment').value;
         if (!/^[\x20-\x7e]{0,80}$/.test(comment)) throw new Error('備註只能使用最多 80 個 ASCII 可列印字元。');
-        value = { id: optionalField('id'), enabled: $('edit-enabled').checked, chain: $('edit-chain').value, action: $('edit-action').value, protocol: $('edit-protocol').value, in_interface: optionalField('in-interface'), out_interface: $('edit-out-interface').disabled ? null : optionalField('out-interface'), source: optionalField('source'), destination: optionalField('destination'), destination_port: $('edit-destination-port').disabled || !$('edit-destination-port').value ? null : numberField('destination-port'), comment };
+        value = { id: optionalField('id'), enabled: $('edit-enabled').checked, family: $('edit-family').value, chain: $('edit-chain').value, action: $('edit-action').value, protocol: $('edit-protocol').value, in_interface: optionalField('in-interface'), out_interface: $('edit-out-interface').disabled ? null : optionalField('out-interface'), source: optionalField('source'), destination: optionalField('destination'), destination_port: $('edit-destination-port').disabled || !$('edit-destination-port').value ? null : numberField('destination-port'), comment };
         if (index < 0 && items.length >= 64) throw new Error('最多可建立 64 條自訂規則。');
         if (items.some((rule, row) => row !== index && rule.id === value.id)) throw new Error('規則 ID 不可重複。');
       }
@@ -425,7 +468,26 @@
     } catch (error) { message('editor-error', errorText(error)); }
   });
   ['editor-close', 'editor-cancel'].forEach((id) => $(id).addEventListener('click', () => $('editor-dialog').close()));
+  $('editor-dialog').addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+    const dialog = event.currentTarget;
+    // Native modal dialogs can tab into browser chrome; keep this editor's cycle local.
+    // Recompute after every keypress because DHCP and VPN options enable fields dynamically.
+    const controls = [...dialog.querySelectorAll('button, input, select, textarea, a[href], [tabindex]')]
+      .filter((control) => control.tabIndex >= 0 && !control.matches(':disabled') && control.checkVisibility());
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if (!first) { event.preventDefault(); dialog.focus(); return; }
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog)) {
+      event.preventDefault(); first.focus();
+    }
+  });
   $('add-vlans').addEventListener('click', () => openEditor('vlan'));
+  $('add-ipv6-vlan').addEventListener('click', () => openEditor('ipv6-vlan'));
+  $('ipv6-form').addEventListener('input', () => { markDirty(); advancedBusy(); });
+  $('ipv6-form').addEventListener('submit', (event) => { event.preventDefault(); saveAll(); });
   $('add-wireguard').addEventListener('click', () => openEditor('wireguard'));
   $('add-firewall').addEventListener('click', () => openEditor('rule'));
   document.querySelectorAll('.advanced-save').forEach((button) => button.addEventListener('click', () => saveAll()));
@@ -478,6 +540,7 @@
   async function saveAll() {
     if (!state.config || state.busy) return;
     if (!$('network-form').checkValidity()) { showPanel('network'); $('network-form').reportValidity(); return; }
+    if (!$('ipv6-form').checkValidity()) { showPanel('ipv6'); $('ipv6-form').reportValidity(); return; }
     clearMessages();
     const config = structuredClone(state.config);
     config.hostname = $('hostname').value.trim();
@@ -488,6 +551,7 @@
     config.dhcp.end = $('dhcp-end').value.trim();
     config.dhcp.lease_hours = Number($('lease-hours').value);
     config.dns.upstream = $('dns-upstream').value.split(/[\s,]+/).filter(Boolean);
+    config.ipv6 = $('ipv6-enabled').checked ? { wan_address: $('ipv6-wan-address').value.trim() || null, wan_gateway: $('ipv6-wan-gateway').value.trim() || null, lan_address: $('ipv6-lan-address').value.trim(), vlans: structuredClone(state.ipv6Vlans), dns_upstream: $('ipv6-dns').value.split(/[\s,]+/).filter(Boolean) } : null;
     if (!Number.isSafeInteger(config.dhcp.lease_hours) || config.dhcp.lease_hours < 1) { message('global-error', '租約時間必須是大於零的整數。'); return; }
     state.busy = true; $('network-fields').disabled = true; $('save-config').disabled = true; $('reload-config').disabled = true;
     advancedBusy();
