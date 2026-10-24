@@ -1,0 +1,252 @@
+{
+  "task_id": "RT07-CORE",
+  "actor_instance": "wan_core",
+  "receiver_instance": "root",
+  "kind": "handoff",
+  "result": "PASS",
+  "simulation": false,
+  "observed_at": "2026-10-24T22:29:53.561352+08:00",
+  "base_sha": "a698bdce2952c99da9e4ff0f7515df138afe7630",
+  "head_sha": "a698bdce2952c99da9e4ff0f7515df138afe7630",
+  "candidate": "r4 core: verified existing-PID DHCPv6 lifecycle; absent-stop never launches default daemon",
+  "acceptance_ids": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4"
+  ],
+  "artifacts": [
+    {
+      "path": "crates/routertop/src/lib.rs",
+      "sha256": "4f00c1d5ffe912f9fca9090a0ceab7fe71179ad897de624128a1315471d18329",
+      "normalized_lf_sha256": "4f00c1d5ffe912f9fca9090a0ceab7fe71179ad897de624128a1315471d18329"
+    },
+    {
+      "path": "crates/routertop/src/main.rs",
+      "sha256": "31410c7a56035699dd9a151af7b569a5a97c6ef0b8b7d41044a5682b0923a490",
+      "normalized_lf_sha256": "31410c7a56035699dd9a151af7b569a5a97c6ef0b8b7d41044a5682b0923a490"
+    },
+    {
+      "path": "crates/routertop/src/network.rs",
+      "sha256": "1a5b1d59231537810cf980b4dd13cd568f212b6665ed3c15ef25973a91c81865",
+      "normalized_lf_sha256": "1a5b1d59231537810cf980b4dd13cd568f212b6665ed3c15ef25973a91c81865"
+    },
+    {
+      "path": "crates/routertop/src/pd.rs",
+      "sha256": "1017e5525cdb7171fd1857e1558da0d506e890dc9bf53af876ffd9d8b215dd04",
+      "normalized_lf_sha256": "1017e5525cdb7171fd1857e1558da0d506e890dc9bf53af876ffd9d8b215dd04"
+    },
+    {
+      "path": "crates/routertop/src/pppoe.rs",
+      "sha256": "9ea5e8311801a897a6cad27f00cda8f0e6c339660b017d07624f20fce02db566",
+      "normalized_lf_sha256": "c2228394c0be11f4767496bd52218436d802ed5fca15114912c5fff1c6c2eacd"
+    },
+    {
+      "path": "crates/routertop/src/wan.rs",
+      "sha256": "719dba328a0429599c401cb37471726d3545a183c4f598334e2f4bb8e24e829b",
+      "normalized_lf_sha256": "719dba328a0429599c401cb37471726d3545a183c4f598334e2f4bb8e24e829b"
+    },
+    {
+      "path": "crates/routertop/tests/wan.rs",
+      "sha256": "8e8c6d0167907ee65b5c03326b6290f7895cda18cf0ee711485e60791a760c0a",
+      "normalized_lf_sha256": "8e8c6d0167907ee65b5c03326b6290f7895cda18cf0ee711485e60791a760c0a"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-boot",
+      "sha256": "ca08d94fd92a88b3d1373bee0c147ded3e15a285a3a8649d8aef17936fc024e6",
+      "normalized_lf_sha256": "0e99c90128f2556b10f96c015049a70296119d3091e402070d071e77a656caf8"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-ipv6-start",
+      "sha256": "e5886f5469aea2ec3de77af38fe524ebb6533b26606a62bf843fef4baf9b0de5",
+      "normalized_lf_sha256": "9db5a554838e2713ccbdf97e6617ee4e82cd52113ff0ad1950898abafbe04f9a"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-wan-start",
+      "sha256": "83e536546a99b0cb79fb5f556d4e8c1fe8ee15684c10bbcf1e7a91ed068ed3f2",
+      "normalized_lf_sha256": "62302b1472689330ba3b813d83196149b359872714b33441f5be68693b0f359a"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-ppp-ip-up",
+      "sha256": "ade0cb9bd31a2a9824c14d694404c57d45f09c0497184e9e49a6b8a530361135",
+      "normalized_lf_sha256": "fa722fbb753bdd70ce2bb3e5eb41c96c4f98172e8f873bf88ee2433bac71b2fe"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-ppp-ip-down",
+      "sha256": "2d3eef8ab9815a2a980e2066c1df16e1ea0078caa464b9fe64d8ff689de1cf7e",
+      "normalized_lf_sha256": "e36b8c401c969fe6e1a16d6c78a3bfaf277031a4a9e24f0f21cae8259822eeb2"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-ppp-ipv6-up",
+      "sha256": "40c4a93f905c155bc0c279bd64c30d52f9852a9233c01b2c1b1cb312605e5fa5",
+      "normalized_lf_sha256": "4d70d1558334abb2a31834c50b2863b47a9bcfbff8b5faf72a24604c6c04abd4"
+    },
+    {
+      "path": "image/overlay/usr/sbin/routertop-ppp-ipv6-down",
+      "sha256": "4f2c7d033ad4fe70f4ccd2c3c4c9f43354a7436db666f9b725b4a665ddf21fca",
+      "normalized_lf_sha256": "4804df164c4d759adde449613d72a6c3a0b0eddd2347f22a590cc363ee2fc659"
+    }
+  ],
+  "checks": [
+    {
+      "name": "legacy unit/integration suite before final scope additions",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed_tests": 84,
+      "scope": "initial candidate; later changed WAN/pd covered below"
+    },
+    {
+      "name": "WAN model/render/firewall regression",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--test",
+        "wan"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed_tests": 9
+    },
+    {
+      "name": "WAN health hysteresis and absent/stale client stop",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--lib",
+        "wan::tests"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed_tests": 2
+    },
+    {
+      "name": "PD regression after final race fix",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--test",
+        "pd"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed_tests": 9
+    },
+    {
+      "name": "fmt",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "fmt",
+        "--all"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "clippy",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "real isolated Linux packets",
+      "platform": "Alpine Linux",
+      "argv": [],
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "owner": "wan_test"
+    },
+    {
+      "name": "actual final ISO browser/reboot",
+      "platform": "QEMU x86_64",
+      "argv": [],
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "owner": "root"
+    },
+    {
+      "name": "PPPoE regression after shared IPv6 lifecycle fix",
+      "platform": "Windows",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--test",
+        "pppoe"
+      ],
+      "cwd": "E:/routertop/.worktrees/wan-core",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed_tests": 6
+    }
+  ],
+  "review_fixes": [
+    {
+      "id": "P1-user-firewall-scope",
+      "status": "FIXED",
+      "regression": "explicit_interface_firewall_rules_are_never_broadened_to_another_uplink",
+      "independent_closure": "PASS: wan_review actual rendered primary rule appears once and keeps interface scope"
+    },
+    {
+      "id": "dhcpcd-no-master-stop",
+      "status": "FIXED",
+      "regression": "stopping_absent_or_stale_ipv6_client_never_runs_a_command",
+      "independent_closure": "pending focused wan_review r4 closure"
+    }
+  ],
+  "unresolved": [
+    "Real packet/ISO acceptance delegated to their named owners; do not treat Windows unit/render checks as runtime proof.",
+    "IPv6/PD is primary-only and suspended while backup/none active; dual plus static IPv6 is rejected.",
+    "Actual existing connections may reset when WAN public address changes.",
+    "ARM/hardware/real ISP/throughput/power-loss NOT_RUN."
+  ],
+  "next_action": "Root integrate exactly listed paths; test owner resync latest lib.rs/wan.rs/pd.rs and run actual matrix; independent reviewer focused closure.",
+  "external_side_effects": {
+    "authorized": true,
+    "performed": false,
+    "note": "Root owns user-authorized commit/push; this author did neither."
+  },
+  "fix_evidence": [
+    {
+      "id": "dual-probe-rpf",
+      "failure": "wan_test actual DHCP/DHCP leases acquired but remote probes fail with kernel all/wan0 rp_filter=1 and no main default",
+      "causal_control": "wan_test only changed owned router namespace all+wan0+wan1 rp_filter=0; same binary/routes/config/ISP remote ping and LAN HTTP passed",
+      "production_fix": "dual-only rendered all/default/physical rp_filter=0; single WAN unchanged; future PPP interfaces inherit default=0",
+      "verification": "9 focused WAN model/render tests and Clippy PASS; actual final Linux matrix pending owner rerun without manual override"
+    },
+    {
+      "id": "dhcpcd-no-master-stop",
+      "failure": "wan_test actual Alpine dhcpcd10.5.2 empty private /run plus -6 -x created a default-config daemon rather than exiting; later dedicated -f launch only controlled wrong existing master",
+      "causal_control": "wan_test r3 identical binary with wrapper only skipping absent-PID stop passed all12 mixed PPP/DHCP IPv6 groups including PD/changed-prefix return/stable DUID/withdrawal",
+      "production_fix": "Shared lifecycle lock; verified PID/exe/netns; absent/stale returns without command, existing client stopped by bounded SIGTERM; all new starts dedicated -f with bounded readiness; role recheck after lock and retry each primary loop; all dual and legacy PPP stop sites audited",
+      "verification": "Windows WAN9 + WAN unit2 + PPP6 + clippy PASS; actual r4 binary/network/ISO acceptance pending root and test owners"
+    }
+  ]
+}

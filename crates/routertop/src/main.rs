@@ -51,6 +51,9 @@ fn check_live_wan(config: &routertop::Config) -> Result<(), String> {
     if !cfg!(target_os = "linux") {
         return Err("network-check requires Linux".into());
     }
+    if config.wan_backup.is_some() {
+        return Ok(());
+    }
     let output = Command::new("ip")
         .args(["-j", "-4", "address", "show", "dev", config.wan.device()])
         .output()
@@ -195,9 +198,7 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
         if auto {
             run("/usr/sbin/routertop-ipv6-start", &[])?;
         }
-        if config.wan.mode == routertop::WanProtocol::Pppoe {
-            run("/usr/sbin/routertop-pppoe-start", &[])?;
-        }
+        run("/usr/sbin/routertop-wan-start", &[])?;
         fs::write("/run/routertop/applied", "boot provisioned\n").map_err(|e| e.to_string())?;
         Ok(())
     })();
@@ -210,6 +211,28 @@ fn apply(config: &routertop::Config, source: &str) -> Result<(), String> {
 
 fn execute(args: &[String]) -> Result<(), String> {
     match args {
+        [cmd, file, dir] if cmd == "wan-run" || cmd == "wan-step" => {
+            require_local_root()?;
+            let config =
+                parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
+            if cmd == "wan-run" {
+                routertop::wan::supervise(&config, Path::new(file), Path::new(dir))
+            } else {
+                routertop::wan::step(&config, Path::new(file), Path::new(dir))
+            }
+        }
+        [cmd, file, dir, interface, event] if cmd == "wan-dhcp-event" => {
+            require_local_root()?;
+            let config =
+                parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
+            routertop::wan::dhcp_event(
+                &config,
+                Path::new(dir),
+                interface,
+                event,
+                &env::vars().collect(),
+            )
+        }
         [cmd, file, dir] if cmd == "pppoe-init" || cmd == "pppoe-run" => {
             require_local_root()?;
             let config =
@@ -226,6 +249,12 @@ fn execute(args: &[String]) -> Result<(), String> {
                 parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
             routertop::pppoe::event(&config, Path::new(file), Path::new(dir), event, interface)
         }
+        [cmd, file] if cmd == "wan-count" => {
+            let config =
+                parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
+            println!("{}", routertop::wan::uplinks(&config).len());
+            Ok(())
+        }
         [cmd, file] if cmd == "wan-mode" => {
             let config =
                 parse_config(&fs::read_to_string(file).map_err(|_| "cannot read configuration")?)?;
@@ -233,6 +262,8 @@ fn execute(args: &[String]) -> Result<(), String> {
                 "{}",
                 if config.wan.mode == routertop::WanProtocol::Pppoe {
                     "pppoe"
+                } else if config.wan.mode == routertop::WanProtocol::Static {
+                    "static"
                 } else {
                     "dhcp"
                 }
@@ -323,7 +354,10 @@ fn execute(args: &[String]) -> Result<(), String> {
             } else if cmd == "hostname" {
                 println!("{}", config.hostname);
             } else {
-                if config.wan.mode == routertop::WanProtocol::Pppoe {
+                if routertop::wan::uplinks(&config)
+                    .iter()
+                    .any(|w| w.mode == routertop::WanProtocol::Pppoe)
+                {
                     require_local_root()?;
                 }
                 print!(

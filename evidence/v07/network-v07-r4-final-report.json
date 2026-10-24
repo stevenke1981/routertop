@@ -1,0 +1,69 @@
+{
+  "candidate": "r4-final",
+  "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "source_archive": "source-v07-r4-final.tar.gz",
+  "source_archive_sha256": "e4c5a618a7a09085ab2f185e8e4bd95b1b2d2edad01ebd60625c253450dbe56e",
+  "checks": {
+    "focused_initial_backup_ipv6": {
+      "exit_code": 0,
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 13,
+        "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104"
+      },
+      "evidence": "network-v07-focused-r4.jsonl",
+      "harness_sha256": "a7771b89fb068fee5978f633e6032d4af63589179d61c029e14e29345fbb72ec"
+    },
+    "nobody_export": {
+      "exit_code": 0,
+      "summary": {
+        "result": "PASS",
+        "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+        "checks": {
+          "public": 0,
+          "backup_pppoe": 1
+        }
+      },
+      "evidence": "v07-cli-export-r4.log"
+    },
+    "network_matrix": {
+      "exit_code": 0,
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 62,
+        "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104"
+      },
+      "evidence": "network-v07-results-r4-final.jsonl",
+      "harness_sha256": "c5886069eee6133f6d2eed4e007447f4064089f13729f62bc88240fabb579de1"
+    },
+    "single_pppoe_regression": {
+      "exit_code": 0,
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 17
+      },
+      "evidence": "network-v06-regression-r4.jsonl"
+    },
+    "single_pppoe_pd_only_regression": {
+      "exit_code": 0,
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 6
+      },
+      "evidence": "network-v06-pd-only-regression-r4.jsonl"
+    },
+    "image_build": {
+      "exit_code": 0
+    }
+  },
+  "result": "PASS",
+  "harness_sha256": "c5886069eee6133f6d2eed4e007447f4064089f13729f62bc88240fabb579de1",
+  "binary_sha256_after": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "prior_attempts": [
+    {
+      "report": "network-v07-r4-first-report.json",
+      "network_matrix_exit_code": 1,
+      "reason": "Standalone ifup shared /run/ifstate from earlier r3 namespace. Fixed test-only by giving standalone activation fresh private /run; no runtime/compiler/ISO input changed. Existing global ifstate wan0=wan0 was retained while fixed static case passed."
+    }
+  ]
+}

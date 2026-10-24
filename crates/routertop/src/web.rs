@@ -545,6 +545,26 @@ fn session_token(request: &Request) -> Option<&str> {
     }
     found
 }
+fn preserve_wan_password(wan: &mut crate::Wan, previous: Option<&crate::Wan>) {
+    if wan.mode != crate::WanProtocol::Pppoe {
+        wan.pppoe = None;
+        return;
+    }
+    if let Some(ppp) = &mut wan.pppoe {
+        if ppp.password.is_empty() {
+            if let Some(old) = previous
+                .filter(|old| {
+                    old.mode == crate::WanProtocol::Pppoe && old.interface == wan.interface
+                })
+                .and_then(|old| old.pppoe.as_ref())
+                .filter(|old| old.username == ppp.username)
+            {
+                ppp.password.clone_from(&old.password);
+            }
+        }
+    }
+}
+
 fn pending(paths: &Paths, config: &str) -> bool {
     fs::read_to_string(&paths.active)
         .ok()
@@ -738,25 +758,29 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
             if let Some(ppp) = &mut config.wan.pppoe {
                 ppp.password.clear();
             }
+            let backup_password_set = config
+                .wan_backup
+                .as_ref()
+                .and_then(|wan| wan.pppoe.as_ref())
+                .is_some_and(|p| !p.password.is_empty());
+            if let Some(ppp) = config
+                .wan_backup
+                .as_mut()
+                .and_then(|wan| wan.pppoe.as_mut())
+            {
+                ppp.password.clear();
+            }
             response(
                 200,
-                json!({"config":config,"wan_password_set":password_set,"revision":data.revision,"pending_reboot":pending(paths,&data.config)}),
+                json!({"config":config,"wan_password_set":password_set,"wan_backup_password_set":backup_password_set,"revision":data.revision,"pending_reboot":pending(paths,&data.config)}),
             )
         }
         ("POST", "/config") => {
             let mut change: SaveConfig = parse(request)?;
             let previous = crate::parse_config(&data.config).map_err(|_| (500, "設定資料無效"))?;
-            if change.config.wan.mode == crate::WanProtocol::Dhcp {
-                change.config.wan.pppoe = None;
-            } else if let Some(ppp) = &mut change.config.wan.pppoe {
-                if ppp.password.is_empty() {
-                    if let Some(old) = previous.wan.pppoe.as_ref().filter(|old| {
-                        previous.wan.mode == crate::WanProtocol::Pppoe
-                            && old.username == ppp.username
-                    }) {
-                        ppp.password.clone_from(&old.password);
-                    }
-                }
+            preserve_wan_password(&mut change.config.wan, Some(&previous.wan));
+            if let Some(backup) = &mut change.config.wan_backup {
+                preserve_wan_password(backup, previous.wan_backup.as_ref());
             }
             if let Err(error) = crate::validate(&change.config) {
                 return Ok(response(400, json!({"error":error})));
@@ -800,7 +824,7 @@ fn dispatch(paths: &Paths, request: &Request, now: u64) -> ApiResult<Response> {
                 .map_err(|_| (500, "無法讀取系統主機名稱"))?;
             response(
                 200,
-                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true,"ipv6_dynamic":crate::pd::read_status(),"wan":crate::pppoe::read_status(&crate::parse_config(&data.config).map_err(|_|(500,"設定資料無效"))?)}),
+                json!({"hostname":hostname.trim(),"uptime_seconds":uptime,"memory_total_kib":total,"memory_available_kib":available,"persistent":true,"pending_reboot":pending(paths,&data.config),"version":env!("CARGO_PKG_VERSION"),"console_auth_required":true,"console_password_shared":true,"ipv6_dynamic":crate::pd::read_status(),"wan":crate::wan::read_status(&crate::parse_config(&data.config).map_err(|_|(500,"設定資料無效"))?)}),
             )
         }
         ("POST", "/logout") => {

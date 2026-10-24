@@ -1,0 +1,201 @@
+{
+  "task_id": "ROUTERTOP-V07-WAN-TEST",
+  "revision": "r4-final / harness c5886069",
+  "actor_instance": "/root/wan_test",
+  "receiver_instance": "/root",
+  "role": "test_engineer",
+  "kind": "handoff",
+  "base_sha": "a698bdce2952c99da9e4ff0f7515df138afe7630",
+  "head_sha": "a698bdce2952c99da9e4ff0f7515df138afe7630",
+  "working_tree_changes": true,
+  "source_revision_note": "Git SHA is the baseline worktree commit. Production candidate is bound by the immutable source archive and actual binary SHA; root owns final commit/push. The last edit after compilation only isolates standalone ifup /run state in the test harness.",
+  "candidate": "r4-final",
+  "production_source_archive": "source-v07-r4-final.tar.gz",
+  "production_source_archive_sha256": "e4c5a618a7a09085ab2f185e8e4bd95b1b2d2edad01ebd60625c253450dbe56e",
+  "tested_binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "binary_sha256_after_matrix": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "result": "PASS",
+  "simulation": false,
+  "observed_at": "2026-10-24T22:53:05.864957+08:00",
+  "acceptance_ids": [
+    "AC2",
+    "AC3",
+    "AC4"
+  ],
+  "artifact": {
+    "path": "evidence/v07/network-v07-r4-final-report.json",
+    "sha256": "9b7598e1932213d3b5eafc8c037763783e341c64bde0baa1ed4cab8a4371a512"
+  },
+  "owned_files": {
+    "scripts/network-v07-smoke.py": {
+      "sha256_normalized_lf": "c5886069eee6133f6d2eed4e007447f4064089f13729f62bc88240fabb579de1"
+    },
+    "scripts/fixtures/dual-wan-isp.py": {
+      "sha256_normalized_lf": "704e2a9a6f94d16ceeef8b7951cb91fca830951a65ab637d46d25e63a8f595e5"
+    },
+    "scripts/fixtures/pppoe-isp.py": {
+      "sha256_normalized_lf": "ad07b28e647a6b098940c01e67345a01859eb2a1c9a46eed1c09647fca900d16"
+    }
+  },
+  "environment": {
+    "os": "Alpine Linux 3.24.3",
+    "kernel": "6.18.58-0-virt",
+    "rustc": "1.96.1 (31fca3adb 2026-06-26), Alpine 1.96.1-r0",
+    "pppd": "2.5.3",
+    "dhcpcd": "10.5.2",
+    "virtualization": "QEMU TCG, 1536 MiB, 4 vCPUs; disposable Linux namespaces, actual DHCP/PPP/DHCPv6 and forwarded HTTP. Synthetic ISP services; no physical ISP or host NIC bridging."
+  },
+  "checks": [
+    {
+      "name": "focused_initial_backup_ipv6",
+      "platform": "Alpine Linux 3.24.3 x86_64 / QEMU TCG",
+      "argv": [
+        "python3",
+        "scripts/network-v07-smoke.py",
+        "./target/release/routertop",
+        "--case",
+        "pppoe-dhcp-ipv6"
+      ],
+      "cwd": "/build/routertop-v07",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 13,
+        "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104"
+      },
+      "evidence": "network-v07-focused-r4.jsonl",
+      "harness_sha256": "a7771b89fb068fee5978f633e6032d4af63589179d61c029e14e29345fbb72ec"
+    },
+    {
+      "name": "nobody_export",
+      "platform": "Alpine Linux 3.24.3 x86_64 / QEMU TCG",
+      "argv": [
+        "python3",
+        "/build/v07-cli-export-check.py"
+      ],
+      "cwd": "/build/routertop-v07",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": {
+        "result": "PASS",
+        "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+        "checks": {
+          "public": 0,
+          "backup_pppoe": 1
+        }
+      },
+      "evidence": "v07-cli-export-r4.log",
+      "harness_sha256": null
+    },
+    {
+      "name": "network_matrix",
+      "platform": "Alpine Linux 3.24.3 x86_64 / QEMU TCG",
+      "argv": [
+        "python3",
+        "scripts/network-v07-smoke.py",
+        "./target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v07",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 62,
+        "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104"
+      },
+      "evidence": "network-v07-results-r4-final.jsonl",
+      "harness_sha256": "c5886069eee6133f6d2eed4e007447f4064089f13729f62bc88240fabb579de1"
+    },
+    {
+      "name": "single_pppoe_regression",
+      "platform": "Alpine Linux 3.24.3 x86_64 / QEMU TCG",
+      "argv": [
+        "python3",
+        "scripts/network-v06-smoke.py",
+        "./target/release/routertop"
+      ],
+      "cwd": "/build/routertop-v07",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 17
+      },
+      "evidence": "network-v06-regression-r4.jsonl",
+      "harness_sha256": null
+    },
+    {
+      "name": "single_pppoe_pd_only_regression",
+      "platform": "Alpine Linux 3.24.3 x86_64 / QEMU TCG",
+      "argv": [
+        "python3",
+        "scripts/network-v06-smoke.py",
+        "./target/release/routertop",
+        "--pd-only"
+      ],
+      "cwd": "/build/routertop-v07",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": {
+        "status": "PASS",
+        "passed_cases": 6
+      },
+      "evidence": "network-v06-pd-only-regression-r4.jsonl",
+      "harness_sha256": null
+    },
+    {
+      "name": "image_build",
+      "platform": "Alpine Linux 3.24.3 x86_64 / QEMU TCG",
+      "argv": [
+        "sh",
+        "/build/v07-image-r4.sh"
+      ],
+      "cwd": "/build/routertop-v07",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": null,
+      "evidence": null,
+      "harness_sha256": null
+    }
+  ],
+  "scope_notes": [
+    "The 62 final matrix groups cover standalone static, Static/DHCP, DHCP/Static, DHCP/DHCP, DHCP/PPPoE, PPPoE/DHCP, PPPoE/PPPoE and initially absent PPP-primary/DHCP-backup with IPv6/PD.",
+    "Each dual case proves distinct HTTP egress markers, carrier loss/restoration, carrier-up upstream blackhole, no false primary recovery through backup, both-down fail-closed and unchanged saved configuration bytes.",
+    "IPv6 remains primary-only: backup withdraws primary PD addresses and IPv6 authorization; primary recovery reacquires a changed prefix with stable identity.",
+    "The focused 13-group test used initial harness a7771b89; the full 62-group matrix used final c5886069, whose only subsequent fix isolates standalone ifup state in private /run. Production sources, release binary and ISO did not change.",
+    "CLI nobody regression accepts public DHCP export (exit 0) and rejects backup PPP credential export (exit 1); dummy credentials were never printed.",
+    "Actual GUI/reboot/cold-boot/256 MiB appliance proof, independent review, Git remote and hosted CI are owned separately by root; not inferred from this packet suite."
+  ],
+  "prior_failures": [
+    {
+      "report": "network-v07-r4-first-report.json",
+      "network_matrix_exit_code": 1,
+      "reason": "Standalone ifup shared /run/ifstate from earlier r3 namespace. Fixed test-only by giving standalone activation fresh private /run; no runtime/compiler/ISO input changed. Existing global ifstate wan0=wan0 was retained while fixed static case passed."
+    },
+    {
+      "candidate": "r1",
+      "cause": "Strict reverse-path filtering rejected bound probe replies before main default selection. Causal private-lab control isolated rp_filter; core fixed rendered dual-WAN sysctl."
+    },
+    {
+      "candidate": "r3",
+      "cause": "dhcpcd -6 -x with no master started a default-config daemon and blocked later PPP PD. Empty-private-run reproduction plus guarded-stop diagnostic confirmed cause; core r4 uses verified same-netns PID lifecycle and bounded signals."
+    }
+  ],
+  "unresolved": [],
+  "not_run": [
+    "Physical router hardware",
+    "Production ISP interoperability",
+    "ARM boot/run",
+    "Throughput and power-loss testing"
+  ],
+  "next_action": "Root integrates the three owned scripts and evidence, verifies exact final artifact/GUI/remote CI, then commits and pushes. Keep builder QEMU PID 42680 / serial 19401 and HTTP PID 14516 / port 19402 available until root requests shutdown. No network namespaces remain after cleanup.",
+  "external_side_effects": {
+    "authorized": true,
+    "performed": false,
+    "note": "No commit/push or external publication by test owner. Localhost artifact uploads and isolated lab mutations only."
+  },
+  "supported_subchecks": [
+    "AC1 packet/runtime secret privacy and Linux export guard only; model/Web/fmt/clippy evidence is owned by core/root."
+  ]
+}

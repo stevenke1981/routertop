@@ -1,0 +1,18 @@
+{"case": "public rendering contains no PPP password and no DHCPv4 underlay client", "status": "PASS"}
+{"case": "private PPP credential options use root-only permissions", "status": "PASS"}
+{"case": "actual PAP authentication rejects wrong credentials while LAN management stays available", "status": "PASS"}
+{"case": "pppoe: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "real PPPoE PADI/PADO/PADR/PADS and authenticated PPP IPv4 NAT", "status": "PASS"}
+{"case": "IPv6CP and DHCPv6-PD work on PPP without ISP router advertisements", "status": "PASS"}
+{"case": "real wire IPv4/IPv6 SYN MSS fits PPP MTU and TCP checksums remain valid for LAN/VLAN", "status": "PASS"}
+{"case": "LAN/VLAN each transfer and verify a 120 KiB payload over IPv4 and IPv6 PPP paths", "status": "PASS"}
+{"case": "actual point-to-point PPP interface uses the configured 1492-byte MTU", "status": "PASS"}
+{"case": "logical PPP WAN denies unsolicited IPv4/IPv6 access to live listeners", "status": "PASS"}
+{"case": "no DHCPv4 discovery on the PPPoE physical underlay", "status": "PASS"}
+{"case": "pppoe: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "real renewal changes PPP delegation; new routes work and retired source is denied", "status": "PASS"}
+{"case": "ISP session termination withdraws PD and leaves LAN management available", "status": "PASS"}
+{"case": "pppoe: acquired IA_NA/PD, separate LAN/VLAN /64 SLAAC and real routed HTTP", "status": "PASS"}
+{"case": "ISP recovery triggers real PPPoE redial with restored IPv4/IPv6/PD and stable identity", "status": "PASS"}
+{"case": "DHCPv6 lease expiry blocks stale IPv6 while authenticated PPP IPv4 remains usable", "status": "PASS"}
+{"status": "PASS", "passed_cases": 17}

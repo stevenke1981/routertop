@@ -1,0 +1,53 @@
+{
+  "result": "PASS",
+  "candidate": "r4-final",
+  "observed_utc": "2026-10-24T14:45:35.562960+00:00",
+  "source_archive_sha256": "e4c5a618a7a09085ab2f185e8e4bd95b1b2d2edad01ebd60625c253450dbe56e",
+  "iso_sha256": "b670017e38fd6158396c26d1f7eefd867b901010b2e88d462cf950f303260be2",
+  "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "artifact_verification": {
+    "path": "evidence/v07/artifact-verification.json",
+    "sha256": "5aa03087cfdb9a14227672696192d65f1732365b6b4117967bf923fb0fa9b23a"
+  },
+  "actual_browser": {
+    "path": "evidence/v07/browser/browser-v07-report.json",
+    "sha256": "dd41cb655a5a338a49ec8364630c21878449ea4ee5dd25b19e4e9cbdab68b7a3",
+    "browser_groups": 13,
+    "lifecycle_groups": 5,
+    "visual_audits": 6,
+    "initial_backup_boot_regression": {
+      "result": "PASS",
+      "first_active": "backup",
+      "backup_routed_http": true,
+      "no_live_dhcpcd_master_before_primary": true,
+      "no_dynamic_ipv6_authorization_before_primary": true,
+      "primary_restored_without_reboot": true,
+      "primary_delegated_interfaces": [
+        "eth1",
+        "vlan20"
+      ],
+      "settings_preserved": true
+    }
+  },
+  "lab": {
+    "ram_mib": 256,
+    "firmware": [
+      "BIOS",
+      "UEFI"
+    ],
+    "uplinks": "two isolated socket Ethernet links to actual PPPoE ISP peers",
+    "same_data_volume_after_reboot_and_cold_boot": true,
+    "host_nic_bridging": false
+  },
+  "shutdown": {
+    "authenticated_appliance_shutdown": "PASS",
+    "https_stopped": "PASS by actual browser harness",
+    "appliance_qemu_process_absent": "PASS by root Get-CimInstance of task PID",
+    "isp_vm_clean_shutdown_and_process_exit": "PASS by root"
+  },
+  "boundaries": [
+    "Separate real namespace matrix report; no packet inference from browser alone",
+    "No retained live-binary digest; source/build/artifact hashes and launched ISO path verified",
+    "ARM, hardware, real ISP, throughput/load, power-loss and signing NOT_RUN"
+  ]
+}

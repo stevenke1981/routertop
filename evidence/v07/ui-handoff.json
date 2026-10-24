@@ -1,0 +1,129 @@
+{
+  "task_id": "WAN-07-UI",
+  "actor_instance": "wan_web",
+  "receiver_instance": "root",
+  "base_sha": "a698bdce2952c99da9e4ff0f7515df138afe7630",
+  "head_sha": "uncommitted assigned files",
+  "observed_utc": "2026-10-24T14:44:26.848757+00:00",
+  "result": "PASS",
+  "actual_iso": {
+    "result": "PASS",
+    "candidate": "r4-final",
+    "browser_groups": 13,
+    "lifecycle_groups": 5,
+    "visual_audits": 6,
+    "initial_backup_boot": {
+      "result": "PASS",
+      "first_active": "backup",
+      "backup_routed_http": true,
+      "no_live_dhcpcd_master_before_primary": true,
+      "no_dynamic_ipv6_authorization_before_primary": true,
+      "primary_restored_without_reboot": true,
+      "primary_delegated_interfaces": [
+        "eth1",
+        "vlan20"
+      ],
+      "settings_preserved": true
+    },
+    "configured_ram_mib": 256,
+    "report": "evidence/v07/browser/browser-v07-report.json",
+    "report_sha256": "dd41cb655a5a338a49ec8364630c21878449ea4ee5dd25b19e4e9cbdab68b7a3",
+    "artifact_binding": {
+      "source_archive_sha256": "e4c5a618a7a09085ab2f185e8e4bd95b1b2d2edad01ebd60625c253450dbe56e",
+      "iso_sha256": "b670017e38fd6158396c26d1f7eefd867b901010b2e88d462cf950f303260be2",
+      "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+      "runtime_build_source_verification": "evidence/v07/artifact-verification.json",
+      "configured_ram_mib": 256,
+      "wan_transport": "two isolated QEMU socket Ethernet links; actual PPPoE peers and DHCPv6-PD"
+    },
+    "cold_boot": {
+      "result": "PASS",
+      "firmware": "UEFI",
+      "identity_preserved": true,
+      "pppoe_credential_preserved": true,
+      "private_credential_permissions": "0600"
+    },
+    "final_authenticated_poweroff_https_down": "PASS",
+    "host_process_gone": "pending root independent verification"
+  },
+  "checks": [
+    {
+      "name": "Web/API persistence and secret regressions",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--test",
+        "web",
+        "--test",
+        "web_network"
+      ],
+      "platform": "Windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 19
+    },
+    {
+      "name": "Scoped clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--test",
+        "web",
+        "--test",
+        "web_network",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "name": "Actual Chrome, API fixtures",
+      "argv": [
+        ".cache/venv/Scripts/python.exe",
+        "scripts/browser-v07-smoke.py",
+        "--fixture",
+        "--chrome",
+        "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        "--output",
+        "evidence/v07/browser-fixture"
+      ],
+      "exit_code": 0,
+      "result": "PASS",
+      "groups": 8,
+      "visual_audits": 4
+    },
+    {
+      "name": "JS and Python syntax + Rust fmt",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "owned_files": {
+    "web/index.html": "da0b40ba2a643a7e9ddd36dfb15ea1fc3303b330ff20e3c081705f04a81c7c12",
+    "web/app.js": "5f9830238c663b1df1af00f7d800b49cb570082aaf0c85abf3a0a575c1ba1ffc",
+    "crates/routertop/src/web.rs": "a957aa708a13221fbd406d9230e7673917d8108f02f93f8d4089b05f096a8ead",
+    "crates/routertop/tests/web.rs": "b7661deb96aa7dad8a22dfb4e8af28db71d0ee9ac0cdb00f9a2ce344b8a0cb51",
+    "scripts/browser-v07-smoke.py": "0025aa0788ddafe5b38eaffec62b001242921e0e404a704348253e1bf084d566",
+    "scripts/appliance-wan-checks.py": "0bc7c3044d4eb534959270dca06069912ce95f52fe057706c1a35f0e2ebee682"
+  },
+  "fixture_artifacts": {
+    "evidence/v07/browser-fixture/browser-v07-report.json": "9c4e2946da69b578a4018ebbe0e2bc65962a14389ddbb30701178b41c736e382",
+    "evidence/v07/browser-fixture/dual-wan-desktop.png": "9fef3ea80a119c926088b9b60be56cdded351092d9431fa0574ae17425e201a6",
+    "evidence/v07/browser-fixture/dual-wan-ipv6-pd-desktop.png": "1167e6d739cf2fa514e797380e520dcb832d691e62fc5edec163b5761e0c6081",
+    "evidence/v07/browser-fixture/dual-wan-mobile.png": "e6d3e01cad9fd9e669dd24d512b63974a02e69a2c1acd826ac53a1f51dc9f76f",
+    "evidence/v07/browser-fixture/static-wan-desktop.png": "e57e88695108a07bc0f08803e330729f4ff16c583e462dffa2f0a14157d44d58"
+  },
+  "unresolved": [
+    "Host QEMU process exit confirmation owned by root",
+    "ARM/hardware/real ISP NOT_RUN"
+  ],
+  "boundaries": [
+    "API fixture browser is actual Chrome with real static HTML/CSS/JS, not an actual appliance",
+    "No runtime credential or token emitted; both usernames masked in screenshots",
+    "Core source files in this worktree copied from wan_core only for compilation; root must integrate only owned_files"
+  ]
+}

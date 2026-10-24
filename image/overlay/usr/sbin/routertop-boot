@@ -61,7 +61,7 @@ sh /run/routertop/network-setup.sh
 sysctl -p /etc/sysctl.conf
 dnsmasq --user=dnsmasq --group=dnsmasq --pid-file=/run/dnsmasq.pid
 /usr/sbin/routertop-ipv6-start
-/usr/sbin/routertop-pppoe-start
+/usr/sbin/routertop-wan-start
 touch /run/routertop/applied
 /usr/sbin/routertop-management
 trap - EXIT

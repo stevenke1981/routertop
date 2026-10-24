@@ -301,10 +301,23 @@ fn read_lease(path: &Path) -> Lease {
 }
 
 pub fn event(config: &Config, dir: &Path, env: &BTreeMap<String, String>) -> Result<(), String> {
+    if config.wan_backup.is_some()
+        && !crate::wan::primary_active(&dir.parent().ok_or("PD parent missing")?.join("wan"))
+    {
+        return Ok(());
+    }
     if env.get("interface") != Some(&config.wan.device().to_string()) {
         return Ok(());
     }
     let _lock = lock(dir)?;
+    // Recheck after locking: a WAN transition may have withdrawn state while
+    // this hook waited for a preceding reconciliation.
+    if config.wan_backup.is_some()
+        && !crate::wan::primary_active(&dir.parent().ok_or("PD parent missing")?.join("wan"))
+    {
+        return Ok(());
+    }
+
     let now = uptime()?;
     let reason = env.get("reason").map(String::as_str).unwrap_or("");
     match reason {
@@ -613,6 +626,11 @@ pub fn monitor(config: &Config, dir: &Path) -> Result<(), String> {
 }
 
 fn reconcile(config: &Config, dir: &Path, v6: &Ipv6Config) -> Result<(), String> {
+    if config.wan_backup.is_some()
+        && !crate::wan::primary_active(&dir.parent().ok_or("PD parent missing")?.join("wan"))
+    {
+        return disconnect(config, dir);
+    }
     let bytes = output("ip", &["-j", "-6", "address", "show"])?;
     let devices: Vec<Value> = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
     let routes: Vec<Value> = if devices
@@ -636,6 +654,13 @@ fn reconcile(config: &Config, dir: &Path, v6: &Ipv6Config) -> Result<(), String>
         Vec::new()
     };
     let _lock = lock(dir)?;
+    if config.wan_backup.is_some()
+        && !crate::wan::primary_active(&dir.parent().ok_or("PD parent missing")?.join("wan"))
+    {
+        drop(_lock);
+        return disconnect(config, dir);
+    }
+
     let now = uptime()?;
     let carrier = devices
         .iter()

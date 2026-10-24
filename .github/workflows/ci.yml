@@ -41,6 +41,7 @@ jobs:
             cargo build --locked --release
             python3 scripts/network-v06-smoke.py ./target/release/routertop
             python3 scripts/network-v06-smoke.py ./target/release/routertop --pd-only
+            python3 scripts/network-v07-smoke.py ./target/release/routertop
             ROUTERTOP_BINARY=/src/target/release/routertop ROUTERTOP_BINARY_TARGET="$(rustc -vV | sed -n "s/^host: //p")" sh scripts/build-image.sh
             sh scripts/make-data-disk.sh dist/x86_64/routertop-data-blank.img
             # Keep mode 0600; let the runner upload this newly created blank disk.

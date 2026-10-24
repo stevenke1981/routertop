@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin
+config=/etc/routertop/routertop.toml
+if [ "$(routertop wan-count "$config")" = 1 ]; then
+    exec /usr/sbin/routertop-pppoe-start
+fi
+[ -f /run/routertop/persistent ] || { echo 'Dual WAN requires persistent settings.' >&2; exit 1; }
+modprobe ppp_generic || true
+modprobe ppp_async || true
+mkdir -p /dev /run/routertop/wan
+[ -c /dev/ppp ] || mknod /dev/ppp c 108 0
+routertop wan-run "$config" /run/routertop/wan >/var/log/routertop-wan.log 2>&1 &
+echo "$!" >/run/routertop/wan/supervisor.pid

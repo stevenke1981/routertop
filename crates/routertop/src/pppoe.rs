@@ -12,9 +12,9 @@ use std::{
 };
 
 pub(crate) fn validate(config: &Config) -> Result<(), String> {
-    if config.wan.mode == WanProtocol::Dhcp {
+    if config.wan.mode != WanProtocol::Pppoe {
         if config.wan.pppoe.is_some() {
-            return Err("DHCP WAN cannot contain PPPoE credentials".into());
+            return Err("non-PPPoE WAN cannot contain PPPoE credentials".into());
         }
         return Ok(());
     }
@@ -68,7 +68,7 @@ pub fn peer_options(config: &Config, runtime: &Path) -> Result<String, String> {
     Ok(options)
 }
 
-fn private_dir(path: &Path) -> Result<(), String> {
+pub(crate) fn private_dir(path: &Path) -> Result<(), String> {
     fs::create_dir_all(path).map_err(|_| "cannot create PPPoE runtime")?;
     #[cfg(unix)]
     {
@@ -78,7 +78,7 @@ fn private_dir(path: &Path) -> Result<(), String> {
     }
     Ok(())
 }
-fn write(path: &Path, bytes: &[u8], _public: bool) -> Result<(), String> {
+pub(crate) fn write(path: &Path, bytes: &[u8], _public: bool) -> Result<(), String> {
     let temporary = path.with_extension("new");
     let mut options = OpenOptions::new();
     options.write(true).create(true).truncate(true);
@@ -186,6 +186,9 @@ pub fn event(
     action: &str,
     interface: &str,
 ) -> Result<(), String> {
+    if config.wan_backup.is_some() {
+        return crate::wan::ppp_event(config, source, dir, action, interface);
+    }
     if config.wan.mode != WanProtocol::Pppoe || interface != "ppp0" {
         return Ok(());
     }
@@ -214,26 +217,15 @@ pub fn event(
         "ipv6-up" if config.ipv6.is_some() => {
             // PPP IPv6CP establishes the link-local peer/default. DHCPv6 must
             // start immediately: a PPP ISP need not send an Ethernet-style RA.
-            let conf = pd.join("dhcpcd.conf");
-            let launch = Command::new("dhcpcd")
-                .args(["-6", "-b", "-f"])
-                .arg(conf)
-                .env("ROUTERTOP_CONFIG", source)
-                .env("ROUTERTOP_PD_RUNTIME", &pd)
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .status()
-                .map_err(|_| "cannot start PPP DHCPv6 client")?;
-            if !launch.success() {
-                return Err("cannot start PPP DHCPv6 client".into());
-            }
+            crate::wan::start_v6(source, &pd, false)?;
             status(config, dir, "connected", address(), true)
         }
         "ipv6-down" => {
-            let _ = run("dhcpcd", &["-6", "-x"]);
+            let stopped = crate::wan::stop_v6(&pd);
             if config.ipv6.is_some() {
                 crate::pd::disconnect(config, &pd)?;
             }
+            stopped?;
             status(config, dir, "reconnecting", address(), false)
         }
         _ => Err("unknown PPP lifecycle event".into()),

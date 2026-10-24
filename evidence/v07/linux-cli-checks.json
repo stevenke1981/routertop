@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "candidate": "r4-final",
+  "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "scope": "Actual Linux unprivileged export; credential output suppressed",
+  "public_dhcp_export_exit_code": 0,
+  "backup_pppoe_export_exit_code": 1,
+  "source_private_log_sha256": "407ce6b46f31a008cd18ec86e91a6e38a526debb85d14fe00211ce9e76f60348"
+}

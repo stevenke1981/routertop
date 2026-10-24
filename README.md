@@ -1,10 +1,10 @@
 # RouterTop
 
-以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.6 加入 PPPoE WAN、IPv6CP 與 PPP 連線上的 DHCPv6-PD，延續 WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
+以 Linux、Alpine、apk 與 Rust 製作的小型路由系統。x86_64 優先，aarch64 預留。0.7 加入固定 IP WAN、雙 WAN 主備切換與恢復後自動切回，支援 DHCP／PPPoE，延續 IPv6CP、DHCPv6-PD、WireGuard 全通道、必要的本機 console 登入及受 macOS「系統設定」啟發的淺色介面；這仍是隔離環境用的開發映像，**尚未達成 RouterOS 全功能相當性**，也不包含 WinBox、MikroTik 原始碼或 RouterBOARD 驅動。
 
 ## 已實作範圍
 
-- IPv4 DHCP／PPPoE WAN、固定 LAN、DHCP 伺服器、DNS 轉送、NAT、狀態防火牆與 LAN gateway 靜態路由。
+- IPv4 固定 IP／DHCP／PPPoE WAN、雙 WAN 主備切換、綁定各線路的健康檢查與自動恢復；固定 LAN、DHCP 伺服器、DNS 轉送、NAT、狀態防火牆與 LAN gateway 靜態路由。
 - 實體 WAN／LAN 上的 802.1Q VLAN、選配 DHCP 與對外 NAT，預設跨網段隔離。
 - 靜態或自動 IPv6 WAN、DHCPv6-PD `/48`–`/64` 申請、LAN／VLAN 獨立 `/64`、RA／SLAAC、IPv6 DNS 轉送及必要的 ND／PMTU 規則。
 - IPv4／IPv6 split-tunnel WireGuard，或一個明確啟用的全通道介面；全通道 IPv4 NAT、可選 NAT66 與防止直接 WAN 回退的規則。
@@ -17,15 +17,15 @@
 
 預設 WAN 為 `eth0`，LAN 為 `eth1`／`192.168.88.1/24`，DHCP 範圍為 `.100` 至 `.199`。HTTPS 預設僅綁定 LAN 位址的 443 埠；SSH 未安裝或啟用，`ssh_port` 只控制防火牆放行。
 
-實作項目不等於驗收通過。0.6 的實際產物、體積、測試及未執行項目記錄於 [0.6 驗收紀錄](docs/acceptance-v0.6.md)。[0.5](docs/acceptance-v0.5.md)、[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
+實作項目不等於驗收通過。0.7 的實際產物、體積、測試及未執行項目記錄於 [0.7 驗收紀錄](docs/acceptance-v0.7.md)。[0.6](docs/acceptance-v0.6.md)、[0.5](docs/acceptance-v0.5.md)、[0.4](docs/acceptance-v0.4.md)、[0.3](docs/acceptance-v0.3.md)、[0.2](docs/acceptance-v0.2.md) 與 [0.1](docs/acceptance.md) 保留為各版本證據。
 
 ## 首次啟動與登入
 
 1. 在 Linux 建立一個全新的資料磁碟檔：`sh scripts/make-data-disk.sh routertop-data.img`。需要 `mkfs.ext4`、`sfdisk` 等工具；輸出為 33 MiB 一般檔案，內含 32 MiB ext4 分割區及 `ROUTERTOP_DATA` 標籤。工具拒絕覆寫既有路徑。
-2. 將資料磁碟與 0.6 映像交給 Windows 啟動器：
+2. 將資料磁碟與 0.7 映像交給 Windows 啟動器：
 
    ```powershell
-   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.6 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
+   ./scripts/boot-qemu.ps1 -ImageDirectory ./dist/v0.7 -DataDisk ./routertop-data.img -Qemu 'C:/path/to/qemu-system-x86_64.exe'
    ```
 
 3. 首次 console 顯示 `Setup choice [create/token]:`。選 `create` 並輸入、確認 12–128 位元組密碼，即可建立管理員；若想從 Web 註冊，選 `token`，在可信實體終端取得一次性註冊權杖。
@@ -36,6 +36,12 @@
 
 序列與螢幕 console 都會要求管理員密碼，成功後才進入 root shell，輸入 `exit` 返回登入。密碼輸入不回顯；Web 修改密碼會影響下一次 console 登入，但不會終止已登入的 shell。資料卷缺失、管理員資料損壞或驗證失敗時，不會退回無保護 shell；必要時使用可信離線維護環境與備份復原。這不代表已提供 Secure Boot、磁碟加密或防止實體離線改寫。
 
+## 固定 IP 與雙 WAN
+
+在「網路設定」選擇固定 IP、DHCP 或 PPPoE；固定 IP 需填寫 IPv4／前綴與同網段閘道。啟用雙 WAN 後，設定備線介面、連線方式及兩條線路各自可回應 ping 的 IPv4 檢查目標。主線連續失敗達門檻後切換備線，恢復達門檻後自動切回；兩線皆無法通過檢查時停止對外路由。Web 顯示使用中線路和各線狀態。兩組 PPPoE 密碼分別保存，讀取不回傳密碼。
+
+這版是主備切換；外部 IP 改變後，既有 TCP／VPN 連線可能需要重連。IPv6／DHCPv6-PD 僅使用主線，備線接手時撤回 IPv6，主線恢復後重新取得前綴。雙 WAN 啟用 IPv6 時需使用自動模式；單 WAN 仍支援靜態 IPv6。詳細欄位與限制見 [0.7 WAN 契約](docs/network-v0.7-contract.md)。
+
 ## 設定與持久化
 
 系統 root 仍從 RAM 執行。開機只掛載明確指定的 `routertop.datadev=/dev/vda1`，或唯一具有 `ROUTERTOP_DATA` 標籤的 ext4 分割區；不會在開機時格式化磁碟。啟動器預設透過標籤尋找附加資料檔。
@@ -44,7 +50,7 @@
 
 Web 儲存會寫入資料卷並顯示是否待重啟；不會立即改動運作中的網路。確認重新啟動後才載入新設定。若修改 LAN 位址或 HTTPS 埠，下次需使用新網址；Windows 啟動器內建轉送仍指向預設 `192.168.88.1:443`，需要相應調整測試連線。資料卷不會讓 RAM root 裡手動執行的所有 `apk add` 或檔案修改自動持久化。
 
-VLAN 與 split-tunnel VPN 的網際網路存取需要明確啟用；跨 VLAN、VPN 到 LAN／VLAN 的連線需要 forward 放行規則。一般自訂規則在 established／related 之後依畫面順序匹配；input 系統保留 LAN 管理、DHCP／DNS、VPN listener 與必要 IPv6 控制訊息。全通道的直接 WAN 阻擋則放在 established／related 之前，不讓既有直接連線繞過。啟用 VPN 時須先取得 WAN IPv4 租約；開機與 DHCP 更新檢查網段衝突，衝突時停止轉送。
+VLAN 與 split-tunnel VPN 的網際網路存取需要明確啟用；跨 VLAN、VPN 到 LAN／VLAN 的連線需要 forward 放行規則。一般自訂規則在 established／related 之後依畫面順序匹配；input 系統保留 LAN 管理、DHCP／DNS、VPN listener 與必要 IPv6 控制訊息。全通道的直接 WAN 阻擋則放在 established／related 之前，不讓既有直接連線繞過。啟用 VPN 時須先取得 WAN IPv4 位址；開機與 DHCP 更新檢查網段衝突，衝突時停止轉送。
 
 IPv6 WAN 可選靜態或自動取得。自動模式使用 dhcpcd 處理 RA、SLAAC 與 DHCPv6；啟用 PD 時向 ISP 申請 `/48`–`/64` 前綴，再以唯一子網編號配置 LAN／VLAN 的 `/64`。例如 `/56` 可用編號 0–255；實際上游授予的前綴仍需容納全部編號，否則拒絕配置。PD 與手動 LAN／VLAN IPv6 位址互斥。Web 顯示目前位址、委派子網、DNS 與等待／異常狀態。
 

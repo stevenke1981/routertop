@@ -1,0 +1,8 @@
+{
+  "candidate": "r4-final",
+  "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "production_archive_sha256": "e4c5a618a7a09085ab2f185e8e4bd95b1b2d2edad01ebd60625c253450dbe56e",
+  "initial_harness_sha256": "a7771b89fb068fee5978f633e6032d4af63589179d61c029e14e29345fbb72ec",
+  "final_harness_sha256": "c5886069eee6133f6d2eed4e007447f4064089f13729f62bc88240fabb579de1",
+  "production_changed": false
+}

@@ -1,0 +1,135 @@
+{
+  "task_id": "WAN-07",
+  "actor_instance": "root",
+  "receiver_instance": "user",
+  "kind": "handoff",
+  "result": "PASS",
+  "result_scope": "Local implementation and acceptance; publication and hosted CI checked after this source snapshot",
+  "observed_at": "2026-10-24T14:56:39.694145+00:00",
+  "base_sha": "a698bdce2952c99da9e4ff0f7515df138afe7630",
+  "head_sha": null,
+  "tested_source": "uncommitted r4-final worktree identified by runtime/build hashes",
+  "source_archive_sha256": "e4c5a618a7a09085ab2f185e8e4bd95b1b2d2edad01ebd60625c253450dbe56e",
+  "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "iso_sha256": "b670017e38fd6158396c26d1f7eefd867b901010b2e88d462cf950f303260be2",
+  "acceptance_ids": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4",
+    "AC5",
+    "AC6-size-and-review"
+  ],
+  "artifacts": [
+    {
+      "path": "docs/acceptance-v0.7.md",
+      "sha256": "943755f22e525748cd4895cda632c5709ed99ebaeb3ba997e059d07a54d9d41c"
+    },
+    {
+      "path": "docs/review-v0.7.md",
+      "sha256": "09ad1972137bf6686a146b34a5ab1bb45d90ce189daa3230dfe49db5afb2e804"
+    },
+    {
+      "path": "evidence/v07/core-handoff.json",
+      "sha256": "6c0cdb6b8ce0fcb07dfa506f18f12b083fd8af718829d27c876244e8cec0173d"
+    },
+    {
+      "path": "evidence/v07/network-test-handoff.json",
+      "sha256": "e9334012e3c2b7b660c34ffcbc96d75f5cab911873722026acc59442ea46cf7f"
+    },
+    {
+      "path": "evidence/v07/ui-handoff.json",
+      "sha256": "d0cb14151d0f67aa80866e268dd5f2aa4ec418107ff96fe3b04076e3d6d28a0d"
+    },
+    {
+      "path": "evidence/v07/windows-checks.json",
+      "sha256": "4be9059293c7c252b4dd877bbee8a9fee785672e30d472465adaa7020e3760ee"
+    },
+    {
+      "path": "evidence/v07/network-v07-r4-final-report.json",
+      "sha256": "9b7598e1932213d3b5eafc8c037763783e341c64bde0baa1ed4cab8a4371a512"
+    },
+    {
+      "path": "evidence/v07/browser/browser-v07-report.json",
+      "sha256": "dd41cb655a5a338a49ec8364630c21878449ea4ee5dd25b19e4e9cbdab68b7a3"
+    },
+    {
+      "path": "evidence/v07/artifact-verification.json",
+      "sha256": "5aa03087cfdb9a14227672696192d65f1732365b6b4117967bf923fb0fa9b23a"
+    },
+    {
+      "path": "evidence/v07/image-acceptance-manifest.json",
+      "sha256": "bf52c84b4819c971bff6edeb812b994142e099b04d300e4c55ae361c99f98a45"
+    },
+    {
+      "path": "evidence/v07/odin.json",
+      "sha256": "565f31cd364351f259fcc8e5bba05697fc93fc747645593a59ca588961c7684b"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Windows Rust tests/fmt/Clippy",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_tests": 96
+    },
+    {
+      "name": "Alpine real WAN matrix",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_groups": 62
+    },
+    {
+      "name": "focused initial backup IPv6 regression",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed_groups": 13,
+      "note": "These repeat inside the 62 matrix groups"
+    },
+    {
+      "name": "single PPPoE regressions",
+      "result": "PASS",
+      "exit_code": 0,
+      "standard_groups": 17,
+      "pd_only_groups": 6
+    },
+    {
+      "name": "final ISO Chrome",
+      "result": "PASS",
+      "exit_code": 0,
+      "browser_groups": 13,
+      "lifecycle_groups": 5,
+      "visual_audits": 6
+    },
+    {
+      "name": "executable WAN boot hook",
+      "result": "PASS",
+      "git_mode": "100755",
+      "tested_archive_mode": "0755"
+    },
+    {
+      "name": "public push and exact-head CI",
+      "result": "NOT_RUN",
+      "exit_code": null,
+      "note": "Performed after commit; see actual remote checks and final delivery record"
+    }
+  ],
+  "owners": {
+    "core": ".worktrees/wan-core",
+    "web": ".worktrees/wan-web",
+    "network": ".worktrees/wan-test",
+    "independent_review": ".worktrees/wan-review",
+    "integration": "current checkout"
+  },
+  "unresolved": [
+    "Post-commit publication/hosted-CI evidence pending at this source snapshot",
+    "IPv6/PD primary-only; backup IPv4 only",
+    "ARM, physical ISP/NIC, load/power-loss and production signing NOT_RUN"
+  ],
+  "next_action": "Commit/push authorized validated sources and verify exact remote commit and hosted conclusions",
+  "external_side_effects": {
+    "authorized": true,
+    "performed": false,
+    "state_at_source_snapshot": "Before git commit/push"
+  }
+}

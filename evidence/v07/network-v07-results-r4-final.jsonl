@@ -1,0 +1,63 @@
+{"case": "standalone static IPv4 WAN renders and carries actual LAN NAT HTTP", "status": "PASS"}
+{"case": "static-dhcp: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "static-dhcp: public status is secret-free", "status": "PASS"}
+{"case": "static-dhcp: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "static-dhcp: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "static-dhcp: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "static-dhcp: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "static-dhcp: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "static-dhcp: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"case": "dhcp-static: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "dhcp-static: public status is secret-free", "status": "PASS"}
+{"case": "dhcp-static: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "dhcp-static: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "dhcp-static: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "dhcp-static: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "dhcp-static: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "dhcp-static: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"case": "dhcp-dhcp: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "dhcp-dhcp: public status is secret-free", "status": "PASS"}
+{"case": "dhcp-dhcp: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "dhcp-dhcp: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "dhcp-dhcp: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "dhcp-dhcp: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "dhcp-dhcp: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "dhcp-dhcp: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"case": "dhcp-pppoe: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "dhcp-pppoe: public status is secret-free; PPP peers are private with real discovery and no underlay DHCP", "status": "PASS"}
+{"case": "dhcp-pppoe: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "dhcp-pppoe: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "dhcp-pppoe: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "dhcp-pppoe: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "dhcp-pppoe: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "dhcp-pppoe: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"case": "pppoe-dhcp: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "pppoe-dhcp: public status is secret-free; PPP peers are private with real discovery and no underlay DHCP", "status": "PASS"}
+{"case": "pppoe-dhcp: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "pppoe-dhcp: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "pppoe-dhcp: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "pppoe-dhcp: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "pppoe-dhcp: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "pppoe-dhcp: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"case": "pppoe-pppoe: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "pppoe-pppoe: public status is secret-free; PPP peers are private with real discovery and no underlay DHCP", "status": "PASS"}
+{"case": "pppoe-pppoe: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "pppoe-pppoe: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "pppoe-pppoe: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "pppoe-pppoe: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "pppoe-pppoe: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "pppoe-pppoe: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"case": "initially absent PPP primary boots on real DHCP backup without starting a default-config IPv6 client", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: both real uplinks acquire addresses; primary carries NAT HTTP", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: public status is secret-free; PPP peers are private with real discovery and no underlay DHCP", "status": "PASS"}
+{"case": "primary PPP IPv6CP/real DHCPv6-PD/SLAAC carry IPv6 HTTP before failover", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: both WANs deny unsolicited access to a live router listener", "status": "PASS"}
+{"case": "backup IPv4 selection withdraws primary delegated addresses and IPv6 firewall authorization", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: actual primary carrier loss switches traffic to backup; management remains available", "status": "PASS"}
+{"case": "primary return reacquires changed prefix and real IPv6 traffic with stable saved identity", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: primary carrier restoration automatically restores preferred uplink", "status": "PASS"}
+{"case": "upstream IPv4 blackhole also withdraws live primary PD despite PPP IPv6CP remaining up", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: upstream blackhole with carrier up triggers failover; backup success cannot falsely recover primary", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: both upstreams down fail closed while LAN management stays available", "status": "PASS"}
+{"case": "pppoe-dhcp-ipv6: upstream restoration recovers primary without rewriting saved configuration", "status": "PASS"}
+{"status": "PASS", "passed_cases": 62, "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104"}

@@ -1,4 +1,4 @@
-# 架構決策：RouterTop 0.6
+# 架構決策：RouterTop 0.7
 
 ## 基礎系統與資料平面
 
@@ -81,3 +81,7 @@ Cargo.lock 固定 Rust dependency resolution；apk 驗證 Alpine 簽章。產物
 ## PPPoE lifecycle (0.6)
 
 The validated WAN model distinguishes physical underlay from logical `ppp0`. ppp-daemon and rp-pppoe carry PPPoE over generic/async PPP; the lean linux-virt kernel has no native PPPoE module. Private peer options and hooks provide persistent redial, IPv6CP-triggered DHCPv6, and immediate withdrawal on disconnect. Shared PD monitoring and DNS supervision start once, even while dialing. Web GET excludes the stored ISP password; revision-controlled saves preserve a blank credential only for the same account. See [the 0.6 contract](network-v0.6-contract.md).
+
+## 雙 WAN 主備監督
+
+保留 wan 為主線，新增可選 wan_backup／failover。Rust supervisor 管理兩個取得位址的客戶端與唯一主要 IPv4 預設路由；各自路由表與裝置綁定 probe 防止檢查跨線誤判。主備出口 nft 集合具有有限生命週期，監督程式停止或路由更新失敗時不保留永久放行。ppp0／ppp1 使用獨立私密 peer 檔案，兩組密碼在 Web 分別清空回傳並依槽位、介面與帳號保留。主線 IPv6／PD 在備援期間撤回；單 WAN 的既有 IPv6 生命週期維持。詳細配置與驗收見 [0.7 WAN 契約](network-v0.7-contract.md)及 [0.7 驗收](acceptance-v0.7.md)。

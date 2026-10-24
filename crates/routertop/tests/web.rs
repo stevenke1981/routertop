@@ -627,3 +627,87 @@ fn pppoe_password_is_write_only_preserved_and_removed_atomically() {
         false
     );
 }
+
+#[test]
+fn dual_wan_secrets_are_slot_bound_and_static_failover_survives_restart() {
+    let fixture = Fixture::new();
+    let auth = fixture.setup();
+    let public = || body(&fixture.call(&authenticated(request("GET", "/config"), &auth)));
+    let save = |config: Value, revision| {
+        fixture.call(&authenticated(
+            post("/config", json!({"revision":revision,"config":config})),
+            &auth,
+        ))
+    };
+    let mut config = public()["config"].clone();
+    config["wan"] = json!({"interface":"eth0","mode":"pppoe","pppoe":{"username":"same-user","password":"primary-test-secret","mtu":1492},"static_ipv4":null});
+    config["wan_backup"] = json!({"interface":"eth2","mode":"pppoe","pppoe":{"username":"same-user","password":"backup-test-secret","mtu":1492},"static_ipv4":null});
+    config["failover"] = json!({"primary_target":"203.0.113.9","backup_target":"203.0.113.10","interval_seconds":2,"failure_threshold":2,"recovery_threshold":3});
+    let reply = save(config, 1);
+    assert_eq!(reply.status, 200, "{}", reply.body);
+    let first = public();
+    assert_eq!(first["wan_password_set"], true);
+    assert_eq!(first["wan_backup_password_set"], true);
+    for slot in ["wan", "wan_backup"] {
+        assert_eq!(first["config"][slot]["pppoe"]["password"], "");
+    }
+    assert!(!first.to_string().contains("test-secret"));
+    assert_eq!(save(first["config"].clone(), 2).status, 200);
+    let persisted = stored_config(&fixture.paths.data).unwrap();
+    let private = routertop::parse_config(&persisted).unwrap();
+    assert_eq!(private.wan.pppoe.unwrap().password, "primary-test-secret");
+    assert_eq!(
+        private.wan_backup.unwrap().pppoe.unwrap().password,
+        "backup-test-secret"
+    );
+    let before = fs::read(fixture.paths.data.join("state.json")).unwrap();
+    let mut changed = first["config"].clone();
+    changed["wan_backup"]["interface"] = json!("eth3");
+    assert_eq!(save(changed, 3).status, 400);
+    let mut swapped = first["config"].clone();
+    let primary = swapped["wan"].clone();
+    swapped["wan"] = swapped["wan_backup"].clone();
+    swapped["wan_backup"] = primary;
+    assert_eq!(save(swapped, 3).status, 400);
+    assert_eq!(
+        before,
+        fs::read(fixture.paths.data.join("state.json")).unwrap()
+    );
+    let mut fixed = first["config"].clone();
+    fixed["wan"]["mode"] = json!("static");
+    fixed["wan"]["static_ipv4"] = json!({"address":"198.51.100.2/24","gateway":"198.51.100.1"});
+    let reply = save(fixed, 3);
+    assert_eq!(reply.status, 200, "{}", reply.body);
+    let saved = public();
+    assert_eq!(saved["wan_password_set"], false);
+    assert_eq!(saved["config"]["wan"]["pppoe"], Value::Null);
+    assert_eq!(saved["wan_backup_password_set"], true);
+    let persisted = stored_config(&fixture.paths.data).unwrap();
+    assert!(!persisted.contains("primary-test-secret"));
+    assert!(persisted.contains("backup-test-secret"));
+    fs::remove_dir_all(&fixture.paths.runtime).unwrap();
+    initialize_store(&fixture.paths.data, SAMPLE).unwrap();
+    let login = fixture.call(&post(
+        "/login",
+        json!({"username":"admin","password":PASSWORD}),
+    ));
+    assert_eq!(login.status, 200);
+    let auth = credentials(&login);
+    let after = body(&fixture.call(&authenticated(request("GET", "/config"), &auth)));
+    assert_eq!(saved, after);
+    let mut removed = after["config"].clone();
+    removed["wan_backup"] = Value::Null;
+    removed["failover"] = Value::Null;
+    assert_eq!(
+        fixture
+            .call(&authenticated(
+                post("/config", json!({"revision":4,"config":removed})),
+                &auth
+            ))
+            .status,
+        200
+    );
+    assert!(!stored_config(&fixture.paths.data)
+        .unwrap()
+        .contains("backup-test-secret"));
+}

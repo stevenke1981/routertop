@@ -1,0 +1,44 @@
+{
+  "result": "PASS",
+  "scope": "Odin read-only project analysis and actual Rust LSP symbol navigation; not build/runtime acceptance",
+  "project": "ws_7eccb743b075c34e255f096273a38d0dd35fc1bd370bd2b8",
+  "workspace": "E:/routertop",
+  "permissions_changed": false,
+  "queries": [
+    {
+      "tool": "project_analysis",
+      "trace_id": "e023c38f-7b01-4f85-a13f-6b4d869aff06",
+      "observed_kind": "LIVE_STRUCTURE_AND_CONFIGURATION"
+    },
+    {
+      "tool": "get_symbols_overview",
+      "path": "crates/routertop/src/lib.rs",
+      "trace_id": "5dce9c77-b4ca-4437-9f80-415eb476b3d4",
+      "backend": "lsp",
+      "language": "rust"
+    },
+    {
+      "tool": "get_symbols_overview",
+      "path": "crates/routertop/src/wan.rs",
+      "trace_id": "b725500c-d9f7-41a1-b89c-0ebd3b995452",
+      "backend": "lsp",
+      "language": "rust",
+      "symbols": [
+        "StaticIpv4",
+        "Failover",
+        "interval",
+        "threshold",
+        "device",
+        "uplinks",
+        "label",
+        "overlap",
+        "validate",
+        "cmd",
+        "ip",
+        "read"
+      ]
+    }
+  ],
+  "diagnostics": "NOT_RUN; Cargo tests/fmt/Clippy verified separately",
+  "source_edits": "Performed in explicitly owned worktrees, not through Odin write permissions"
+}

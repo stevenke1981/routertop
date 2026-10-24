@@ -104,7 +104,7 @@ class Isp:
         for bind in ("0.0.0.0", "::"):
             directory = self.directory / ("www6" if ":" in bind else "www4")
             directory.mkdir(exist_ok=True)
-            (directory / "index.html").write_text("PPPOE-ISP")
+            (directory / "index.html").write_text(args.marker)
             (directory / "large.bin").write_text("routertop-pppoe\n" * 8192)
             script = (
                 "import functools,http.server,socket,sys;socket.getfqdn=lambda _name='':'isp';"
@@ -135,7 +135,7 @@ class Isp:
         enabled = state.get("pppoe_enabled", True)
         if enabled and self.server is None:
             self.server = self.start(["unshare", "-m", "sh", self.wrapper, self.pppdir,
-                                      "-I", self.args.interface, "-L", "198.18.0.1", "-R", "198.18.0.2",
+                                      "-I", self.args.interface, "-L", self.args.gateway, "-R", self.args.client,
                                       "-N", "1", "-C", "routertop-lab", "-O", self.options,
                                       "-q", self.pppd_wrapper], "server.log")
             self.generation += 1
@@ -285,6 +285,9 @@ class Isp:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--interface", required=True)
+    parser.add_argument("--marker", default="PPPOE-ISP")
+    parser.add_argument("--gateway", default="198.18.0.1")
+    parser.add_argument("--client", default="198.18.0.2")
     parser.add_argument("--credentials-file", type=Path, required=True)
     parser.add_argument("--control-file", type=Path, required=True)
     parser.add_argument("--status-file", type=Path, required=True)

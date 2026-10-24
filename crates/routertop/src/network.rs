@@ -221,6 +221,12 @@ pub(crate) fn validate_network(config: &Config) -> Result<(), String> {
     if config.wan.mode == crate::WanProtocol::Pppoe {
         names.insert("ppp0");
     }
+    if let Some(backup) = &config.wan_backup {
+        names.insert(&backup.interface);
+        if backup.mode == crate::WanProtocol::Pppoe {
+            names.insert("ppp1");
+        }
+    }
     let mut tags = HashSet::new();
     let mut ports = HashSet::new();
     for vlan in &config.vlans {

@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "candidate": "r4-final",
+  "image_exit_code": 0,
+  "binary_sha256": "2333d78fdbd34724295c80a2be410fd0a19c39dafa369f51dd896a2fa5c1c104",
+  "artifact_sha256": {
+    "vmlinuz": "17fbd3efd16f2e7cb1b945f06423b37399ba7d5ac8cdd3665e7f13f363500e85",
+    "initramfs.gz": "352b03451769f88c4eb4d6d400cba794ce1f344cd5267a163af3feed4c7d3841",
+    "packages.txt": "ddc1b86615f05c0f1ddf281b066f708f9df671c8beeff82d1e1784867160d64f",
+    "repositories.txt": "7b8b3e6fe030eeb4ee7619b42c9419aa846bff1c632442d3f00ed9fb97c6fa36",
+    "build-manifest.json": "f90379394dd0b2347b92f0c94dfadedbd6bce734b97c0293861ccf58465086f7",
+    "routertop-x86_64.iso": "b670017e38fd6158396c26d1f7eefd867b901010b2e88d462cf950f303260be2"
+  },
+  "all_uploads_completed": true
+}
