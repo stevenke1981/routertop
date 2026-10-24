@@ -226,11 +226,15 @@ persistent_keepalive = 0
         database.mkdir(mode=0o755)
         # dhcpcd's fixed PID/database paths are isolated in a private mount
         # namespace. The builder's /run, resolver and identity remain untouched.
+        # Ubuntu's udev plugin detects netns through /var/run/netns, hidden by
+        # this private /run. Our veths are already configured and have no udev
+        # database here: skip device-management plugins, retain real netlink,
+        # DHCPv6, RA and privilege separation (dhcpcd's documented --nodev).
         wrapper = self.secret_file("dhcpcd-start", "#!/bin/sh\nset -eu\n"
                                    "echo ROUTERTOP_CLIENT_STAGE=private-mounts\nmount --make-rprivate /\n"
                                    "echo ROUTERTOP_CLIENT_STAGE=private-run\nmount -t tmpfs tmpfs /run\n"
                                    "echo ROUTERTOP_CLIENT_STAGE=private-database\nmount --bind \"$1\" /var/lib/dhcpcd\n"
-                                   "echo ROUTERTOP_CLIENT_STAGE=client-exec\nexec dhcpcd -B -6 -f \"$2\"\n")
+                                   "echo ROUTERTOP_CLIENT_STAGE=client-exec\nexec dhcpcd --nodev -B -6 -f \"$2\"\n")
         wrapper.chmod(0o700)
         self.client_process = self.start("router", ["unshare", "-m", "sh", wrapper, database, client_config], "dhcpcd.log")
 
